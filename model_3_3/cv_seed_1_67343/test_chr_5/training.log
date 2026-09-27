@@ -1,0 +1,11 @@
+Validation split: 95/903 non-overlapping block components; per-group counts: {'positive_tss': 515, 'positive_genic': 177, 'positive_noncoding': 746, 'negative_tss': 606, 'negative_genic': 1629, 'negative_noncoding': 1048}
+Traceback (most recent call last):
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 3326, in <module>
+    raise SystemExit(main())
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 3319, in main
+    return int(args.function(args))
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 2585, in train_command
+    splits["test"] = make_fixed_balanced_evaluation_split(
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 818, in make_fixed_balanced_evaluation_split
+    raise ValueError(
+ValueError: Cannot balance test: negative pool 'noncoding' has 2,125 samples but 2,141 are required. Reduce the number of evaluation positives or provide a larger negative pool.
