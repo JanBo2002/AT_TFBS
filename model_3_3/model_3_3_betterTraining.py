@@ -40,7 +40,7 @@ validation split before drawing biological conclusions.
 
 from __future__ import annotations
 
-SCRIPT_VERSION = "1.5.1-block-stratified-validation"
+SCRIPT_VERSION = "1.5.2-tolerant-balanced-evaluation"
 
 import argparse
 import csv
@@ -787,43 +787,80 @@ def make_fixed_balanced_evaluation_split(
     indices: np.ndarray,
     seed: int,
     split_name: str,
-) -> np.ndarray:
-    """Create a fixed 1:1 split, paired within each biological group."""
+    max_positive_reduction: float = 0.1,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Create a fixed 1:1 split, paired within each biological group.
+
+    If a negative pool is smaller than its positive group, the positive group is
+    randomly reduced to the pool size (seeded) and a warning is printed, as long
+    as the reduction stays within ``max_positive_reduction`` of the group. A
+    larger shortfall still raises, because it indicates a broken negative set
+    rather than a rounding effect. The returned summary records, per group, the
+    available and used counts and how many positives were dropped.
+    """
+    if not 0.0 <= max_positive_reduction <= 1.0:
+        raise ValueError("max_positive_reduction must be in [0, 1]")
     indices = np.asarray(indices, dtype=np.int64)
     labels = cache["labels"][indices].astype(np.int64)
     negative_types = cache["negative_types"][indices].astype(str)
     positive_types = cache["positive_types"][indices].astype(str)
-    positives = indices[labels == 1]
-    if positives.size == 0:
+    if not np.any(labels == 1):
         raise ValueError(f"{split_name} contains no positive examples")
 
-    quotas = {
-        pool_name: int(
-            np.sum((labels == 1) & (positive_types == pool_name))
-        )
+    positive_pools = {
+        pool_name: indices[(labels == 1) & (positive_types == pool_name)]
         for pool_name in POOL_NAMES
     }
-    missing_positive_pools = [name for name, count in quotas.items() if count == 0]
+    missing_positive_pools = [name for name, pool in positive_pools.items() if pool.size == 0]
     if missing_positive_pools:
         raise ValueError(
             f"Cannot balance {split_name}: no positive examples in pools "
             f"{missing_positive_pools}."
         )
     rng = np.random.default_rng(seed)
-    selected_parts = [positives]
-    for pool_name in NEGATIVE_POOL_NAMES:
+    selected_parts: list[np.ndarray] = []
+    summary: dict[str, Any] = {
+        "max_positive_reduction": float(max_positive_reduction),
+        "groups": {},
+        "positives_dropped_total": 0,
+    }
+    for pool_name in POOL_NAMES:
+        positives = positive_pools[pool_name]
         pool = indices[(labels == 0) & (negative_types == pool_name)]
-        quota = quotas[pool_name]
-        if pool.size < quota:
-            raise ValueError(
-                f"Cannot balance {split_name}: negative pool {pool_name!r} has "
-                f"{pool.size:,} samples but {quota:,} are required. Reduce the "
-                "number of evaluation positives or provide a larger negative pool."
+        pairs = int(positives.size)
+        dropped = 0
+        if pool.size < positives.size:
+            shortfall = (positives.size - pool.size) / positives.size
+            if shortfall > max_positive_reduction:
+                raise ValueError(
+                    f"Cannot balance {split_name}: negative pool {pool_name!r} has "
+                    f"{pool.size:,} samples but {positives.size:,} are required "
+                    f"({shortfall:.1%} short, allowed {max_positive_reduction:.1%}). "
+                    "Provide a larger negative pool or raise "
+                    "--max-eval-positive-reduction."
+                )
+            pairs = int(pool.size)
+            dropped = int(positives.size - pairs)
+            positives = rng.choice(positives, size=pairs, replace=False)
+            print(
+                f"WARNING: {split_name}: negative pool {pool_name!r} has only "
+                f"{pool.size:,} samples for {pairs + dropped:,} positives; "
+                f"{dropped:,} positives ({shortfall:.1%}) were dropped at random "
+                "to keep the 1:1 pairing.",
+                file=sys.stderr,
             )
-        selected_parts.append(rng.choice(pool, size=quota, replace=False))
+        selected_parts.append(positives)
+        selected_parts.append(rng.choice(pool, size=pairs, replace=False))
+        summary["groups"][pool_name] = {
+            "positives_available": int(positive_pools[pool_name].size),
+            "negatives_available": int(pool.size),
+            "pairs_used": pairs,
+            "positives_dropped": dropped,
+        }
+        summary["positives_dropped_total"] += dropped
 
     selected = np.concatenate(selected_parts).astype(np.int64, copy=False)
-    return rng.permutation(selected)
+    return rng.permutation(selected), summary
 
 
 class CyclicBalancedNegativeSampler(Sampler[int]):
@@ -2573,20 +2610,23 @@ def train_command(args: argparse.Namespace) -> int:
         min_split_samples_per_group=args.min_split_samples_per_group,
         balanced_evaluation=args.balanced_evaluation,
     )
+    evaluation_balance: dict[str, Any] = {}
     if args.balanced_evaluation:
         # These selections are made exactly once. They remain unchanged across
         # all epochs so validation scores and the final test are comparable.
-        splits["val"] = make_fixed_balanced_evaluation_split(
+        splits["val"], evaluation_balance["validation"] = make_fixed_balanced_evaluation_split(
             cache,
             splits["val"],
             seed=args.seed + 10_001,
             split_name="validation",
+            max_positive_reduction=args.max_eval_positive_reduction,
         )
-        splits["test"] = make_fixed_balanced_evaluation_split(
+        splits["test"], evaluation_balance["test"] = make_fixed_balanced_evaluation_split(
             cache,
             splits["test"],
             seed=args.seed + 20_003,
             split_name="test",
+            max_positive_reduction=args.max_eval_positive_reduction,
         )
     labels = cache["labels"].astype(np.int64)
     for split_name, indices in splits.items():
@@ -2698,6 +2738,7 @@ def train_command(args: argparse.Namespace) -> int:
             "samples_per_training_epoch": len(train_sampler),
             "pos_weight": float(pos_weight.item()),
         },
+        "evaluation_balance": evaluation_balance,
     }
     with (output_dir / "configuration.json").open("wt", encoding="utf-8") as handle:
         json.dump(config_payload, handle, indent=2, default=json_default)
@@ -3176,6 +3217,18 @@ def build_parser() -> argparse.ArgumentParser:
             "Use fixed 1:1 validation/test subsets with equal positive/negative "
             "counts inside each of the tss, genic, and noncoding groups. Use "
             "--no-balanced-evaluation to evaluate every held-out sample."
+        ),
+    )
+    train_parser.add_argument(
+        "--max-eval-positive-reduction",
+        type=float,
+        default=0.1,
+        help=(
+            "With --balanced-evaluation: if a negative group on the held-out "
+            "chromosomes is smaller than its positive group, drop positives at "
+            "random (seeded) down to the negative count instead of aborting, as "
+            "long as the reduction stays within this fraction of the group. "
+            "Larger shortfalls still abort. Default 0.1."
         ),
     )
     train_parser.add_argument(
