@@ -58,7 +58,7 @@ ARCH_ATTENTION_POSITION = "relative"
 ARCH_POOL_STAGES = 2
 ARCH_POOL_TYPE = "max"
 ARCH_VARIANT_NAME = "relpos_res4bp"
-SCRIPT_VERSION = f"1.7.0-arch-{ARCH_VARIANT_NAME}"
+SCRIPT_VERSION = f"1.7.2-cyclic-positive-balanced-eval-arch-{ARCH_VARIANT_NAME}"
 ARCH_ENCODER_CHANNELS = {4: (80, 96, 112, 128), 2: (96, 128)}[ARCH_POOL_STAGES]
 
 import argparse
@@ -108,6 +108,7 @@ except ImportError as exc:  # pragma: no cover - clear dependency error
 try:
     from scipy.stats import pearsonr, spearmanr
     from scipy.optimize import Bounds, LinearConstraint, milp
+    from scipy import sparse
 except ImportError as exc:  # pragma: no cover
     raise RuntimeError(
         "SciPy with scipy.optimize.milp is required (SciPy >= 1.9). "
@@ -543,6 +544,8 @@ def make_splits(
     val_block_size: int,
     min_split_samples_per_group: int = 2,
     balanced_evaluation: bool = True,
+    max_eval_positive_reduction: float = 1.0,
+    val_milp_time_limit: float = 120.0,
 ) -> dict[str, np.ndarray]:
     """Select intact genomic blocks while covering all six biological strata.
 
@@ -590,6 +593,10 @@ def make_splits(
         raise ValueError("val_block_size must be positive")
     if min_split_samples_per_group < 1:
         raise ValueError("min_split_samples_per_group must be positive")
+    if not 0.0 <= max_eval_positive_reduction <= 1.0:
+        raise ValueError("max_eval_positive_reduction must be in [0, 1]")
+    if val_milp_time_limit <= 0:
+        raise ValueError("val_milp_time_limit must be positive")
     if val_fraction == 0.0:
         return {
             "train": train_candidates,
@@ -598,6 +605,8 @@ def make_splits(
         }
 
     candidate_strata = strata[train_candidates]
+    if np.any(candidate_strata < 0):
+        raise ValueError("At least one training example has an unknown biological group")
     totals = np.bincount(
         candidate_strata[candidate_strata >= 0], minlength=len(stratum_names)
     )
@@ -617,6 +626,22 @@ def make_splits(
             f"At least {min_split_samples_per_group} examples of every group "
             "are required in both training and validation. Too few: "
             + ", ".join(too_small)
+        )
+    # Training draws at most one copy of each negative per epoch. If negatives
+    # are fewer, the sampler cycles through all positives over later epochs.
+    # Validation/test randomly keep as many positives as negatives if needed.
+    deficits = [
+        f"{name}: {int(totals[3 + i])} negative < {int(totals[i])} positive"
+        for i, name in enumerate(POOL_NAMES)
+        if totals[3 + i] < totals[i]
+    ]
+    if deficits:
+        print(
+            "Training groups with fewer negatives than positives: "
+            + "; ".join(deficits)
+            + ". Positives will be cycled between epochs without replacement "
+            "inside an epoch.",
+            file=sys.stderr,
         )
 
     # Every chromosome/block pair is atomic. Merge neighboring blocks if
@@ -664,6 +689,21 @@ def make_splits(
     for stratum, component in zip(candidate_strata, component_of_sample):
         counts[int(stratum), int(component)] += 1.0
 
+    support = np.count_nonzero(counts, axis=1)
+    indivisible = [
+        f"{name} ({int(support[i])} component)"
+        for i, name in enumerate(stratum_names)
+        if support[i] < 2
+    ]
+    if indivisible:
+        raise RuntimeError(
+            "No leak-free training/validation split: all examples of "
+            + ", ".join(indivisible)
+            + f" are joined at --val-block-size {val_block_size}. "
+            "Smaller blocks may help only when they separate those examples; "
+            "overlapping input contexts still remain together."
+        )
+
     n_components = len(roots)
     n_strata = len(stratum_names)
     n_variables = n_components + 2 * n_strata
@@ -679,22 +719,22 @@ def make_splits(
         equalities[stratum, n_components + n_strata + stratum] = 1.0
 
     constraints = [
-        LinearConstraint(equalities, target_counts, target_counts),
+        LinearConstraint(sparse.csr_matrix(equalities), target_counts, target_counts),
         LinearConstraint(
-            np.pad(counts, ((0, 0), (0, 2 * n_strata))),
+            sparse.csr_matrix(np.pad(counts, ((0, 0), (0, 2 * n_strata)))),
             np.full(n_strata, min_split_samples_per_group),
             totals - min_split_samples_per_group,
         ),
     ]
-    # The training sampler needs at least as many negatives as positives in
-    # every group. Balanced validation has the same requirement.
-    balance = counts[3:] - counts[:3]
-    balance_total = totals[3:] - totals[:3]
-    constraints.append(LinearConstraint(
-        np.pad(balance, ((0, 0), (0, 2 * n_strata))),
-        np.zeros(3) if balanced_evaluation else np.full(3, -np.inf),
-        balance_total,
-    ))
+    # Training balances each epoch by cycling positives if negatives are scarce.
+    # Validation uses the same optional reduction limit as the evaluator.
+    pad = ((0, 0), (0, 2 * n_strata))
+    if balanced_evaluation and max_eval_positive_reduction < 1.0:
+        val_balance = counts[3:] - (1.0 - max_eval_positive_reduction) * counts[:3]
+        constraints.append(LinearConstraint(
+            sparse.csr_matrix(np.pad(val_balance, pad)),
+            np.zeros(3), np.full(3, np.inf),
+        ))
     upper_bounds = np.concatenate((np.ones(n_components), np.full(2 * n_strata, np.inf)))
     integrality = np.concatenate((np.ones(n_components), np.zeros(2 * n_strata)))
     result = milp(
@@ -702,15 +742,20 @@ def make_splits(
         integrality=integrality,
         bounds=Bounds(np.zeros(n_variables), upper_bounds),
         constraints=constraints,
-        options={"time_limit": 30.0, "mip_rel_gap": 0.01},
+        options={"time_limit": val_milp_time_limit, "mip_rel_gap": 0.01},
     )
     if result.x is None:
+        reason = "time limit reached" if result.status == 1 else (
+            "constraints are infeasible" if result.status == 2 else "solver failed"
+        )
         raise RuntimeError(
-            "No genomic-block validation split satisfies the six group minima "
-            "and positive/negative balance (or the optimizer timed out). "
-            "Try a smaller --val-block-size or add more examples; windows "
-            "overlapping across blocks always remain together. "
-            f"Optimizer status: {result.message}"
+            f"Genomic-block validation split failed ({reason}). "
+            f"{n_components} overlap-connected components; training chromosome "
+            f"totals: {dict(zip(stratum_names, totals.astype(int).tolist()))}; "
+            f"component support: {dict(zip(stratum_names, support.tolist()))}. "
+            f"Solver: {result.message}. "
+            "If infeasible, check per-group counts and block sizes; if timed out, "
+            "increase --val-milp-time-limit. No individual windows were reassigned."
         )
     selected_components = np.rint(result.x[:n_components]).astype(bool)
     validation_counts = counts @ selected_components.astype(np.float64)
@@ -718,8 +763,10 @@ def make_splits(
         np.max(np.abs(result.x[:n_components] - selected_components)) > 1e-5
         or np.any(validation_counts < min_split_samples_per_group)
         or np.any(totals - validation_counts < min_split_samples_per_group)
-        or np.any(balance_total - balance @ selected_components < -1e-5)
-        or (balanced_evaluation and np.any(balance @ selected_components < -1e-5))
+        or (balanced_evaluation and max_eval_positive_reduction < 1.0 and np.any(
+            (counts[3:] - (1.0 - max_eval_positive_reduction) * counts[:3])
+            @ selected_components < -1e-5
+        ))
     ):
         raise RuntimeError("The genomic-block optimizer returned an invalid split")
 
@@ -928,16 +975,14 @@ def make_fixed_balanced_evaluation_split(
     indices: np.ndarray,
     seed: int,
     split_name: str,
-    max_positive_reduction: float = 0.1,
+    max_positive_reduction: float = 1.0,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Create a fixed 1:1 split, paired within each biological group.
 
-    If a negative pool is smaller than its positive group, the positive group is
-    randomly reduced to the pool size (seeded) and a warning is printed, as long
-    as the reduction stays within ``max_positive_reduction`` of the group. A
-    larger shortfall still raises, because it indicates a broken negative set
-    rather than a rounding effect. The returned summary records, per group, the
-    available and used counts and how many positives were dropped.
+    If a negative pool is smaller than its positive group, randomly select
+    exactly as many positives as negatives (seeded) and print a warning. The
+    optional max_positive_reduction can impose a stricter limit; its default
+    of 1.0 accepts every nonempty pool. The summary records group counts.
     """
     if not 0.0 <= max_positive_reduction <= 1.0:
         raise ValueError("max_positive_reduction must be in [0, 1]")
@@ -952,12 +997,6 @@ def make_fixed_balanced_evaluation_split(
         pool_name: indices[(labels == 1) & (positive_types == pool_name)]
         for pool_name in POOL_NAMES
     }
-    missing_positive_pools = [name for name, pool in positive_pools.items() if pool.size == 0]
-    if missing_positive_pools:
-        raise ValueError(
-            f"Cannot balance {split_name}: no positive examples in pools "
-            f"{missing_positive_pools}."
-        )
     rng = np.random.default_rng(seed)
     selected_parts: list[np.ndarray] = []
     summary: dict[str, Any] = {
@@ -968,6 +1007,19 @@ def make_fixed_balanced_evaluation_split(
     for pool_name in POOL_NAMES:
         positives = positive_pools[pool_name]
         pool = indices[(labels == 0) & (negative_types == pool_name)]
+        if positives.size == 0:
+            print(
+                f"WARNING: {split_name}: no positives in group {pool_name!r}; "
+                "this group is absent from the balanced evaluation.",
+                file=sys.stderr,
+            )
+            summary["groups"][pool_name] = {
+                "positives_available": 0,
+                "negatives_available": int(pool.size),
+                "pairs_used": 0,
+                "positives_dropped": 0,
+            }
+            continue
         pairs = int(positives.size)
         dropped = 0
         if pool.size < positives.size:
@@ -1001,16 +1053,20 @@ def make_fixed_balanced_evaluation_split(
         summary["positives_dropped_total"] += dropped
 
     selected = np.concatenate(selected_parts).astype(np.int64, copy=False)
+    if selected.size == 0:
+        raise ValueError(
+            f"Cannot evaluate {split_name}: there are no positive/negative pairs "
+            "in any biological group."
+        )
     return rng.permutation(selected), summary
 
 
 class CyclicBalancedNegativeSampler(Sampler[int]):
-    """Use all positives and pair each positive group with its negative group.
+    """Draw a distinct 1:1 pair per group and cycle unused samples over epochs.
 
-    The sampler works on local dataset positions. Each negative pool is randomly
-    permuted once and consumed without replacement across epochs. A pool is only
-    reshuffled after its current permutation has been exhausted. The full
-    positive/negative epoch is shuffled before it is passed to the DataLoader.
+    Each epoch uses min(positive_count, negative_count) examples of each class
+    within each biological group. Scarce negatives are never duplicated within
+    an epoch; instead the positive pool is traversed cyclically across epochs.
     """
 
     def __init__(self, dataset: TFBindingDataset, seed: int) -> None:
@@ -1020,65 +1076,71 @@ class CyclicBalancedNegativeSampler(Sampler[int]):
         labels = dataset.labels[global_indices].astype(np.int64)
         positive_types = dataset.positive_types[global_indices].astype(str)
         negative_types = dataset.negative_types[global_indices].astype(str)
-        self.positive_positions = np.flatnonzero(labels == 1).astype(np.int64)
-        if self.positive_positions.size == 0:
-            raise ValueError("The training split contains no positive examples")
-
         self.positive_pool_positions = {
             pool_name: np.flatnonzero(
                 (labels == 1) & (positive_types == pool_name)
             ).astype(np.int64)
-            for pool_name in POSITIVE_POOL_NAMES
+            for pool_name in POOL_NAMES
         }
-        missing_positive_pools = [
-            name
-            for name, positions in self.positive_pool_positions.items()
-            if positions.size == 0
-        ]
-        if missing_positive_pools:
-            raise ValueError(
-                "The training split contains no positive examples in pools "
-                f"{missing_positive_pools}."
-            )
-
-        self.pool_positions: dict[str, np.ndarray] = {}
-        for pool_name in NEGATIVE_POOL_NAMES:
-            positions = np.flatnonzero(
+        self.negative_pool_positions = {
+            pool_name: np.flatnonzero(
                 (labels == 0) & (negative_types == pool_name)
             ).astype(np.int64)
-            required = int(self.positive_pool_positions[pool_name].size)
-            if positions.size < required:
+            for pool_name in POOL_NAMES
+        }
+        self.quotas: dict[str, int] = {}
+        for pool_name in POOL_NAMES:
+            positives = self.positive_pool_positions[pool_name].size
+            negatives = self.negative_pool_positions[pool_name].size
+            if not positives or not negatives:
                 raise ValueError(
-                    f"Training pool {pool_name!r} has {positions.size:,} samples, "
-                    f"but {required:,} are required to pair its positive group. Cyclic "
-                    "sampling without replacement cannot satisfy this balance."
+                    f"Training pool {pool_name!r} needs both classes, found "
+                    f"{positives:,} positives and {negatives:,} negatives."
                 )
-            self.pool_positions[pool_name] = positions
+            self.quotas[pool_name] = int(min(positives, negatives))
+
+        self.positions = {
+            (label, name): pool
+            for label, pools in (("positive", self.positive_pool_positions),
+                                 ("negative", self.negative_pool_positions))
+            for name, pool in pools.items()
+        }
+        self.min_epochs_for_positive_coverage = max(
+            math.ceil(self.positive_pool_positions[name].size / self.quotas[name])
+            for name in POOL_NAMES
+        )
+        for name in POOL_NAMES:
+            if self.positive_pool_positions[name].size > self.quotas[name]:
+                print(
+                    f"Training pool {name!r}: {self.positive_pool_positions[name].size:,} "
+                    f"positives, {self.negative_pool_positions[name].size:,} negatives; "
+                    f"{self.quotas[name]:,} distinct pairs per epoch. "
+                    "Positive examples rotate across epochs.",
+                    file=sys.stderr,
+                )
 
         self.rng = np.random.default_rng(self.seed)
         self.orders = {
-            name: self.rng.permutation(positions)
-            for name, positions in self.pool_positions.items()
+            key: self.rng.permutation(positions)
+            for key, positions in self.positions.items()
         }
-        self.cursors = {name: 0 for name in NEGATIVE_POOL_NAMES}
+        self.cursors = {key: 0 for key in self.positions}
         self.epoch = 0
-        self.seen_positions = {name: set() for name in NEGATIVE_POOL_NAMES}
+        self.seen_positions = {key: set() for key in self.positions}
         self.last_summary: dict[str, Any] = {}
 
     def __len__(self) -> int:
-        return int(2 * self.positive_positions.size)
+        return 2 * sum(self.quotas.values())
 
-    def _draw_unique(self, pool_name: str, count: int) -> np.ndarray:
+    def _draw_unique(self, key: tuple[str, str], count: int) -> np.ndarray:
         selected: list[int] = []
         selected_set: set[int] = set()
         while len(selected) < count:
-            if self.cursors[pool_name] >= self.orders[pool_name].size:
-                self.orders[pool_name] = self.rng.permutation(
-                    self.pool_positions[pool_name]
-                )
-                self.cursors[pool_name] = 0
-            position = int(self.orders[pool_name][self.cursors[pool_name]])
-            self.cursors[pool_name] += 1
+            if self.cursors[key] >= self.orders[key].size:
+                self.orders[key] = self.rng.permutation(self.positions[key])
+                self.cursors[key] = 0
+            position = int(self.orders[key][self.cursors[key]])
+            self.cursors[key] += 1
             # A draw that crosses a cycle boundary must still not duplicate an
             # example inside the same epoch.
             if position in selected_set:
@@ -1088,37 +1150,54 @@ class CyclicBalancedNegativeSampler(Sampler[int]):
         return np.asarray(selected, dtype=np.int64)
 
     def __iter__(self) -> Iterator[int]:
-        quotas = {
-            name: int(self.positive_pool_positions[name].size)
-            for name in POOL_NAMES
-        }
+        positive_parts: list[np.ndarray] = []
         negative_parts: list[np.ndarray] = []
-        for pool_name in NEGATIVE_POOL_NAMES:
-            drawn = self._draw_unique(pool_name, quotas[pool_name])
-            negative_parts.append(drawn)
-            self.seen_positions[pool_name].update(int(value) for value in drawn)
+        for pool_name in POOL_NAMES:
+            count = self.quotas[pool_name]
+            for label, parts in (("positive", positive_parts),
+                                 ("negative", negative_parts)):
+                key = (label, pool_name)
+                drawn = self._draw_unique(key, count)
+                parts.append(drawn)
+                self.seen_positions[key].update(int(value) for value in drawn)
 
         epoch_positions = np.concatenate(
-            [self.positive_positions, *negative_parts]
+            [*positive_parts, *negative_parts]
         ).astype(np.int64, copy=False)
         epoch_positions = self.rng.permutation(epoch_positions)
         self.epoch += 1
+        pairs = sum(self.quotas.values())
         self.last_summary = {
             "epoch": self.epoch,
-            "positive": int(self.positive_positions.size),
-            "positive_by_group": quotas,
-            "negative_total": int(self.positive_positions.size),
-            "negative_drawn": quotas,
+            "positive": pairs,
+            "positive_by_group": self.quotas.copy(),
+            "positive_pool_size": {
+                name: int(self.positive_pool_positions[name].size)
+                for name in POOL_NAMES
+            },
+            "positive_unique_seen": {
+                name: len(self.seen_positions[("positive", name)])
+                for name in POOL_NAMES
+            },
+            "positive_coverage": {
+                name: len(self.seen_positions[("positive", name)])
+                / self.positive_pool_positions[name].size
+                for name in POOL_NAMES
+            },
+            "negative_total": pairs,
+            "negative_drawn": self.quotas.copy(),
             "negative_unique_seen": {
-                name: len(self.seen_positions[name]) for name in NEGATIVE_POOL_NAMES
+                name: len(self.seen_positions[("negative", name)])
+                for name in POOL_NAMES
             },
             "negative_pool_size": {
-                name: int(self.pool_positions[name].size)
-                for name in NEGATIVE_POOL_NAMES
+                name: int(self.negative_pool_positions[name].size)
+                for name in POOL_NAMES
             },
             "negative_coverage": {
-                name: len(self.seen_positions[name]) / self.pool_positions[name].size
-                for name in NEGATIVE_POOL_NAMES
+                name: len(self.seen_positions[("negative", name)])
+                / self.negative_pool_positions[name].size
+                for name in POOL_NAMES
             },
         }
         return iter(epoch_positions.tolist())
@@ -2919,6 +2998,8 @@ def train_command(args: argparse.Namespace) -> int:
         val_block_size=args.val_block_size,
         min_split_samples_per_group=args.min_split_samples_per_group,
         balanced_evaluation=args.balanced_evaluation,
+        max_eval_positive_reduction=args.max_eval_positive_reduction,
+        val_milp_time_limit=args.val_milp_time_limit,
     )
     evaluation_balance: dict[str, Any] = {}
     if args.balanced_evaluation:
@@ -3000,6 +3081,19 @@ def train_command(args: argparse.Namespace) -> int:
     val_dataset = TFBindingDataset(cache, splits["val"], 0.0, fixed_shifts=fixed_val_shifts)
     test_dataset = TFBindingDataset(cache, splits["test"], 0.0, fixed_shifts=fixed_test_shifts)
     train_sampler = CyclicBalancedNegativeSampler(train_dataset, seed=args.seed)
+    required_epochs = train_sampler.min_epochs_for_positive_coverage
+    if args.epochs < required_epochs:
+        print(
+            f"WARNING: {required_epochs} epochs are needed to expose every "
+            f"training positive at least once; only {args.epochs} were requested.",
+            file=sys.stderr,
+        )
+    if required_epochs > args.min_checkpoint_epoch:
+        args.min_checkpoint_epoch = min(args.epochs, required_epochs)
+        print(
+            "Checkpoint selection and early stopping start at epoch "
+            f"{args.min_checkpoint_epoch} so positive pools can be traversed."
+        )
     train_loader = make_loader(
         train_dataset,
         args.batch_size,
@@ -3425,6 +3519,7 @@ def inspect_command(args: argparse.Namespace) -> int:
         val_fraction=args.val_fraction,
         val_block_size=args.val_block_size,
         min_split_samples_per_group=args.min_split_samples_per_group,
+        val_milp_time_limit=args.val_milp_time_limit,
     )
     print(f"Cache: {cache_path}")
     print(f"Sequences: {cache['sequences'].shape}, dtype={cache['sequences'].dtype}")
@@ -3496,6 +3591,10 @@ def add_dataset_arguments(parser: argparse.ArgumentParser) -> None:
         help="Comma-separated chromosome names.",
     )
     parser.add_argument("--val-fraction", type=float, default=0.10)
+    parser.add_argument(
+        "--val-milp-time-limit", type=float, default=120.0,
+        help="Maximum seconds for genomic-block validation optimization (default: 120).",
+    )
     parser.add_argument(
         "--val-block-size",
         type=int,
@@ -3622,13 +3721,11 @@ def build_parser() -> argparse.ArgumentParser:
     train_parser.add_argument(
         "--max-eval-positive-reduction",
         type=float,
-        default=0.1,
+        default=1.0,
         help=(
-            "With --balanced-evaluation: if a negative group on the held-out "
-            "chromosomes is smaller than its positive group, drop positives at "
-            "random (seeded) down to the negative count instead of aborting, as "
-            "long as the reduction stays within this fraction of the group. "
-            "Larger shortfalls still abort. Default 0.1."
+            "With --balanced-evaluation: randomly keep as many positives as "
+            "negatives in a group when negatives are scarce, and warn. Default "
+            "1.0 permits any shortfall; a smaller value imposes a limit."
         ),
     )
     train_parser.add_argument(
