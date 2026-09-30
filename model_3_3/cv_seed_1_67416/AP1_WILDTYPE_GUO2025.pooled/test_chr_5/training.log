@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 3379, in <module>
+    raise SystemExit(main())
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 3372, in main
+    return int(args.function(args))
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 2604, in train_command
+    splits = make_splits(
+  File "/home/jbossenz/AT_TFBS/model_3_3/model_3_3_betterTraining.py", line 664, in make_splits
+    raise RuntimeError(
+RuntimeError: No genomic-block validation split satisfies the six group minima and positive/negative balance (or the optimizer timed out). Try a smaller --val-block-size or add more examples; windows overlapping across blocks always remain together. Optimizer status: The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)
