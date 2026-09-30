@@ -1,0 +1,6041 @@
+[
+  {
+    "epoch": 1,
+    "learning_rate_used": 0.0003,
+    "learning_rate_next": 0.0002997049959000266,
+    "elapsed_seconds": 229.82614040374756,
+    "train": {
+      "loss": {
+        "classification": 0.6436722627764997,
+        "regression": 0.0,
+        "total": 0.6436722627764997
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.623826332509707,
+        "balanced_accuracy": 0.623826332509707,
+        "precision": 0.6238700564971752,
+        "recall": 0.6236498411577832,
+        "specificity": 0.6240028238616308,
+        "negative_predictive_value": 0.6237826393789696,
+        "f1": 0.6237599293909973,
+        "mcc": 0.24765268044777894,
+        "true_negative": 8839.0,
+        "false_positive": 5326.0,
+        "false_negative": 5331.0,
+        "true_positive": 8834.0,
+        "auroc": 0.688214237700023,
+        "auprc": 0.6854572292042782
+      },
+      "regression_scalar_all": {
+        "mae": 0.9746429920196533,
+        "rmse": 1.2265840768814087,
+        "pearson": 0.03768997639417648,
+        "spearman": 0.07870197178663184,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.450752854347229,
+        "rmse": 1.639146089553833,
+        "pearson": 0.015678348019719124,
+        "spearman": 0.026030931658868557,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.4985331892967224,
+        "rmse": 0.5676419734954834,
+        "pearson": 0.019195739179849625,
+        "spearman": 0.019903789587844396,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28998398.0,
+        "mae": 0.7282545387154232,
+        "rmse": 0.9011339098939682,
+        "pearson": 0.03189087943205339
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.9586797512936657,
+        "rmse": 1.140298396228342,
+        "pearson": 0.01648770943119583
+      },
+      "regression_profile_negative": {
+        "n_values": 14493540.0,
+        "mae": 0.49764938717430496,
+        "rmse": 0.5687028659351635,
+        "pearson": 0.017085110815743022
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.6771731298639329,
+        "regression": 0.0,
+        "total": 0.6771731298639329
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.6451715374841169,
+        "balanced_accuracy": 0.6451715374841169,
+        "precision": 0.5868491068034968,
+        "recall": 0.9809402795425667,
+        "specificity": 0.30940279542566707,
+        "negative_predictive_value": 0.941972920696325,
+        "f1": 0.7343638525564804,
+        "mcc": 0.39184156693137356,
+        "true_negative": 487.0,
+        "false_positive": 1087.0,
+        "false_negative": 30.0,
+        "true_positive": 1544.0,
+        "auroc": 0.8581104317458574,
+        "auprc": 0.8516417789632288
+      },
+      "regression_scalar_all": {
+        "mae": 1.0426654815673828,
+        "rmse": 1.3155754804611206,
+        "pearson": 0.0177812110632658,
+        "spearman": -0.007359935431165566,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.625001072883606,
+        "rmse": 1.7907966375350952,
+        "pearson": 0.019602999091148376,
+        "spearman": -0.002572979178859141,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.46032994985580444,
+        "rmse": 0.5045049786567688,
+        "pearson": 0.016757003962993622,
+        "spearman": 0.021673934840141185,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.7764785957516508,
+        "rmse": 0.9590378048812419,
+        "pearson": -0.010003806324841729
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 1.0969797098211693,
+        "rmse": 1.2605740917469406,
+        "pearson": 0.023049713052208303
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.45535886174108414,
+        "rmse": 0.49916744169204136,
+        "pearson": -0.0016863225855474828
+      }
+    },
+    "sampling": {
+      "epoch": 1,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 0.8495752123938031,
+        "genic": 0.11123795027904616,
+        "noncoding": 0.7602953410981698
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.5,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 2,
+    "learning_rate_used": 0.0002997049959000266,
+    "learning_rate_next": 0.00029882114784651444,
+    "elapsed_seconds": 65.1103789806366,
+    "train": {
+      "loss": {
+        "classification": 0.5023136062027497,
+        "regression": 0.0,
+        "total": 0.5023136062027497
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.7575361807271443,
+        "balanced_accuracy": 0.7575361807271443,
+        "precision": 0.755677039529016,
+        "recall": 0.7611719025767737,
+        "specificity": 0.753900458877515,
+        "negative_predictive_value": 0.7594225572464799,
+        "f1": 0.7584145183413639,
+        "mcc": 0.5150859789348828,
+        "true_negative": 10679.0,
+        "false_positive": 3486.0,
+        "false_negative": 3383.0,
+        "true_positive": 10782.0,
+        "auroc": 0.8389906164912074,
+        "auprc": 0.8328200824165266
+      },
+      "regression_scalar_all": {
+        "mae": 0.9098556041717529,
+        "rmse": 1.1689597368240356,
+        "pearson": 0.14193405210971832,
+        "spearman": 0.11688566352918706,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3980461359024048,
+        "rmse": 1.5827215909957886,
+        "pearson": 0.06322334706783295,
+        "spearman": 0.04096363852293811,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.42166492342948914,
+        "rmse": 0.47741663455963135,
+        "pearson": 0.035176850855350494,
+        "spearman": 0.03156499176951874,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000520.0,
+        "mae": 0.6597797275798173,
+        "rmse": 0.8394144868067664,
+        "pearson": 0.09804071844955506
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.899414956554799,
+        "rmse": 1.0869326880708257,
+        "pearson": 0.055298286336749096
+      },
+      "regression_profile_negative": {
+        "n_values": 14495662.0,
+        "mae": 0.419992474808637,
+        "rmse": 0.4769782057752872,
+        "pearson": 0.026915002713455007
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.6559452411151826,
+        "regression": 0.0,
+        "total": 0.6559452411151826
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.7067979669631512,
+        "balanced_accuracy": 0.7067979669631512,
+        "precision": 0.6357947434292867,
+        "recall": 0.9682337992376112,
+        "specificity": 0.44536213468869124,
+        "negative_predictive_value": 0.933422103861518,
+        "f1": 0.767564845127172,
+        "mcc": 0.4852069389052735,
+        "true_negative": 701.0,
+        "false_positive": 873.0,
+        "false_negative": 50.0,
+        "true_positive": 1524.0,
+        "auroc": 0.89106453503485,
+        "auprc": 0.8938854801047758
+      },
+      "regression_scalar_all": {
+        "mae": 0.6360690593719482,
+        "rmse": 0.9150495529174805,
+        "pearson": 0.19490496814250946,
+        "spearman": 0.21367335616022692,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.9652277827262878,
+        "rmse": 1.232261300086975,
+        "pearson": 0.05466073751449585,
+        "spearman": 0.0429567016405519,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.30691030621528625,
+        "rmse": 0.39517542719841003,
+        "pearson": 0.05312870442867279,
+        "spearman": 0.06131400178396827,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.42829029428338494,
+        "rmse": 0.6228511955693722,
+        "pearson": 0.15802577330726858
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.5563879245170859,
+        "rmse": 0.7898125375092079,
+        "pearson": 0.08381491249049927
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.2999454145239105,
+        "rmse": 0.3893945687081188,
+        "pearson": 0.02583223166335627
+      }
+    },
+    "sampling": {
+      "epoch": 2,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 3508,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.22247590055809233,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.18552423603793,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 3,
+    "learning_rate_used": 0.00029882114784651444,
+    "learning_rate_next": 0.00029735194398393893,
+    "elapsed_seconds": 63.564406394958496,
+    "train": {
+      "loss": {
+        "classification": 0.46110733917585917,
+        "regression": 0.0,
+        "total": 0.46110733917585917
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.786092481468408,
+        "balanced_accuracy": 0.786092481468408,
+        "precision": 0.7877174298899539,
+        "recall": 0.783268619837628,
+        "specificity": 0.7889163430991881,
+        "negative_predictive_value": 0.7844857844857844,
+        "f1": 0.7854867256637168,
+        "mcc": 0.5721940885835057,
+        "true_negative": 11175.0,
+        "false_positive": 2990.0,
+        "false_negative": 3070.0,
+        "true_positive": 11095.0,
+        "auroc": 0.868562176725843,
+        "auprc": 0.8656641013225888
+      },
+      "regression_scalar_all": {
+        "mae": 0.8086880445480347,
+        "rmse": 1.067131757736206,
+        "pearson": 0.25472959876060486,
+        "spearman": 0.28880786981825385,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.250983715057373,
+        "rmse": 1.449385166168213,
+        "pearson": 0.07007478922605515,
+        "spearman": 0.06694507265147762,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3663925230503082,
+        "rmse": 0.4205036759376526,
+        "pearson": 0.07121323049068451,
+        "spearman": 0.0831618795802189,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29001674.0,
+        "mae": 0.565186590552249,
+        "rmse": 0.7445894494585155,
+        "pearson": 0.20636285718667732
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7645261923072003,
+        "rmse": 0.9653263178235552,
+        "pearson": 0.09488812091994647
+      },
+      "regression_profile_negative": {
+        "n_values": 14496816.0,
+        "mae": 0.36573640664758184,
+        "rmse": 0.4204314614670267,
+        "pearson": 0.07073550303148021
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.41614331339581795,
+        "regression": 0.0,
+        "total": 0.41614331339581795
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8221092757306226,
+        "balanced_accuracy": 0.8221092757306225,
+        "precision": 0.7699680511182109,
+        "recall": 0.9186785260482846,
+        "specificity": 0.7255400254129606,
+        "negative_predictive_value": 0.8992125984251969,
+        "f1": 0.8377752027809965,
+        "mcc": 0.6565809841251492,
+        "true_negative": 1142.0,
+        "false_positive": 432.0,
+        "false_negative": 128.0,
+        "true_positive": 1446.0,
+        "auroc": 0.9136185375761461,
+        "auprc": 0.914582639947922
+      },
+      "regression_scalar_all": {
+        "mae": 0.6250239014625549,
+        "rmse": 0.8741499781608582,
+        "pearson": 0.5031697750091553,
+        "spearman": 0.583362324736733,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.913118302822113,
+        "rmse": 1.168745994567871,
+        "pearson": 0.18042023479938507,
+        "spearman": 0.22377141036526374,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.33692941069602966,
+        "rmse": 0.4028761684894562,
+        "pearson": 0.12907619774341583,
+        "spearman": 0.144124940783354,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4341276741573644,
+        "rmse": 0.6013973235295811,
+        "pearson": 0.43169227779342056
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.5333673063259197,
+        "rmse": 0.7515598644639333,
+        "pearson": 0.2124306575869761
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3346964931526063,
+        "rmse": 0.3976469698441578,
+        "pearson": 0.11639522399900114
+      }
+    },
+    "sampling": {
+      "epoch": 3,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 5262,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.3337138508371385,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.12201440112399,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 4,
+    "learning_rate_used": 0.00029735194398393893,
+    "learning_rate_next": 0.0002953031825887303,
+    "elapsed_seconds": 63.21439814567566,
+    "train": {
+      "loss": {
+        "classification": 0.42346585918463797,
+        "regression": 0.0,
+        "total": 0.42346585918463797
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8110483586304271,
+        "balanced_accuracy": 0.8110483586304271,
+        "precision": 0.8091062157990739,
+        "recall": 0.81418990469467,
+        "specificity": 0.8079068125661842,
+        "negative_predictive_value": 0.8130150610969026,
+        "f1": 0.8116400999331433,
+        "mcc": 0.6221089969572197,
+        "true_negative": 11444.0,
+        "false_positive": 2721.0,
+        "false_negative": 2632.0,
+        "true_positive": 11533.0,
+        "auroc": 0.8923454037303531,
+        "auprc": 0.8893997993865704
+      },
+      "regression_scalar_all": {
+        "mae": 0.8370006084442139,
+        "rmse": 1.1161731481552124,
+        "pearson": 0.0939987376332283,
+        "spearman": 0.10668186962123268,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3237998485565186,
+        "rmse": 1.5250554084777832,
+        "pearson": -0.022287894040346146,
+        "spearman": -0.035627432748610494,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3502010107040405,
+        "rmse": 0.4072972536087036,
+        "pearson": 0.055849455296993256,
+        "spearman": 0.06401318991408167,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000333.0,
+        "mae": 0.5820132371090057,
+        "rmse": 0.7759338004028218,
+        "pearson": 0.07134190122648379
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.810790036233699,
+        "rmse": 1.0171341082934884,
+        "pearson": 0.001127071787504225
+      },
+      "regression_profile_negative": {
+        "n_values": 14495475.0,
+        "mae": 0.353088349514898,
+        "rmse": 0.4114666192737686,
+        "pearson": 0.04870072259314412
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.5593689951662263,
+        "regression": 0.0,
+        "total": 0.5593689951662263
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.7906607369758577,
+        "balanced_accuracy": 0.7906607369758576,
+        "precision": 0.9328287606433302,
+        "recall": 0.6264294790343075,
+        "specificity": 0.9548919949174078,
+        "negative_predictive_value": 0.7187948350071736,
+        "f1": 0.749524895477005,
+        "mcc": 0.6154695679603236,
+        "true_negative": 1503.0,
+        "false_positive": 71.0,
+        "false_negative": 588.0,
+        "true_positive": 986.0,
+        "auroc": 0.9261123013906088,
+        "auprc": 0.9252598633486513
+      },
+      "regression_scalar_all": {
+        "mae": 0.8349722623825073,
+        "rmse": 1.1058608293533325,
+        "pearson": 0.3421899378299713,
+        "spearman": 0.42974385495827605,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3022384643554688,
+        "rmse": 1.5077776908874512,
+        "pearson": 0.06345459818840027,
+        "spearman": 0.10643988005599081,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3677060306072235,
+        "rmse": 0.4152861535549164,
+        "pearson": 0.0513746440410614,
+        "spearman": 0.07150779285215662,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5866996401063995,
+        "rmse": 0.7736668539193615,
+        "pearson": 0.29341584363387907
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.8072183166879543,
+        "rmse": 1.0124764785812348,
+        "pearson": 0.1070491610236841
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3657553261566161,
+        "rmse": 0.4137497718501828,
+        "pearson": 0.04218698894913183
+      }
+    },
+    "sampling": {
+      "epoch": 4,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 7016,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.44495180111618465,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.42902616789603,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 5,
+    "learning_rate_used": 0.0002953031825887303,
+    "learning_rate_next": 0.0002926829491861254,
+    "elapsed_seconds": 76.23080730438232,
+    "train": {
+      "loss": {
+        "classification": 0.39752345848558984,
+        "regression": 0.0,
+        "total": 0.39752345848558984
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8284151076597247,
+        "balanced_accuracy": 0.8284151076597247,
+        "precision": 0.8260442949257079,
+        "recall": 0.832050829509354,
+        "specificity": 0.8247793858100954,
+        "negative_predictive_value": 0.8308206514009387,
+        "f1": 0.8290366827278163,
+        "mcc": 0.6568475805934963,
+        "true_negative": 11683.0,
+        "false_positive": 2482.0,
+        "false_negative": 2379.0,
+        "true_positive": 11786.0,
+        "auroc": 0.9075222570359496,
+        "auprc": 0.9040566891088654
+      },
+      "regression_scalar_all": {
+        "mae": 0.821797788143158,
+        "rmse": 1.1375486850738525,
+        "pearson": -0.23102053999900818,
+        "spearman": -0.25232963365627076,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3583811521530151,
+        "rmse": 1.5705089569091797,
+        "pearson": -0.1647282987833023,
+        "spearman": -0.1992836391250025,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.28521454334259033,
+        "rmse": 0.348619282245636,
+        "pearson": -0.0012413709191605449,
+        "spearman": -0.00943176968613357,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999246.0,
+        "mae": 0.5574004202872432,
+        "rmse": 0.7806642460690741,
+        "pearson": -0.16826366725325925
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.8283247117571535,
+        "rmse": 1.0465844480700253,
+        "pearson": -0.10438955954472165
+      },
+      "regression_profile_negative": {
+        "n_values": 14494388.0,
+        "mae": 0.2862804270511256,
+        "rmse": 0.3509748315652657,
+        "pearson": 0.005298111593852251
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.34442802373760084,
+        "regression": 0.0,
+        "total": 0.34442802373760084
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8541931385006353,
+        "balanced_accuracy": 0.8541931385006354,
+        "precision": 0.8228141285466126,
+        "recall": 0.9027954256670903,
+        "specificity": 0.8055908513341804,
+        "negative_predictive_value": 0.8923293455313159,
+        "f1": 0.8609512269009391,
+        "mcc": 0.711756856745208,
+        "true_negative": 1268.0,
+        "false_positive": 306.0,
+        "false_negative": 153.0,
+        "true_positive": 1421.0,
+        "auroc": 0.9318766357373391,
+        "auprc": 0.9314450912499574
+      },
+      "regression_scalar_all": {
+        "mae": 0.9192162752151489,
+        "rmse": 1.2434252500534058,
+        "pearson": -0.3258717656135559,
+        "spearman": -0.350097196807653,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.537520408630371,
+        "rmse": 1.7232633829116821,
+        "pearson": -0.1708887219429016,
+        "spearman": -0.1945541641071472,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.30091214179992676,
+        "rmse": 0.35010889172554016,
+        "pearson": -0.0007982108509168029,
+        "spearman": -0.007096691859547603,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.6516907185746674,
+        "rmse": 0.8748494616161367,
+        "pearson": -0.23991203319864707
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.998196364615575,
+        "rmse": 1.1853784188119165,
+        "pearson": -0.09794815345417748
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.30451625956270667,
+        "rmse": 0.3526560962414888,
+        "pearson": -0.010316537967302657
+      }
+    },
+    "sampling": {
+      "epoch": 5,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 8770,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.5561897513952309,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.46867316473481,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 6,
+    "learning_rate_used": 0.0002926829491861254,
+    "learning_rate_next": 0.00028950158464029354,
+    "elapsed_seconds": 63.159740686416626,
+    "train": {
+      "loss": {
+        "classification": 0.38224812702259703,
+        "regression": 0.0,
+        "total": 0.38224812702259703
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.83618072714437,
+        "balanced_accuracy": 0.83618072714437,
+        "precision": 0.8317079966564502,
+        "recall": 0.8429226967878574,
+        "specificity": 0.8294387575008825,
+        "negative_predictive_value": 0.8407757263489337,
+        "f1": 0.8372777953087199,
+        "mcc": 0.6724225858679986,
+        "true_negative": 11749.0,
+        "false_positive": 2416.0,
+        "false_negative": 2225.0,
+        "true_positive": 11940.0,
+        "auroc": 0.9155354229294725,
+        "auprc": 0.9110694588482078
+      },
+      "regression_scalar_all": {
+        "mae": 0.8446081280708313,
+        "rmse": 1.169082522392273,
+        "pearson": -0.3292125463485718,
+        "spearman": -0.3498199202387405,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.4022259712219238,
+        "rmse": 1.614530086517334,
+        "pearson": -0.2190227061510086,
+        "spearman": -0.24028010662285187,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.28699028491973877,
+        "rmse": 0.3560906946659088,
+        "pearson": -0.007694533560425043,
+        "spearman": -0.007370414919173495,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999858.0,
+        "mae": 0.5796208845766153,
+        "rmse": 0.8062855535604445,
+        "pearson": -0.23275439018482386
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.8722678311284499,
+        "rmse": 1.0833905480037735,
+        "pearson": -0.10485795230178376
+      },
+      "regression_profile_negative": {
+        "n_values": 14495000.0,
+        "mae": 0.2867749098358119,
+        "rmse": 0.35510784752628416,
+        "pearson": 0.002989355922933817
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3224030266050841,
+        "regression": 0.0,
+        "total": 0.3224030266050841
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8653113087674714,
+        "balanced_accuracy": 0.8653113087674714,
+        "precision": 0.8545006165228114,
+        "recall": 0.8805590851334181,
+        "specificity": 0.8500635324015248,
+        "negative_predictive_value": 0.8768020969855832,
+        "f1": 0.867334167709637,
+        "mcc": 0.7309625864255362,
+        "true_negative": 1338.0,
+        "false_positive": 236.0,
+        "false_negative": 188.0,
+        "true_positive": 1386.0,
+        "auroc": 0.9384236214599053,
+        "auprc": 0.9398032679112729
+      },
+      "regression_scalar_all": {
+        "mae": 0.9294152855873108,
+        "rmse": 1.246606469154358,
+        "pearson": -0.21654300391674042,
+        "spearman": -0.2152305439641575,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.5303925275802612,
+        "rmse": 1.722516417503357,
+        "pearson": -0.18753670156002045,
+        "spearman": -0.2266293474622594,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.32843807339668274,
+        "rmse": 0.37548935413360596,
+        "pearson": 0.057919085025787354,
+        "spearman": 0.05535571363136513,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.661849812557997,
+        "rmse": 0.8800710741935892,
+        "pearson": -0.16398973590288068
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.9926337262404443,
+        "rmse": 1.1857762047243903,
+        "pearson": -0.12688920437770845
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.33042743143753156,
+        "rmse": 0.37651826932356974,
+        "pearson": 0.048206608454548466
+      }
+    },
+    "sampling": {
+      "epoch": 6,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 10524,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.667427701674277,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.0463865472427,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 7,
+    "learning_rate_used": 0.00028950158464029354,
+    "learning_rate_next": 0.00028577164434366993,
+    "elapsed_seconds": 63.21588683128357,
+    "train": {
+      "loss": {
+        "classification": 0.3672220647324533,
+        "regression": 0.0,
+        "total": 0.3672220647324533
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8450052947405577,
+        "balanced_accuracy": 0.8450052947405577,
+        "precision": 0.8404625888254145,
+        "recall": 0.8516766678432757,
+        "specificity": 0.8383339216378397,
+        "negative_predictive_value": 0.8496708643388666,
+        "f1": 0.8460324695816824,
+        "mcc": 0.6900720185882944,
+        "true_negative": 11875.0,
+        "false_positive": 2290.0,
+        "false_negative": 2101.0,
+        "true_positive": 12064.0,
+        "auroc": 0.9226522893600946,
+        "auprc": 0.9192078616003407
+      },
+      "regression_scalar_all": {
+        "mae": 0.8173127174377441,
+        "rmse": 1.1287776231765747,
+        "pearson": -0.19328756630420685,
+        "spearman": -0.1996326095900132,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3545730113983154,
+        "rmse": 1.5595663785934448,
+        "pearson": -0.14728927612304688,
+        "spearman": -0.17087824464849058,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2800522744655609,
+        "rmse": 0.34063270688056946,
+        "pearson": 0.023692384362220764,
+        "spearman": 0.025929689805441532,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999668.0,
+        "mae": 0.5491737980923358,
+        "rmse": 0.768417367101355,
+        "pearson": -0.1345439979802782
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.8148710042116267,
+        "rmse": 1.0305105022018348,
+        "pearson": -0.09426813570714616
+      },
+      "regression_profile_negative": {
+        "n_values": 14494810.0,
+        "mae": 0.2832924070456753,
+        "rmse": 0.344458653548244,
+        "pearson": 0.012206490137843995
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.34364515943204205,
+        "regression": 0.0,
+        "total": 0.34364515943204205
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8640406607369758,
+        "balanced_accuracy": 0.8640406607369759,
+        "precision": 0.8677792041078306,
+        "recall": 0.8589580686149937,
+        "specificity": 0.8691232528589581,
+        "negative_predictive_value": 0.8603773584905661,
+        "f1": 0.8633461047254151,
+        "mcc": 0.7281189410642817,
+        "true_negative": 1368.0,
+        "false_positive": 206.0,
+        "false_negative": 222.0,
+        "true_positive": 1352.0,
+        "auroc": 0.9331158001126953,
+        "auprc": 0.9330821038094514
+      },
+      "regression_scalar_all": {
+        "mae": 0.8129146099090576,
+        "rmse": 1.1440184116363525,
+        "pearson": -0.25531935691833496,
+        "spearman": -0.26710780704321935,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3687212467193604,
+        "rmse": 1.5859736204147339,
+        "pearson": -0.18392159044742584,
+        "spearman": -0.21115461729039192,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2571078836917877,
+        "rmse": 0.3197556138038635,
+        "pearson": -0.04874033480882645,
+        "spearman": -0.058957333731983315,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5254396711728228,
+        "rmse": 0.7672917872455757,
+        "pearson": -0.19785450276803918
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.8005126105267011,
+        "rmse": 1.0389830355897387,
+        "pearson": -0.20241282806940328
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.24983579573773598,
+        "rmse": 0.3115130796356219,
+        "pearson": -0.04847718795888453
+      }
+    },
+    "sampling": {
+      "epoch": 7,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 12278,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.7786656519533232,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 63.97765191429575,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 8,
+    "learning_rate_used": 0.00028577164434366993,
+    "learning_rate_next": 0.00028150784866655756,
+    "elapsed_seconds": 63.27356553077698,
+    "train": {
+      "loss": {
+        "classification": 0.3596648287208224,
+        "regression": 0.0,
+        "total": 0.3596648287208224
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8515707730321215,
+        "balanced_accuracy": 0.8515707730321214,
+        "precision": 0.844636678200692,
+        "recall": 0.8616307800917755,
+        "specificity": 0.8415107659724673,
+        "negative_predictive_value": 0.8587896253602305,
+        "f1": 0.8530491001223135,
+        "mcc": 0.7032839104004033,
+        "true_negative": 11920.0,
+        "false_positive": 2245.0,
+        "false_negative": 1960.0,
+        "true_positive": 12205.0,
+        "auroc": 0.9271353665618849,
+        "auprc": 0.9234562468363753
+      },
+      "regression_scalar_all": {
+        "mae": 0.797160804271698,
+        "rmse": 1.0913128852844238,
+        "pearson": -0.012559008784592152,
+        "spearman": 0.031222890726101415,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2902823686599731,
+        "rmse": 1.5008273124694824,
+        "pearson": -0.1443171203136444,
+        "spearman": -0.1581837092019322,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.30403944849967957,
+        "rmse": 0.3597842752933502,
+        "pearson": 0.04781769588589668,
+        "spearman": 0.0645496468257676,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999092.0,
+        "mae": 0.5072875892326504,
+        "rmse": 0.7209805381563784,
+        "pearson": -0.007207144107839031
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7128962731626042,
+        "rmse": 0.9533470681949542,
+        "pearson": -0.20673675018702528
+      },
+      "regression_profile_negative": {
+        "n_values": 14494234.0,
+        "mae": 0.3015281980174359,
+        "rmse": 0.3612064069411763,
+        "pearson": 0.03945989379953742
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4761762866037963,
+        "regression": 0.0,
+        "total": 0.4761762866037963
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8252858958068615,
+        "balanced_accuracy": 0.8252858958068615,
+        "precision": 0.9444444444444444,
+        "recall": 0.6912325285895807,
+        "specificity": 0.9593392630241423,
+        "negative_predictive_value": 0.7565130260521042,
+        "f1": 0.7982391782831988,
+        "mcc": 0.6752948670217797,
+        "true_negative": 1510.0,
+        "false_positive": 64.0,
+        "false_negative": 486.0,
+        "true_positive": 1088.0,
+        "auroc": 0.9411457467196453,
+        "auprc": 0.9406693112046949
+      },
+      "regression_scalar_all": {
+        "mae": 0.8081474900245667,
+        "rmse": 1.115694522857666,
+        "pearson": 0.10867267847061157,
+        "spearman": 0.19568639645323532,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.3077064752578735,
+        "rmse": 1.5364655256271362,
+        "pearson": -0.16818520426750183,
+        "spearman": -0.16522509270412225,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.30858829617500305,
+        "rmse": 0.3589182198047638,
+        "pearson": 0.07314878702163696,
+        "spearman": 0.07943091722141424,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.534078814546292,
+        "rmse": 0.7548215950886904,
+        "pearson": 0.09552551134974746
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7675412235593859,
+        "rmse": 1.0071699113805839,
+        "pearson": -0.13768752396054204
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3001657846293678,
+        "rmse": 0.3525079155251795,
+        "pearson": 0.06141408237922373
+      }
+    },
+    "sampling": {
+      "epoch": 8,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 14032,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 0.8899036022323693,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.3225324903407,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 9,
+    "learning_rate_used": 0.00028150784866655756,
+    "learning_rate_next": 0.00027672702486255125,
+    "elapsed_seconds": 63.5562903881073,
+    "train": {
+      "loss": {
+        "classification": 0.3491896489864571,
+        "regression": 0.0,
+        "total": 0.3491896489864571
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8570420049417579,
+        "balanced_accuracy": 0.8570420049417579,
+        "precision": 0.8528078130449948,
+        "recall": 0.8630427109071656,
+        "specificity": 0.8510412989763502,
+        "negative_predictive_value": 0.8613790639514112,
+        "f1": 0.8578947368421053,
+        "mcc": 0.7141354415877837,
+        "true_negative": 12055.0,
+        "false_positive": 2110.0,
+        "false_negative": 1940.0,
+        "true_positive": 12225.0,
+        "auroc": 0.9311081476456999,
+        "auprc": 0.9275691231537075
+      },
+      "regression_scalar_all": {
+        "mae": 0.7609222531318665,
+        "rmse": 1.0341174602508545,
+        "pearson": 0.20733895897865295,
+        "spearman": 0.2689020827481998,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2029056549072266,
+        "rmse": 1.4135432243347168,
+        "pearson": -0.028124818578362465,
+        "spearman": -0.037682457431022776,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3189389109611511,
+        "rmse": 0.3750911355018616,
+        "pearson": 0.11296597123146057,
+        "spearman": 0.13365774861224958,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999177.0,
+        "mae": 0.49875803439585376,
+        "rmse": 0.6938277997370528,
+        "pearson": 0.155097393928474
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6782609442476576,
+        "rmse": 0.9048463242341735,
+        "pearson": -0.040570873256646385
+      },
+      "regression_profile_negative": {
+        "n_values": 14494319.0,
+        "mae": 0.31912460574099827,
+        "rmse": 0.37921216965140386,
+        "pearson": 0.08791656917914652
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.6456400551034429,
+        "regression": 0.0,
+        "total": 0.6456400551034429
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.7449174078780177,
+        "balanced_accuracy": 0.7449174078780179,
+        "precision": 0.6658064516129032,
+        "recall": 0.9834815756035579,
+        "specificity": 0.5063532401524777,
+        "negative_predictive_value": 0.968408262454435,
+        "f1": 0.7940497563477815,
+        "mcc": 0.5573692201897602,
+        "true_negative": 797.0,
+        "false_positive": 777.0,
+        "false_negative": 26.0,
+        "true_positive": 1548.0,
+        "auroc": 0.9418987308050613,
+        "auprc": 0.9411363960305791
+      },
+      "regression_scalar_all": {
+        "mae": 0.7144738435745239,
+        "rmse": 1.033903956413269,
+        "pearson": -0.05855019763112068,
+        "spearman": -0.05737661634228735,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.169307827949524,
+        "rmse": 1.4240163564682007,
+        "pearson": -0.08892810344696045,
+        "spearman": -0.07839717878862074,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.25963982939720154,
+        "rmse": 0.3318014144897461,
+        "pearson": 0.04647175595164299,
+        "spearman": 0.021857014067935342,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4729499268242017,
+        "rmse": 0.6962339493563451,
+        "pearson": -0.05048011942082282
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6789304231170455,
+        "rmse": 0.9209478864033365,
+        "pearson": -0.008208966798095971
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.26657185424572255,
+        "rmse": 0.34732835585475175,
+        "pearson": 0.03243837708025411
+      }
+    },
+    "sampling": {
+      "epoch": 9,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.0992053038286,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 10,
+    "learning_rate_used": 0.00027672702486255125,
+    "learning_rate_next": 0.0002714480406590546,
+    "elapsed_seconds": 63.66319227218628,
+    "train": {
+      "loss": {
+        "classification": 0.33904706708274246,
+        "regression": 0.0,
+        "total": 0.33904706708274246
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8631486057183198,
+        "balanced_accuracy": 0.8631486057183198,
+        "precision": 0.857768813465016,
+        "recall": 0.8706671373102718,
+        "specificity": 0.8556300741263678,
+        "negative_predictive_value": 0.8686926605504587,
+        "f1": 0.8641698489997548,
+        "mcc": 0.7263793380827887,
+        "true_negative": 12120.0,
+        "false_positive": 2045.0,
+        "false_negative": 1832.0,
+        "true_positive": 12333.0,
+        "auroc": 0.936111673111851,
+        "auprc": 0.9321240914586654
+      },
+      "regression_scalar_all": {
+        "mae": 0.7652208805084229,
+        "rmse": 1.0672378540039062,
+        "pearson": -0.0326111726462841,
+        "spearman": -0.0014073749567616685,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2464531660079956,
+        "rmse": 1.4692267179489136,
+        "pearson": -0.1394530087709427,
+        "spearman": -0.1667241708163181,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2839885950088501,
+        "rmse": 0.3454936742782593,
+        "pearson": 0.08541426062583923,
+        "spearman": 0.09378502475775922,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29003098.0,
+        "mae": 0.4992753617419592,
+        "rmse": 0.7136251814708482,
+        "pearson": -0.015371838867399469
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7082155902771552,
+        "rmse": 0.9440549328490827,
+        "pearson": -0.1258897575194171
+      },
+      "regression_profile_negative": {
+        "n_values": 14498240.0,
+        "mae": 0.2902397584280006,
+        "rmse": 0.35652169843848036,
+        "pearson": 0.08317694829367953
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4113923345019111,
+        "regression": 0.0,
+        "total": 0.4113923345019111
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8506988564167726,
+        "balanced_accuracy": 0.8506988564167726,
+        "precision": 0.93125,
+        "recall": 0.7573062261753494,
+        "specificity": 0.9440914866581956,
+        "negative_predictive_value": 0.7955032119914347,
+        "f1": 0.8353188507358094,
+        "mcc": 0.7139629126819017,
+        "true_negative": 1486.0,
+        "false_positive": 88.0,
+        "false_negative": 382.0,
+        "true_positive": 1192.0,
+        "auroc": 0.9422924783126052,
+        "auprc": 0.9427121411729779
+      },
+      "regression_scalar_all": {
+        "mae": 0.7479342818260193,
+        "rmse": 1.091724157333374,
+        "pearson": -0.20188969373703003,
+        "spearman": -0.16818470754974246,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.249080777168274,
+        "rmse": 1.5118176937103271,
+        "pearson": -0.26806920766830444,
+        "spearman": -0.2989730520537142,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2467879056930542,
+        "rmse": 0.31325823068618774,
+        "pearson": 0.03938675671815872,
+        "spearman": 0.032526335872086545,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4800454909233437,
+        "rmse": 0.726759684587345,
+        "pearson": -0.13277392548678016
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7129752915915961,
+        "rmse": 0.976901250199405,
+        "pearson": -0.23001911534917632
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.2466660973730943,
+        "rmse": 0.3181205330845833,
+        "pearson": 0.03644395540739758
+      }
+    },
+    "sampling": {
+      "epoch": 10,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.5673296452406,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 11,
+    "learning_rate_used": 0.0002714480406590546,
+    "learning_rate_next": 0.00026569172979498044,
+    "elapsed_seconds": 63.26603960990906,
+    "train": {
+      "loss": {
+        "classification": 0.3300506685001455,
+        "regression": 0.0,
+        "total": 0.3300506685001455
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8662901517825626,
+        "balanced_accuracy": 0.8662901517825626,
+        "precision": 0.8601374331921983,
+        "recall": 0.8748323332156724,
+        "specificity": 0.8577479703494528,
+        "negative_predictive_value": 0.8726567550096962,
+        "f1": 0.8674226515469691,
+        "mcc": 0.7326872380789113,
+        "true_negative": 12150.0,
+        "false_positive": 2015.0,
+        "false_negative": 1773.0,
+        "true_positive": 12392.0,
+        "auroc": 0.9394125959130509,
+        "auprc": 0.9351344778016326
+      },
+      "regression_scalar_all": {
+        "mae": 0.7672386765480042,
+        "rmse": 1.0873652696609497,
+        "pearson": -0.24391283094882965,
+        "spearman": -0.23569116926870226,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2616499662399292,
+        "rmse": 1.4976125955581665,
+        "pearson": -0.22523178160190582,
+        "spearman": -0.25026777093743285,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2728273570537567,
+        "rmse": 0.3491169214248657,
+        "pearson": 0.04041477292776108,
+        "spearman": 0.05381332245656249,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28997035.0,
+        "mae": 0.49261756858711847,
+        "rmse": 0.7202034489780934,
+        "pearson": -0.16484790805166244
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6958255399542038,
+        "rmse": 0.947428677223216,
+        "pearson": -0.2911720149224295
+      },
+      "regression_profile_negative": {
+        "n_values": 14492177.0,
+        "mae": 0.289231785405776,
+        "rmse": 0.37340774806067945,
+        "pearson": 0.022482774979405973
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3259797957495063,
+        "regression": 0.0,
+        "total": 0.3259797957495063
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8729351969504447,
+        "balanced_accuracy": 0.8729351969504446,
+        "precision": 0.8659600997506235,
+        "recall": 0.8824650571791613,
+        "specificity": 0.863405336721728,
+        "negative_predictive_value": 0.8801813471502591,
+        "f1": 0.8741346758967904,
+        "mcc": 0.7460059080903721,
+        "true_negative": 1359.0,
+        "false_positive": 215.0,
+        "false_negative": 185.0,
+        "true_positive": 1389.0,
+        "auroc": 0.9396183858087828,
+        "auprc": 0.9420445303352537
+      },
+      "regression_scalar_all": {
+        "mae": 0.7821739912033081,
+        "rmse": 1.1097699403762817,
+        "pearson": -0.1068258136510849,
+        "spearman": -0.07565938930536961,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.295659065246582,
+        "rmse": 1.5341322422027588,
+        "pearson": -0.20193509757518768,
+        "spearman": -0.22615362080795454,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.26868873834609985,
+        "rmse": 0.3310846984386444,
+        "pearson": 0.06033644452691078,
+        "spearman": 0.0639535317736147,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5025079560761464,
+        "rmse": 0.738341165130586,
+        "pearson": -0.06913291520621972
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7274250961720511,
+        "rmse": 0.9843168672795202,
+        "pearson": -0.29612996957262977
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.27715668885294353,
+        "rmse": 0.34727191716370037,
+        "pearson": 0.036390364721399
+      }
+    },
+    "sampling": {
+      "epoch": 11,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.04107393747805,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 12,
+    "learning_rate_used": 0.00026569172979498044,
+    "learning_rate_next": 0.000259480809799501,
+    "elapsed_seconds": 63.37276220321655,
+    "train": {
+      "loss": {
+        "classification": 0.31896310938536027,
+        "regression": 0.0,
+        "total": 0.31896310938536027
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8738792799152841,
+        "balanced_accuracy": 0.8738792799152841,
+        "precision": 0.869162135786979,
+        "recall": 0.8802682668549241,
+        "specificity": 0.8674902929756442,
+        "negative_predictive_value": 0.8787185354691075,
+        "f1": 0.8746799480902108,
+        "mcc": 0.7478196130508813,
+        "true_negative": 12288.0,
+        "false_positive": 1877.0,
+        "false_negative": 1696.0,
+        "true_positive": 12469.0,
+        "auroc": 0.943760919195369,
+        "auprc": 0.9404711666849062
+      },
+      "regression_scalar_all": {
+        "mae": 0.766188383102417,
+        "rmse": 1.0779885053634644,
+        "pearson": -0.2526020407676697,
+        "spearman": -0.2635460781087839,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2548959255218506,
+        "rmse": 1.4817581176757812,
+        "pearson": -0.20181235671043396,
+        "spearman": -0.23729343256231245,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2774808406829834,
+        "rmse": 0.35848525166511536,
+        "pearson": 0.00798546988517046,
+        "spearman": 0.01869689432239836,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29002005.0,
+        "mae": 0.49353094343558723,
+        "rmse": 0.7178897413489091,
+        "pearson": -0.1592039931071596
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6902391960401795,
+        "rmse": 0.9379410322824776,
+        "pearson": -0.32389901404765997
+      },
+      "regression_profile_negative": {
+        "n_values": 14497147.0,
+        "mae": 0.29671806215227403,
+        "rmse": 0.3883351324129783,
+        "pearson": 0.010354550077442409
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3319236534958873,
+        "regression": 0.0,
+        "total": 0.3319236534958873
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.872299872935197,
+        "balanced_accuracy": 0.872299872935197,
+        "precision": 0.8568818514007308,
+        "recall": 0.8939008894536213,
+        "specificity": 0.8506988564167726,
+        "negative_predictive_value": 0.8891102257636122,
+        "f1": 0.875,
+        "mcc": 0.7452955863802609,
+        "true_negative": 1339.0,
+        "false_positive": 235.0,
+        "false_negative": 167.0,
+        "true_positive": 1407.0,
+        "auroc": 0.9444095523024238,
+        "auprc": 0.9459067656580428
+      },
+      "regression_scalar_all": {
+        "mae": 0.7190001606941223,
+        "rmse": 1.039323091506958,
+        "pearson": -0.04745255410671234,
+        "spearman": -0.015506276208869548,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1903809309005737,
+        "rmse": 1.4339466094970703,
+        "pearson": -0.12188683450222015,
+        "spearman": -0.12792672333048627,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.24761943519115448,
+        "rmse": 0.32277289032936096,
+        "pearson": 0.04163099825382233,
+        "spearman": 0.0467599557659014,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4618068002370372,
+        "rmse": 0.6916608152979442,
+        "pearson": -0.03947061266064064
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6664326075915735,
+        "rmse": 0.9184184221634434,
+        "pearson": -0.26563593295027427
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.2567860313696521,
+        "rmse": 0.3355477163415285,
+        "pearson": 0.025450902723296545
+      }
+    },
+    "sampling": {
+      "epoch": 12,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.42669915700738,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 13,
+    "learning_rate_used": 0.000259480809799501,
+    "learning_rate_next": 0.00025283979233633894,
+    "elapsed_seconds": 63.31795358657837,
+    "train": {
+      "loss": {
+        "classification": 0.31408369883209825,
+        "regression": 0.0,
+        "total": 0.31408369883209825
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8735968937522062,
+        "balanced_accuracy": 0.8735968937522061,
+        "precision": 0.866076369673492,
+        "recall": 0.8838686904341687,
+        "specificity": 0.8633250970702435,
+        "negative_predictive_value": 0.8814328960645812,
+        "f1": 0.874882079591908,
+        "mcc": 0.7473515099747061,
+        "true_negative": 12229.0,
+        "false_positive": 1936.0,
+        "false_negative": 1645.0,
+        "true_positive": 12520.0,
+        "auroc": 0.9459098474947759,
+        "auprc": 0.9416047166070846
+      },
+      "regression_scalar_all": {
+        "mae": 0.7050275206565857,
+        "rmse": 0.9768852591514587,
+        "pearson": 0.2313038557767868,
+        "spearman": 0.27388033762064573,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.104705572128296,
+        "rmse": 1.330960988998413,
+        "pearson": 0.022894423454999924,
+        "spearman": 0.0003286307360686578,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3053494393825531,
+        "rmse": 0.3703409433364868,
+        "pearson": 0.10289384424686432,
+        "spearman": 0.11900074282492334,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28998203.0,
+        "mae": 0.4679772348325615,
+        "rmse": 0.6594894278301899,
+        "pearson": 0.13547381829633312
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6160599452299591,
+        "rmse": 0.8463873680304109,
+        "pearson": -0.17067553856027173
+      },
+      "regression_profile_negative": {
+        "n_values": 14493345.0,
+        "mae": 0.3197768927742322,
+        "rmse": 0.39148111566421917,
+        "pearson": 0.07797756052698342
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.35943536216030997,
+        "regression": 0.0,
+        "total": 0.35943536216030997
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8707115628970775,
+        "balanced_accuracy": 0.8707115628970775,
+        "precision": 0.8737988468930173,
+        "recall": 0.866581956797967,
+        "specificity": 0.874841168996188,
+        "negative_predictive_value": 0.8676748582230623,
+        "f1": 0.8701754385964913,
+        "mcc": 0.7414484150238217,
+        "true_negative": 1377.0,
+        "false_positive": 197.0,
+        "false_negative": 210.0,
+        "true_positive": 1364.0,
+        "auroc": 0.9421047872915822,
+        "auprc": 0.9437462803395711
+      },
+      "regression_scalar_all": {
+        "mae": 0.7207154631614685,
+        "rmse": 0.9811662435531616,
+        "pearson": 0.4569534659385681,
+        "spearman": 0.5626943990398463,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.0822913646697998,
+        "rmse": 1.3237534761428833,
+        "pearson": 0.09191491454839706,
+        "spearman": 0.11317480730058968,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.35913950204849243,
+        "rmse": 0.41599440574645996,
+        "pearson": 0.14424388110637665,
+        "spearman": 0.1868485804482297,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4911045960067601,
+        "rmse": 0.6716930850778088,
+        "pearson": 0.2954796899933915
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6166380136846055,
+        "rmse": 0.8480163362204794,
+        "pearson": -0.1282638464295562
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.36532887815573467,
+        "rmse": 0.42742752303135106,
+        "pearson": 0.09598261088856573
+      }
+    },
+    "sampling": {
+      "epoch": 13,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.48882595714788,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 14,
+    "learning_rate_used": 0.00025283979233633894,
+    "learning_rate_next": 0.0002457948864674291,
+    "elapsed_seconds": 63.4040470123291,
+    "train": {
+      "loss": {
+        "classification": 0.3043433383616076,
+        "regression": 0.0,
+        "total": 0.3043433383616076
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8817507942110837,
+        "balanced_accuracy": 0.8817507942110836,
+        "precision": 0.8774342151183081,
+        "recall": 0.8874691140134133,
+        "specificity": 0.876032474408754,
+        "negative_predictive_value": 0.8861672498750268,
+        "f1": 0.8824231363189667,
+        "mcc": 0.7635515250747033,
+        "true_negative": 12409.0,
+        "false_positive": 1756.0,
+        "false_negative": 1594.0,
+        "true_positive": 12571.0,
+        "auroc": 0.950568214935442,
+        "auprc": 0.9479125809603407
+      },
+      "regression_scalar_all": {
+        "mae": 0.7414529919624329,
+        "rmse": 0.9879291653633118,
+        "pearson": 0.4030148386955261,
+        "spearman": 0.4911234248499177,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.12066650390625,
+        "rmse": 1.333484411239624,
+        "pearson": 0.0776575356721878,
+        "spearman": 0.07870211466540057,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3622394800186157,
+        "rmse": 0.4169260859489441,
+        "pearson": 0.13371823728084564,
+        "spearman": 0.15711895275938195,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29001544.0,
+        "mae": 0.4902452897645628,
+        "rmse": 0.6655443740003186,
+        "pearson": 0.25078852010103025
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6161663298098583,
+        "rmse": 0.8404654718446624,
+        "pearson": -0.12153159245957335
+      },
+      "regression_profile_negative": {
+        "n_values": 14496686.0,
+        "mae": 0.364253266134519,
+        "rmse": 0.42351849673573383,
+        "pearson": 0.10243018067205722
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.5117418036519241,
+        "regression": 0.0,
+        "total": 0.5117418036519241
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8252858958068615,
+        "balanced_accuracy": 0.8252858958068614,
+        "precision": 0.9475524475524476,
+        "recall": 0.6886912325285895,
+        "specificity": 0.9618805590851334,
+        "negative_predictive_value": 0.7554890219560878,
+        "f1": 0.797645327446652,
+        "mcc": 0.6762979730835458,
+        "true_negative": 1514.0,
+        "false_positive": 60.0,
+        "false_negative": 490.0,
+        "true_positive": 1084.0,
+        "auroc": 0.9490077804991854,
+        "auprc": 0.950610756809368
+      },
+      "regression_scalar_all": {
+        "mae": 0.8141576647758484,
+        "rmse": 1.0469993352890015,
+        "pearson": 0.549748420715332,
+        "spearman": 0.6522691949892958,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1945704221725464,
+        "rmse": 1.4011597633361816,
+        "pearson": 0.19172173738479614,
+        "spearman": 0.22492538113824537,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.4337448179721832,
+        "rmse": 0.4787132740020752,
+        "pearson": 0.12919484078884125,
+        "spearman": 0.16338034301582993,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5596016144074706,
+        "rmse": 0.7268456700738827,
+        "pearson": 0.3556780216362731
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6831713502532413,
+        "rmse": 0.9069544853198189,
+        "pearson": -0.05520048055637933
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.43579336861790086,
+        "rmse": 0.4831923467995865,
+        "pearson": 0.08930507525415024
+      }
+    },
+    "sampling": {
+      "epoch": 14,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.3588865472427,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 15,
+    "learning_rate_used": 0.0002457948864674291,
+    "learning_rate_next": 0.00023837389521772474,
+    "elapsed_seconds": 63.190069913864136,
+    "train": {
+      "loss": {
+        "classification": 0.2974782897216658,
+        "regression": 0.0,
+        "total": 0.2974782897216658
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8865866572537946,
+        "balanced_accuracy": 0.8865866572537946,
+        "precision": 0.881655979927516,
+        "recall": 0.893046240734204,
+        "specificity": 0.8801270737733851,
+        "negative_predictive_value": 0.8916464025175225,
+        "f1": 0.8873145582716656,
+        "mcc": 0.7732378457833307,
+        "true_negative": 12467.0,
+        "false_positive": 1698.0,
+        "false_negative": 1515.0,
+        "true_positive": 12650.0,
+        "auroc": 0.9526274684337149,
+        "auprc": 0.9493644370784677
+      },
+      "regression_scalar_all": {
+        "mae": 0.7314171195030212,
+        "rmse": 0.9811640977859497,
+        "pearson": 0.3858336806297302,
+        "spearman": 0.4536332217950316,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1146026849746704,
+        "rmse": 1.3274966478347778,
+        "pearson": 0.09744832664728165,
+        "spearman": 0.0851979815037055,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3482315242290497,
+        "rmse": 0.40387922525405884,
+        "pearson": 0.12110710889101028,
+        "spearman": 0.13798395887765152,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29002176.0,
+        "mae": 0.48591707616041846,
+        "rmse": 0.6634263175660198,
+        "pearson": 0.24313399031682867
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6186687487077216,
+        "rmse": 0.842012423002895,
+        "pearson": -0.12163619144131523
+      },
+      "regression_profile_negative": {
+        "n_values": 14497318.0,
+        "mae": 0.35309635997269806,
+        "rmse": 0.413695792937486,
+        "pearson": 0.09763041369933528
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.36098051059037317,
+        "regression": 0.0,
+        "total": 0.36098051059037317
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8738881829733164,
+        "balanced_accuracy": 0.8738881829733164,
+        "precision": 0.8884488448844885,
+        "recall": 0.855146124523507,
+        "specificity": 0.8926302414231257,
+        "negative_predictive_value": 0.8603796693202694,
+        "f1": 0.871479443185497,
+        "mcc": 0.7483022551544598,
+        "true_negative": 1405.0,
+        "false_positive": 169.0,
+        "false_negative": 228.0,
+        "true_positive": 1346.0,
+        "auroc": 0.9459748550540953,
+        "auprc": 0.9469258649919952
+      },
+      "regression_scalar_all": {
+        "mae": 0.7489596605300903,
+        "rmse": 1.0053044557571411,
+        "pearson": 0.4819853901863098,
+        "spearman": 0.5902575464780082,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1363067626953125,
+        "rmse": 1.3611165285110474,
+        "pearson": 0.13142578303813934,
+        "spearman": 0.16752944481482157,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3616126775741577,
+        "rmse": 0.4106530249118805,
+        "pearson": 0.1642497330904007,
+        "spearman": 0.19176116350123673,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5024528852021589,
+        "rmse": 0.6818884282960843,
+        "pearson": 0.3331525746599666
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6411999963202961,
+        "rmse": 0.869201233165697,
+        "pearson": -0.06839927749398815
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3634379693060267,
+        "rmse": 0.4169797183465791,
+        "pearson": 0.11666855191209129
+      }
+    },
+    "sampling": {
+      "epoch": 15,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.47953986652617,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 16,
+    "learning_rate_used": 0.00023837389521772474,
+    "learning_rate_next": 0.00023060610584935996,
+    "elapsed_seconds": 63.22739362716675,
+    "train": {
+      "loss": {
+        "classification": 0.29906700773025247,
+        "regression": 0.0,
+        "total": 0.29906700773025247
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.884821743734557,
+        "balanced_accuracy": 0.8848217437345569,
+        "precision": 0.87838400666389,
+        "recall": 0.893328626897282,
+        "specificity": 0.8763148605718319,
+        "negative_predictive_value": 0.8914823326630279,
+        "f1": 0.8857932868993035,
+        "mcc": 0.7697549053332817,
+        "true_negative": 12413.0,
+        "false_positive": 1752.0,
+        "false_negative": 1511.0,
+        "true_positive": 12654.0,
+        "auroc": 0.9524771523752694,
+        "auprc": 0.9490931734424695
+      },
+      "regression_scalar_all": {
+        "mae": 0.7309207916259766,
+        "rmse": 0.9967935681343079,
+        "pearson": 0.2920553982257843,
+        "spearman": 0.30822049780164423,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1560159921646118,
+        "rmse": 1.3627538681030273,
+        "pearson": 0.10168439149856567,
+        "spearman": 0.07230588018766197,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3058256506919861,
+        "rmse": 0.3606888949871063,
+        "pearson": 0.08040940016508102,
+        "spearman": 0.0977930330224295,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28998783.0,
+        "mae": 0.4669292400615265,
+        "rmse": 0.6580167270641811,
+        "pearson": 0.1877140387274446
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6281312221792118,
+        "rmse": 0.8558110666795832,
+        "pearson": -0.0925605987471819
+      },
+      "regression_profile_negative": {
+        "n_values": 14493925.0,
+        "mae": 0.30560566070427386,
+        "rmse": 0.3651487122802516,
+        "pearson": 0.07099772646108832
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3411021011513498,
+        "regression": 0.0,
+        "total": 0.3411021011513498
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8659466327827192,
+        "balanced_accuracy": 0.8659466327827192,
+        "precision": 0.9167872648335745,
+        "recall": 0.8049555273189326,
+        "specificity": 0.9269377382465057,
+        "negative_predictive_value": 0.8261608154020385,
+        "f1": 0.8572395128552097,
+        "mcc": 0.7373999570038068,
+        "true_negative": 1459.0,
+        "false_positive": 115.0,
+        "false_negative": 307.0,
+        "true_positive": 1267.0,
+        "auroc": 0.9504515886329474,
+        "auprc": 0.952640861124876
+      },
+      "regression_scalar_all": {
+        "mae": 0.7931823134422302,
+        "rmse": 1.079986333847046,
+        "pearson": 0.2883685231208801,
+        "spearman": 0.35484967003796786,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.2716413736343384,
+        "rmse": 1.4831175804138184,
+        "pearson": 0.0270326416939497,
+        "spearman": 0.034555231617090516,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.31472349166870117,
+        "rmse": 0.36483290791511536,
+        "pearson": 0.10227615386247635,
+        "spearman": 0.11071262588529648,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5040036536858434,
+        "rmse": 0.7162379337743924,
+        "pearson": 0.16439294818256284
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7011126434478026,
+        "rmse": 0.9462311729378153,
+        "pearson": -0.1913123153639323
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3065142111071115,
+        "rmse": 0.36041935518548596,
+        "pearson": 0.07434737516444394
+      }
+    },
+    "sampling": {
+      "epoch": 16,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.21639005971198,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 17,
+    "learning_rate_used": 0.00023060610584935996,
+    "learning_rate_next": 0.0002225221742782064,
+    "elapsed_seconds": 63.34550476074219,
+    "train": {
+      "loss": {
+        "classification": 0.2896474461441355,
+        "regression": 0.0,
+        "total": 0.2896474461441355
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8895870102364984,
+        "balanced_accuracy": 0.8895870102364984,
+        "precision": 0.8829366456179307,
+        "recall": 0.8982703847511472,
+        "specificity": 0.8809036357218496,
+        "negative_predictive_value": 0.8964724477333141,
+        "f1": 0.8905375139977604,
+        "mcc": 0.7792915480484199,
+        "true_negative": 12478.0,
+        "false_positive": 1687.0,
+        "false_negative": 1441.0,
+        "true_positive": 12724.0,
+        "auroc": 0.9559216131695815,
+        "auprc": 0.953039262497583
+      },
+      "regression_scalar_all": {
+        "mae": 0.7264488339424133,
+        "rmse": 1.0052435398101807,
+        "pearson": 0.1333582103252411,
+        "spearman": 0.13141804449490568,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1686427593231201,
+        "rmse": 1.3780879974365234,
+        "pearson": 0.06715648621320724,
+        "spearman": 0.04826886744624546,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2842548191547394,
+        "rmse": 0.3491451144218445,
+        "pearson": 0.04825301095843315,
+        "spearman": 0.059355205173681445,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999480.0,
+        "mae": 0.4623108282814249,
+        "rmse": 0.6625988686882901,
+        "pearson": 0.06374685588851481
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6346171105412507,
+        "rmse": 0.8646265500998028,
+        "pearson": -0.13007162724652402
+      },
+      "regression_profile_negative": {
+        "n_values": 14494622.0,
+        "mae": 0.28988286453827294,
+        "rmse": 0.3609398293102088,
+        "pearson": 0.048933804228666555
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3391437803382075,
+        "regression": 0.0,
+        "total": 0.3391437803382075
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.875158831003812,
+        "balanced_accuracy": 0.875158831003812,
+        "precision": 0.9058419243986254,
+        "recall": 0.8373570520965693,
+        "specificity": 0.9129606099110547,
+        "negative_predictive_value": 0.8487891317188423,
+        "f1": 0.8702542093100033,
+        "mcc": 0.7524712683580699,
+        "true_negative": 1437.0,
+        "false_positive": 137.0,
+        "false_negative": 256.0,
+        "true_positive": 1318.0,
+        "auroc": 0.9529634192218209,
+        "auprc": 0.9542402502370506
+      },
+      "regression_scalar_all": {
+        "mae": 0.7408040761947632,
+        "rmse": 1.0036755800247192,
+        "pearson": 0.45983457565307617,
+        "spearman": 0.5179303553723194,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1603889465332031,
+        "rmse": 1.3699641227722168,
+        "pearson": 0.20360875129699707,
+        "spearman": 0.21599612142139682,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.321219265460968,
+        "rmse": 0.37138602137565613,
+        "pearson": 0.12631669640541077,
+        "spearman": 0.16175064715288326,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4779456178701585,
+        "rmse": 0.6694642854254554,
+        "pearson": 0.2859555612344837
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6402402241589549,
+        "rmse": 0.8707500991712708,
+        "pearson": -0.07754050113735529
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.31533775625909505,
+        "rmse": 0.3708918004870242,
+        "pearson": 0.10090579481216484
+      }
+    },
+    "sampling": {
+      "epoch": 17,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.50048296452405,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 18,
+    "learning_rate_used": 0.0002225221742782064,
+    "learning_rate_next": 0.00021415400408897832,
+    "elapsed_seconds": 63.31513237953186,
+    "train": {
+      "loss": {
+        "classification": 0.2838245035150965,
+        "regression": 0.0,
+        "total": 0.2838245035150965
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8923049770561242,
+        "balanced_accuracy": 0.8923049770561242,
+        "precision": 0.8871934225195095,
+        "recall": 0.8989057536180727,
+        "specificity": 0.8857042004941758,
+        "negative_predictive_value": 0.8975532980397768,
+        "f1": 0.8930111863099204,
+        "mcc": 0.7846783343560335,
+        "true_negative": 12546.0,
+        "false_positive": 1619.0,
+        "false_negative": 1432.0,
+        "true_positive": 12733.0,
+        "auroc": 0.9581196475555542,
+        "auprc": 0.9551775837665332
+      },
+      "regression_scalar_all": {
+        "mae": 0.6932756304740906,
+        "rmse": 0.9457335472106934,
+        "pearson": 0.38596704602241516,
+        "spearman": 0.4300796354558757,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.0683995485305786,
+        "rmse": 1.2839943170547485,
+        "pearson": 0.13780486583709717,
+        "spearman": 0.12446737983698916,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.318151593208313,
+        "rmse": 0.37440991401672363,
+        "pearson": 0.11384987831115723,
+        "spearman": 0.13481036737869628,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999573.0,
+        "mae": 0.4696962104085562,
+        "rmse": 0.6501886956333206,
+        "pearson": 0.22016495992326568
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6188691247388901,
+        "rmse": 0.833542123430328,
+        "pearson": -0.10521243824174813
+      },
+      "regression_profile_negative": {
+        "n_values": 14494715.0,
+        "mae": 0.3204189090054131,
+        "rmse": 0.3879533957577762,
+        "pearson": 0.09013435968295795
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3660361741177189,
+        "regression": 0.0,
+        "total": 0.3660361741177189
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8815120711562897,
+        "balanced_accuracy": 0.8815120711562897,
+        "precision": 0.9032907991940899,
+        "recall": 0.8545108005082592,
+        "specificity": 0.9085133418043202,
+        "negative_predictive_value": 0.861965039180229,
+        "f1": 0.8782239634345413,
+        "mcc": 0.7641391756252645,
+        "true_negative": 1430.0,
+        "false_positive": 144.0,
+        "false_negative": 229.0,
+        "true_positive": 1345.0,
+        "auroc": 0.9501375593547626,
+        "auprc": 0.952403900976313
+      },
+      "regression_scalar_all": {
+        "mae": 0.7573707699775696,
+        "rmse": 1.012134313583374,
+        "pearson": 0.4840395748615265,
+        "spearman": 0.5616565298429116,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.1584221124649048,
+        "rmse": 1.372731328010559,
+        "pearson": 0.17858651280403137,
+        "spearman": 0.2017157377069293,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3563194274902344,
+        "rmse": 0.40551283955574036,
+        "pearson": 0.12124371528625488,
+        "spearman": 0.15368500050468373,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5008043584336551,
+        "rmse": 0.6850237866936558,
+        "pearson": 0.27899194386597603
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6539126828126047,
+        "rmse": 0.8808917125667364,
+        "pearson": -0.12677389033926373
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3474005097696301,
+        "rmse": 0.4024337976926538,
+        "pearson": 0.09046266404963235
+      }
+    },
+    "sampling": {
+      "epoch": 18,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.31225851773797,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 19,
+    "learning_rate_used": 0.00021415400408897832,
+    "learning_rate_next": 0.00020553462062635933,
+    "elapsed_seconds": 63.615142583847046,
+    "train": {
+      "loss": {
+        "classification": 0.2804090485854342,
+        "regression": 0.0,
+        "total": 0.2804090485854342
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8960112954465231,
+        "balanced_accuracy": 0.8960112954465231,
+        "precision": 0.8908242179335331,
+        "recall": 0.9026473702788563,
+        "specificity": 0.8893752206141899,
+        "negative_predictive_value": 0.9013379122844674,
+        "f1": 0.8966968230591206,
+        "mcc": 0.792092357482772,
+        "true_negative": 12598.0,
+        "false_positive": 1567.0,
+        "false_negative": 1379.0,
+        "true_positive": 12786.0,
+        "auroc": 0.9600630883382514,
+        "auprc": 0.9579124202873348
+      },
+      "regression_scalar_all": {
+        "mae": 0.7117999196052551,
+        "rmse": 0.9619607329368591,
+        "pearson": 0.3899332582950592,
+        "spearman": 0.4458829054461509,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.0924301147460938,
+        "rmse": 1.3045557737350464,
+        "pearson": 0.12067775428295135,
+        "spearman": 0.11528107346080498,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3311697840690613,
+        "rmse": 0.38583800196647644,
+        "pearson": 0.11361093819141388,
+        "spearman": 0.13161190113243695,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999388.0,
+        "mae": 0.4851494058933924,
+        "rmse": 0.6658290016112365,
+        "pearson": 0.2046768545183536
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.637191488553235,
+        "rmse": 0.8531869704239052,
+        "pearson": -0.16401982530895856
+      },
+      "regression_profile_negative": {
+        "n_values": 14494530.0,
+        "mae": 0.3329989864589382,
+        "rmse": 0.3981528880230517,
+        "pearson": 0.08939486406055175
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.39075460404410883,
+        "regression": 0.0,
+        "total": 0.39075460404410883
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8710292249047014,
+        "balanced_accuracy": 0.8710292249047014,
+        "precision": 0.8208791208791208,
+        "recall": 0.9491740787801779,
+        "specificity": 0.7928843710292249,
+        "negative_predictive_value": 0.9397590361445783,
+        "f1": 0.8803771361225693,
+        "mcc": 0.7512908702139853,
+        "true_negative": 1248.0,
+        "false_positive": 326.0,
+        "false_negative": 80.0,
+        "true_positive": 1494.0,
+        "auroc": 0.9519517040730163,
+        "auprc": 0.9542634767659113
+      },
+      "regression_scalar_all": {
+        "mae": 0.5818677544593811,
+        "rmse": 0.8311477899551392,
+        "pearson": 0.5289559364318848,
+        "spearman": 0.5949740440018743,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8648034930229187,
+        "rmse": 1.117887020111084,
+        "pearson": 0.22980256378650665,
+        "spearman": 0.27094573442226505,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.29893213510513306,
+        "rmse": 0.3632381856441498,
+        "pearson": 0.1037106066942215,
+        "spearman": 0.12690734154826414,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4702321324249749,
+        "rmse": 0.6467915296558638,
+        "pearson": 0.28721940766545906
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6102692464575283,
+        "rmse": 0.8093222488764936,
+        "pearson": -0.10643356670421457
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.32992472369632064,
+        "rmse": 0.42569856018899244,
+        "pearson": 0.07721290024520981
+      }
+    },
+    "sampling": {
+      "epoch": 19,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.48713558131367,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 20,
+    "learning_rate_used": 0.00020553462062635933,
+    "learning_rate_next": 0.0001966980406590546,
+    "elapsed_seconds": 63.99677634239197,
+    "train": {
+      "loss": {
+        "classification": 0.27038814145376383,
+        "regression": 0.0,
+        "total": 0.27038814145376383
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9016590187080833,
+        "balanced_accuracy": 0.9016590187080833,
+        "precision": 0.8952414032650226,
+        "recall": 0.9097776208965761,
+        "specificity": 0.8935404165195905,
+        "negative_predictive_value": 0.9082884822389666,
+        "f1": 0.9024509803921569,
+        "mcc": 0.8034239544775235,
+        "true_negative": 12657.0,
+        "false_positive": 1508.0,
+        "false_negative": 1278.0,
+        "true_positive": 12887.0,
+        "auroc": 0.962782131674136,
+        "auprc": 0.9598577486006823
+      },
+      "regression_scalar_all": {
+        "mae": 0.6519939303398132,
+        "rmse": 0.8887104988098145,
+        "pearson": 0.46895912289619446,
+        "spearman": 0.5371631969147936,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.9708181023597717,
+        "rmse": 1.194229006767273,
+        "pearson": 0.17089863121509552,
+        "spearman": 0.16432115991787144,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.33316972851753235,
+        "rmse": 0.39170098304748535,
+        "pearson": 0.12726178765296936,
+        "spearman": 0.15515480996922365,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999899.0,
+        "mae": 0.4881868858223993,
+        "rmse": 0.6612521055723899,
+        "pearson": 0.24900979200942355
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.63052648190156,
+        "rmse": 0.8348984468346129,
+        "pearson": -0.15367999209505173
+      },
+      "regression_profile_negative": {
+        "n_values": 14495041.0,
+        "mae": 0.34575088795902076,
+        "rmse": 0.4210431370559536,
+        "pearson": 0.09086373288418863
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.36776993011113784,
+        "regression": 0.0,
+        "total": 0.36776993011113784
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.874841168996188,
+        "balanced_accuracy": 0.8748411689961881,
+        "precision": 0.9184397163120568,
+        "recall": 0.8227445997458704,
+        "specificity": 0.9269377382465057,
+        "negative_predictive_value": 0.8394706559263522,
+        "f1": 0.8679624664879356,
+        "mcc": 0.7537851284340668,
+        "true_negative": 1459.0,
+        "false_positive": 115.0,
+        "false_negative": 279.0,
+        "true_positive": 1295.0,
+        "auroc": 0.9531115538556176,
+        "auprc": 0.9538241119607902
+      },
+      "regression_scalar_all": {
+        "mae": 0.6669790148735046,
+        "rmse": 0.9261376261711121,
+        "pearson": 0.49973297119140625,
+        "spearman": 0.5834021794616564,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.014634132385254,
+        "rmse": 1.2554434537887573,
+        "pearson": 0.16376104950904846,
+        "spearman": 0.16623754843639368,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.31932374835014343,
+        "rmse": 0.37326088547706604,
+        "pearson": 0.13817043602466583,
+        "spearman": 0.18279556532132252,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4720011692583575,
+        "rmse": 0.6510801441297485,
+        "pearson": 0.2906483470863867
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6192882232775252,
+        "rmse": 0.8342619521930926,
+        "pearson": -0.14572831652232102
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3244298269647512,
+        "rmse": 0.38896340354900044,
+        "pearson": 0.11372721097388624
+      }
+    },
+    "sampling": {
+      "epoch": 20,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.31109501229365,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 21,
+    "learning_rate_used": 0.0001966980406590546,
+    "learning_rate_next": 0.00018767913813114574,
+    "elapsed_seconds": 63.87197470664978,
+    "train": {
+      "loss": {
+        "classification": 0.2694015099423087,
+        "regression": 0.0,
+        "total": 0.2694015099423087
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9030356512530886,
+        "balanced_accuracy": 0.9030356512530886,
+        "precision": 0.9000700770847933,
+        "recall": 0.9067419696434875,
+        "specificity": 0.8993293328626897,
+        "negative_predictive_value": 0.9060455192034139,
+        "f1": 0.9033937049410937,
+        "mcc": 0.8060934490929565,
+        "true_negative": 12739.0,
+        "false_positive": 1426.0,
+        "false_negative": 1321.0,
+        "true_positive": 12844.0,
+        "auroc": 0.9635390746121707,
+        "auprc": 0.9609814483551149
+      },
+      "regression_scalar_all": {
+        "mae": 0.6411021947860718,
+        "rmse": 0.8586563467979431,
+        "pearson": 0.5415976047515869,
+        "spearman": 0.6260838102562287,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.9093038439750671,
+        "rmse": 1.1352382898330688,
+        "pearson": 0.2142535299062729,
+        "spearman": 0.2328058992399523,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.37290051579475403,
+        "rmse": 0.4310629367828369,
+        "pearson": 0.14309369027614594,
+        "spearman": 0.16889254083086258,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999832.0,
+        "mae": 0.5295487095058496,
+        "rmse": 0.7008163320819533,
+        "pearson": 0.2920167020987553
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6700171029072655,
+        "rmse": 0.8756869557923623,
+        "pearson": -0.13563902423563023
+      },
+      "regression_profile_negative": {
+        "n_values": 14494974.0,
+        "mae": 0.3889845318967229,
+        "rmse": 0.46397352448055235,
+        "pearson": 0.10489277025205318
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.34701796323345,
+        "regression": 0.0,
+        "total": 0.34701796323345
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8821473951715375,
+        "balanced_accuracy": 0.8821473951715375,
+        "precision": 0.8757026858213617,
+        "recall": 0.8907242693773825,
+        "specificity": 0.8735705209656925,
+        "negative_predictive_value": 0.8888170652876535,
+        "f1": 0.8831496062992126,
+        "mcc": 0.7644072624504588,
+        "true_negative": 1375.0,
+        "false_positive": 199.0,
+        "false_negative": 172.0,
+        "true_positive": 1402.0,
+        "auroc": 0.9478065579646382,
+        "auprc": 0.9482951960315699
+      },
+      "regression_scalar_all": {
+        "mae": 0.6885716319084167,
+        "rmse": 0.9178602695465088,
+        "pearson": 0.5731956362724304,
+        "spearman": 0.6436272416087994,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.9922327399253845,
+        "rmse": 1.2229840755462646,
+        "pearson": 0.266854465007782,
+        "spearman": 0.3110328487551455,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3849107027053833,
+        "rmse": 0.4350226819515228,
+        "pearson": 0.10174219310283661,
+        "spearman": 0.15204357075766778,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5111804734764462,
+        "rmse": 0.6716018907779869,
+        "pearson": 0.3483839237016925
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6340503698365275,
+        "rmse": 0.8368125846329528,
+        "pearson": -0.03773476703372348
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3880734179780464,
+        "rmse": 0.44873364992536496,
+        "pearson": 0.06288488903685158
+      }
+    },
+    "sampling": {
+      "epoch": 21,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.39344046364594,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 22,
+    "learning_rate_used": 0.00018767913813114574,
+    "learning_rate_next": 0.00017851350653056583,
+    "elapsed_seconds": 64.4609272480011,
+    "train": {
+      "loss": {
+        "classification": 0.2653538996680678,
+        "regression": 0.0,
+        "total": 0.2653538996680678
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9036710201200141,
+        "balanced_accuracy": 0.9036710201200142,
+        "precision": 0.8972488536890371,
+        "recall": 0.9117543240381222,
+        "specificity": 0.8955877162019061,
+        "negative_predictive_value": 0.9103042479908151,
+        "f1": 0.9044434328933086,
+        "mcc": 0.8074475640636826,
+        "true_negative": 12686.0,
+        "false_positive": 1479.0,
+        "false_negative": 1250.0,
+        "true_positive": 12915.0,
+        "auroc": 0.9648863720891231,
+        "auprc": 0.9617284674787937
+      },
+      "regression_scalar_all": {
+        "mae": 0.6457341909408569,
+        "rmse": 0.8720816969871521,
+        "pearson": 0.5024194717407227,
+        "spearman": 0.592847252017627,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.9332628846168518,
+        "rmse": 1.1614223718643188,
+        "pearson": 0.16960260272026062,
+        "spearman": 0.19353013396310584,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.35820552706718445,
+        "rmse": 0.4149109125137329,
+        "pearson": 0.12412086129188538,
+        "spearman": 0.15831578536661076,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28997757.0,
+        "mae": 0.5284198937323447,
+        "rmse": 0.7095515536938325,
+        "pearson": 0.2618213734806293
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6802881837245547,
+        "rmse": 0.893681162189585,
+        "pearson": -0.15530166540577436
+      },
+      "regression_profile_negative": {
+        "n_values": 14492899.0,
+        "mae": 0.3764262876884588,
+        "rmse": 0.45608903171945836,
+        "pearson": 0.08740215628332115
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3347583903624585,
+        "regression": 0.0,
+        "total": 0.3347583903624585
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8799237611181703,
+        "balanced_accuracy": 0.8799237611181703,
+        "precision": 0.8991989319092123,
+        "recall": 0.8557814485387548,
+        "specificity": 0.9040660736975857,
+        "negative_predictive_value": 0.8624242424242424,
+        "f1": 0.876953125,
+        "mcc": 0.7607348302102724,
+        "true_negative": 1423.0,
+        "false_positive": 151.0,
+        "false_negative": 227.0,
+        "true_positive": 1347.0,
+        "auroc": 0.9521004441617195,
+        "auprc": 0.9536656583510098
+      },
+      "regression_scalar_all": {
+        "mae": 0.7179778218269348,
+        "rmse": 0.9416786432266235,
+        "pearson": 0.6038836240768433,
+        "spearman": 0.6930972841507869,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 1.0305709838867188,
+        "rmse": 1.2533302307128906,
+        "pearson": 0.264809787273407,
+        "spearman": 0.32454345434910054,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.4053846597671509,
+        "rmse": 0.4502008259296417,
+        "pearson": 0.12774069607257843,
+        "spearman": 0.18817267833284299,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.541562628837384,
+        "rmse": 0.702453094220174,
+        "pearson": 0.33771091562843203
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6745272495542677,
+        "rmse": 0.8785272107129689,
+        "pearson": -0.09165199507118686
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.40834136450143477,
+        "rmse": 0.4631774387894599,
+        "pearson": 0.09562279605040207
+      }
+    },
+    "sampling": {
+      "epoch": 22,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.35732788900597,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 23,
+    "learning_rate_used": 0.00017851350653056583,
+    "learning_rate_next": 0.0001692373184178635,
+    "elapsed_seconds": 66.05753064155579,
+    "train": {
+      "loss": {
+        "classification": 0.2560305460290428,
+        "regression": 0.0,
+        "total": 0.2560305460290428
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9106600776561948,
+        "balanced_accuracy": 0.9106600776561948,
+        "precision": 0.9036780013879251,
+        "recall": 0.9193081539004588,
+        "specificity": 0.9020120014119308,
+        "negative_predictive_value": 0.9178879310344827,
+        "f1": 0.9114260717410324,
+        "mcc": 0.8214430346752842,
+        "true_negative": 12777.0,
+        "false_positive": 1388.0,
+        "false_negative": 1143.0,
+        "true_positive": 13022.0,
+        "auroc": 0.9680908171044976,
+        "auprc": 0.9660172463191005
+      },
+      "regression_scalar_all": {
+        "mae": 0.6162580847740173,
+        "rmse": 0.8500382900238037,
+        "pearson": 0.4985411763191223,
+        "spearman": 0.5675262774791813,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.905936598777771,
+        "rmse": 1.1391770839691162,
+        "pearson": 0.19839362800121307,
+        "spearman": 0.21886105250762286,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.32657960057258606,
+        "rmse": 0.38393449783325195,
+        "pearson": 0.11338691413402557,
+        "spearman": 0.13615966507401225,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000034.0,
+        "mae": 0.49730315321100355,
+        "rmse": 0.6765580635823938,
+        "pearson": 0.2943502668106618
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6562070153527614,
+        "rmse": 0.863060720222749,
+        "pearson": -0.0801571870461526
+      },
+      "regression_profile_negative": {
+        "n_values": 14495176.0,
+        "mae": 0.3382931518134508,
+        "rmse": 0.4127905327027214,
+        "pearson": 0.08192615527710527
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.3420810410794311,
+        "regression": 0.0,
+        "total": 0.3420810410794311
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8919949174078781,
+        "balanced_accuracy": 0.8919949174078781,
+        "precision": 0.8803945745992602,
+        "recall": 0.9072426937738246,
+        "specificity": 0.8767471410419314,
+        "negative_predictive_value": 0.9043250327653998,
+        "f1": 0.8936170212765957,
+        "mcc": 0.7843546362166189,
+        "true_negative": 1380.0,
+        "false_positive": 194.0,
+        "false_negative": 146.0,
+        "true_positive": 1428.0,
+        "auroc": 0.9528762337152813,
+        "auprc": 0.9544518248140076
+      },
+      "regression_scalar_all": {
+        "mae": 0.5145168900489807,
+        "rmse": 0.7202116250991821,
+        "pearson": 0.6259246468544006,
+        "spearman": 0.6984377233075592,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7170386910438538,
+        "rmse": 0.94575035572052,
+        "pearson": 0.2895531952381134,
+        "spearman": 0.3376519375796207,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3119950592517853,
+        "rmse": 0.3781081736087799,
+        "pearson": 0.15109016001224518,
+        "spearman": 0.19764599717028575,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5068636275590263,
+        "rmse": 0.678388346416988,
+        "pearson": 0.42681987360054074
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6796095340669472,
+        "rmse": 0.8610855109334519,
+        "pearson": 0.03928001125545778
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.33378429299794393,
+        "rmse": 0.42238651333904903,
+        "pearson": 0.10238951560961614
+      }
+    },
+    "sampling": {
+      "epoch": 23,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.48094485423252,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 24,
+    "learning_rate_used": 0.0001692373184178635,
+    "learning_rate_next": 0.00015988718266963235,
+    "elapsed_seconds": 65.57495212554932,
+    "train": {
+      "loss": {
+        "classification": 0.2555010686864392,
+        "regression": 0.0,
+        "total": 0.2555010686864392
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9116484292269679,
+        "balanced_accuracy": 0.9116484292269679,
+        "precision": 0.9043128553598668,
+        "recall": 0.9207200847158489,
+        "specificity": 0.9025767737380869,
+        "negative_predictive_value": 0.9192551049755536,
+        "f1": 0.9124427187182985,
+        "mcc": 0.8234323982376861,
+        "true_negative": 12785.0,
+        "false_positive": 1380.0,
+        "false_negative": 1123.0,
+        "true_positive": 13042.0,
+        "auroc": 0.9682704607551886,
+        "auprc": 0.9655674234761549
+      },
+      "regression_scalar_all": {
+        "mae": 0.5779778361320496,
+        "rmse": 0.7794859409332275,
+        "pearson": 0.5890300869941711,
+        "spearman": 0.658406812509929,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8088935613632202,
+        "rmse": 1.0257707834243774,
+        "pearson": 0.2709819972515106,
+        "spearman": 0.28438307629993137,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.34706205129623413,
+        "rmse": 0.40372124314308167,
+        "pearson": 0.13429419696331024,
+        "spearman": 0.15579026191669032,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999919.0,
+        "mae": 0.4987197281775178,
+        "rmse": 0.6611921210958084,
+        "pearson": 0.38422843962184794
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.638617841250079,
+        "rmse": 0.8303649996868225,
+        "pearson": 0.01616685654798179
+      },
+      "regression_profile_negative": {
+        "n_values": 14495061.0,
+        "mae": 0.35872706001382776,
+        "rmse": 0.42973650350935627,
+        "pearson": 0.10517836861345631
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.42647636734929023,
+        "regression": 0.0,
+        "total": 0.42647636734929023
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8703939008894537,
+        "balanced_accuracy": 0.8703939008894537,
+        "precision": 0.9111424541607899,
+        "recall": 0.820838627700127,
+        "specificity": 0.9199491740787802,
+        "negative_predictive_value": 0.8369942196531792,
+        "f1": 0.8636363636363636,
+        "mcc": 0.7444531697997083,
+        "true_negative": 1448.0,
+        "false_positive": 126.0,
+        "false_negative": 282.0,
+        "true_positive": 1292.0,
+        "auroc": 0.9509916544095683,
+        "auprc": 0.9521717428815012
+      },
+      "regression_scalar_all": {
+        "mae": 0.6272085309028625,
+        "rmse": 0.8275650143623352,
+        "pearson": 0.6279603242874146,
+        "spearman": 0.7031661187799786,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.854769229888916,
+        "rmse": 1.0797293186187744,
+        "pearson": 0.3280390799045563,
+        "spearman": 0.3605255874348515,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.39964789152145386,
+        "rmse": 0.45156630873680115,
+        "pearson": 0.10880674421787262,
+        "spearman": 0.17335172043626426,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5713173899287108,
+        "rmse": 0.7364398165128078,
+        "pearson": 0.3849322079603713
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7261617347546871,
+        "rmse": 0.919225002449609,
+        "pearson": -0.018406294293557585
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.41617417001225016,
+        "rmse": 0.48900764194587804,
+        "pearson": 0.07098831946265058
+      }
+    },
+    "sampling": {
+      "epoch": 24,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.47471022128556,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 25,
+    "learning_rate_used": 0.00015988718266963235,
+    "learning_rate_next": 0.0001505,
+    "elapsed_seconds": 63.392483711242676,
+    "train": {
+      "loss": {
+        "classification": 0.24846593626064603,
+        "regression": 0.0,
+        "total": 0.24846593626064603
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9144016943169785,
+        "balanced_accuracy": 0.9144016943169784,
+        "precision": 0.9103747203579419,
+        "recall": 0.9193081539004588,
+        "specificity": 0.909495234733498,
+        "negative_predictive_value": 0.9185084842435477,
+        "f1": 0.9148196283676981,
+        "mcc": 0.8288432956569582,
+        "true_negative": 12883.0,
+        "false_positive": 1282.0,
+        "false_negative": 1143.0,
+        "true_positive": 13022.0,
+        "auroc": 0.9705723365972293,
+        "auprc": 0.9684019159171738
+      },
+      "regression_scalar_all": {
+        "mae": 0.5811286568641663,
+        "rmse": 0.7785571217536926,
+        "pearson": 0.5920573472976685,
+        "spearman": 0.6687651743443664,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7963496446609497,
+        "rmse": 1.0176324844360352,
+        "pearson": 0.25992926955223083,
+        "spearman": 0.27876676588937854,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3659076392650604,
+        "rmse": 0.42038846015930176,
+        "pearson": 0.12379339337348938,
+        "spearman": 0.15139782082821826,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000914.0,
+        "mae": 0.5520917588052122,
+        "rmse": 0.73541653139879,
+        "pearson": 0.3671419278194682
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7263958633085059,
+        "rmse": 0.9353337192238018,
+        "pearson": -0.03069080320191441
+      },
+      "regression_profile_negative": {
+        "n_values": 14496056.0,
+        "mae": 0.37768181691222863,
+        "rmse": 0.45455799543395536,
+        "pearson": 0.09473685479619758
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4671793974834829,
+        "regression": 0.0,
+        "total": 0.4671793974834829
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8675349428208387,
+        "balanced_accuracy": 0.8675349428208387,
+        "precision": 0.8098553829673273,
+        "recall": 0.9606099110546379,
+        "specificity": 0.7744599745870394,
+        "negative_predictive_value": 0.9516003122560499,
+        "f1": 0.8788142981691369,
+        "mcc": 0.748146476840633,
+        "true_negative": 1219.0,
+        "false_positive": 355.0,
+        "false_negative": 62.0,
+        "true_positive": 1512.0,
+        "auroc": 0.9550806950299419,
+        "auprc": 0.9564587074073634
+      },
+      "regression_scalar_all": {
+        "mae": 0.5041162371635437,
+        "rmse": 0.7047492265701294,
+        "pearson": 0.6310449242591858,
+        "spearman": 0.7057837616394015,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.6970812678337097,
+        "rmse": 0.9206129312515259,
+        "pearson": 0.26391127705574036,
+        "spearman": 0.3204675278451632,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3111512362957001,
+        "rmse": 0.38185709714889526,
+        "pearson": 0.1719815880060196,
+        "spearman": 0.19947620304747388,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5065895898675017,
+        "rmse": 0.6835400456769253,
+        "pearson": 0.4727915826182839
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6964738923748395,
+        "rmse": 0.876713984220785,
+        "pearson": 0.12325360417935627
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3163387793797967,
+        "rmse": 0.40650316789903657,
+        "pearson": 0.1268802739654697
+      }
+    },
+    "sampling": {
+      "epoch": 25,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.20848700386371,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 26,
+    "learning_rate_used": 0.0001505,
+    "learning_rate_next": 0.00014111281733036765,
+    "elapsed_seconds": 63.581454038619995,
+    "train": {
+      "loss": {
+        "classification": 0.24645846058782866,
+        "regression": 0.0,
+        "total": 0.24645846058782866
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9172608542181433,
+        "balanced_accuracy": 0.9172608542181433,
+        "precision": 0.9121975033126438,
+        "recall": 0.92340275326509,
+        "specificity": 0.9111189551711966,
+        "negative_predictive_value": 0.9224501465227646,
+        "f1": 0.9177659275891104,
+        "mcc": 0.8345846767602293,
+        "true_negative": 12906.0,
+        "false_positive": 1259.0,
+        "false_negative": 1085.0,
+        "true_positive": 13080.0,
+        "auroc": 0.9720514923642726,
+        "auprc": 0.969509379247992
+      },
+      "regression_scalar_all": {
+        "mae": 0.5411592125892639,
+        "rmse": 0.7158708572387695,
+        "pearson": 0.6407554149627686,
+        "spearman": 0.7159952658787362,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7212123870849609,
+        "rmse": 0.920979380607605,
+        "pearson": 0.31375744938850403,
+        "spearman": 0.33050156498352273,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3611060678958893,
+        "rmse": 0.4204035699367523,
+        "pearson": 0.1417076587677002,
+        "spearman": 0.18255833482781467,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999961.0,
+        "mae": 0.5578577668592883,
+        "rmse": 0.7451142531883784,
+        "pearson": 0.4174837381953413
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7396564589863309,
+        "rmse": 0.9480686195917043,
+        "pearson": 0.04168800002840403
+      },
+      "regression_profile_negative": {
+        "n_values": 14495103.0,
+        "mae": 0.3759367267750287,
+        "rmse": 0.45970113013501224,
+        "pearson": 0.0992239749141513
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.41003863550080616,
+        "regression": 0.0,
+        "total": 0.41003863550080616
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8818297331639136,
+        "balanced_accuracy": 0.8818297331639136,
+        "precision": 0.9022757697456493,
+        "recall": 0.8564167725540025,
+        "specificity": 0.9072426937738246,
+        "negative_predictive_value": 0.8633615477629988,
+        "f1": 0.878748370273794,
+        "mcc": 0.7646477524254703,
+        "true_negative": 1428.0,
+        "false_positive": 146.0,
+        "false_negative": 226.0,
+        "true_positive": 1348.0,
+        "auroc": 0.9529262846542207,
+        "auprc": 0.9546219184837325
+      },
+      "regression_scalar_all": {
+        "mae": 0.5374631285667419,
+        "rmse": 0.7039111256599426,
+        "pearson": 0.685117781162262,
+        "spearman": 0.7485642336089797,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.6926973462104797,
+        "rmse": 0.8921035528182983,
+        "pearson": 0.36223071813583374,
+        "spearman": 0.4218407841658566,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3822287619113922,
+        "rmse": 0.44173866510391235,
+        "pearson": 0.16609737277030945,
+        "spearman": 0.21785653233452992,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5798233884808153,
+        "rmse": 0.7499801201479674,
+        "pearson": 0.47774458417729027
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7567683856713229,
+        "rmse": 0.9403122672848588,
+        "pearson": 0.11851483694681839
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.4025368583004816,
+        "rmse": 0.49003289120888915,
+        "pearson": 0.11158463979388472
+      }
+    },
+    "sampling": {
+      "epoch": 26,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.2685502283105,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 27,
+    "learning_rate_used": 0.00014111281733036765,
+    "learning_rate_next": 0.00013176268158213652,
+    "elapsed_seconds": 63.313963174819946,
+    "train": {
+      "loss": {
+        "classification": 0.23949034723724105,
+        "regression": 0.0,
+        "total": 0.23949034723724105
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9210730674196964,
+        "balanced_accuracy": 0.9210730674196965,
+        "precision": 0.9163118587282753,
+        "recall": 0.9267913872220261,
+        "specificity": 0.9153547476173668,
+        "negative_predictive_value": 0.9259444404770406,
+        "f1": 0.9215218306893163,
+        "mcc": 0.8422012152210943,
+        "true_negative": 12966.0,
+        "false_positive": 1199.0,
+        "false_negative": 1037.0,
+        "true_positive": 13128.0,
+        "auroc": 0.9740165457060271,
+        "auprc": 0.9717368517109647
+      },
+      "regression_scalar_all": {
+        "mae": 0.5532616376876831,
+        "rmse": 0.7254367470741272,
+        "pearson": 0.6415611505508423,
+        "spearman": 0.7227557186572285,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7279185652732849,
+        "rmse": 0.9294577836990356,
+        "pearson": 0.29675742983818054,
+        "spearman": 0.31224352568719826,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3786047101020813,
+        "rmse": 0.43431004881858826,
+        "pearson": 0.13889631628990173,
+        "spearman": 0.17520041291956479,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000815.0,
+        "mae": 0.5606540908039955,
+        "rmse": 0.7390904105186855,
+        "pearson": 0.43131228625526685
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7351900426082263,
+        "rmse": 0.9393162111440352,
+        "pearson": 0.0597437351998719
+      },
+      "regression_profile_negative": {
+        "n_values": 14495957.0,
+        "mae": 0.38601096811708274,
+        "rmse": 0.4582444468946016,
+        "pearson": 0.10179814284590256
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.40725800054996325,
+        "regression": 0.0,
+        "total": 0.40725800054996325
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8824650571791613,
+        "balanced_accuracy": 0.8824650571791615,
+        "precision": 0.8986754966887417,
+        "recall": 0.8621346886912326,
+        "specificity": 0.9027954256670903,
+        "negative_predictive_value": 0.8675213675213675,
+        "f1": 0.8800259403372244,
+        "mcc": 0.7655632272786012,
+        "true_negative": 1421.0,
+        "false_positive": 153.0,
+        "false_negative": 217.0,
+        "true_positive": 1357.0,
+        "auroc": 0.9508911488950852,
+        "auprc": 0.9512706198649051
+      },
+      "regression_scalar_all": {
+        "mae": 0.5868578553199768,
+        "rmse": 0.8146584033966064,
+        "pearson": 0.6158021092414856,
+        "spearman": 0.6697606446244664,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8608176708221436,
+        "rmse": 1.0931675434112549,
+        "pearson": 0.321015328168869,
+        "spearman": 0.3685746099013677,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.31289801001548767,
+        "rmse": 0.3637599050998688,
+        "pearson": 0.14381557703018188,
+        "spearman": 0.18755711255834823,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.45875444395518455,
+        "rmse": 0.6178485151997924,
+        "pearson": 0.4172883929799839
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.598634392869261,
+        "rmse": 0.785391310986408,
+        "pearson": 0.06165265297990327
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.31860450369957327,
+        "rmse": 0.38233529410059386,
+        "pearson": 0.10045488970394639
+      }
+    },
+    "sampling": {
+      "epoch": 27,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.01914295749913,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 28,
+    "learning_rate_used": 0.00013176268158213652,
+    "learning_rate_next": 0.00012248649346943417,
+    "elapsed_seconds": 63.62151646614075,
+    "train": {
+      "loss": {
+        "classification": 0.23834780852997098,
+        "regression": 0.0,
+        "total": 0.23834780852997098
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9211083656900811,
+        "balanced_accuracy": 0.9211083656900811,
+        "precision": 0.9168413696715584,
+        "recall": 0.9262266148958701,
+        "specificity": 0.9159901164842923,
+        "negative_predictive_value": 0.9254636233951498,
+        "f1": 0.9215100965759438,
+        "mcc": 0.8422608610673021,
+        "true_negative": 12975.0,
+        "false_positive": 1190.0,
+        "false_negative": 1045.0,
+        "true_positive": 13120.0,
+        "auroc": 0.9746759193903628,
+        "auprc": 0.9726606156014019
+      },
+      "regression_scalar_all": {
+        "mae": 0.6062811613082886,
+        "rmse": 0.8194525241851807,
+        "pearson": 0.5899592041969299,
+        "spearman": 0.6556651588739373,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8711540102958679,
+        "rmse": 1.0911840200424194,
+        "pearson": 0.27105990052223206,
+        "spearman": 0.28490529118058505,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3414084017276764,
+        "rmse": 0.3902847170829773,
+        "pearson": 0.1376427412033081,
+        "spearman": 0.16614830329899877,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999329.0,
+        "mae": 0.47603874033375637,
+        "rmse": 0.6326086342132895,
+        "pearson": 0.36595411282025275
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6025333777497758,
+        "rmse": 0.7948090842890185,
+        "pearson": -0.002777560530739606
+      },
+      "regression_profile_negative": {
+        "n_values": 14494471.0,
+        "mae": 0.3494534545733551,
+        "rmse": 0.4104874793325675,
+        "pearson": 0.09538804325722898
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4154291864503187,
+        "regression": 0.0,
+        "total": 0.4154291864503187
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8850063532401525,
+        "balanced_accuracy": 0.8850063532401524,
+        "precision": 0.8986842105263158,
+        "recall": 0.8678526048284625,
+        "specificity": 0.9021601016518425,
+        "negative_predictive_value": 0.8722358722358723,
+        "f1": 0.8829993535875889,
+        "mcc": 0.7704662610443971,
+        "true_negative": 1420.0,
+        "false_positive": 154.0,
+        "false_negative": 208.0,
+        "true_positive": 1366.0,
+        "auroc": 0.9530308265347476,
+        "auprc": 0.9541350397064267
+      },
+      "regression_scalar_all": {
+        "mae": 0.5736426711082458,
+        "rmse": 0.8094506859779358,
+        "pearson": 0.6013930439949036,
+        "spearman": 0.6735797704723564,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8461718559265137,
+        "rmse": 1.0883188247680664,
+        "pearson": 0.28686875104904175,
+        "spearman": 0.3457065019758939,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.30111345648765564,
+        "rmse": 0.3549409806728363,
+        "pearson": 0.13840876519680023,
+        "spearman": 0.18790365911480064,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4561214702209168,
+        "rmse": 0.6192150864007059,
+        "pearson": 0.39422372519774207
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.5895319625428639,
+        "rmse": 0.7793651362076843,
+        "pearson": 0.027568443811688135
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3224534736742653,
+        "rmse": 0.3987634730354443,
+        "pearson": 0.08443708461230758
+      }
+    },
+    "sampling": {
+      "epoch": 28,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.1302028451001,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 29,
+    "learning_rate_used": 0.00012248649346943417,
+    "learning_rate_next": 0.0001133208618688542,
+    "elapsed_seconds": 64.03837561607361,
+    "train": {
+      "loss": {
+        "classification": 0.22509132434062315,
+        "regression": 0.0,
+        "total": 0.22509132434062315
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9287680903635722,
+        "balanced_accuracy": 0.9287680903635722,
+        "precision": 0.9249282865738473,
+        "recall": 0.9332862689728203,
+        "specificity": 0.924249911754324,
+        "negative_predictive_value": 0.9326779226330413,
+        "f1": 0.9290884812706445,
+        "mcc": 0.8575711942522088,
+        "true_negative": 13092.0,
+        "false_positive": 1073.0,
+        "false_negative": 945.0,
+        "true_positive": 13220.0,
+        "auroc": 0.9771372417435625,
+        "auprc": 0.9747131548326551
+      },
+      "regression_scalar_all": {
+        "mae": 0.5963464975357056,
+        "rmse": 0.8005337119102478,
+        "pearson": 0.611325204372406,
+        "spearman": 0.680250169237565,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8371744751930237,
+        "rmse": 1.057401180267334,
+        "pearson": 0.2878865599632263,
+        "spearman": 0.30965617958876973,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3555186092853546,
+        "rmse": 0.4044886827468872,
+        "pearson": 0.12685920298099518,
+        "spearman": 0.14843874056969647,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000340.0,
+        "mae": 0.4766262830733559,
+        "rmse": 0.6254455236923433,
+        "pearson": 0.4023650273632232
+      },
+      "regression_profile_positive": {
+        "n_values": 14504857.0,
+        "mae": 0.5905820564225631,
+        "rmse": 0.7780733817710158,
+        "pearson": 0.040054246710201774
+      },
+      "regression_profile_negative": {
+        "n_values": 14495483.0,
+        "mae": 0.3625968163246686,
+        "rmse": 0.4205086070859074,
+        "pearson": 0.09435664781976143
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4192313578930504,
+        "regression": 0.0,
+        "total": 0.4192313578930504
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8878653113087674,
+        "balanced_accuracy": 0.8878653113087674,
+        "precision": 0.8886059834500318,
+        "recall": 0.8869123252858958,
+        "specificity": 0.8888182973316391,
+        "negative_predictive_value": 0.8871274571972099,
+        "f1": 0.887758346581876,
+        "mcc": 0.7757320316311086,
+        "true_negative": 1399.0,
+        "false_positive": 175.0,
+        "false_negative": 178.0,
+        "true_positive": 1396.0,
+        "auroc": 0.9538272015551311,
+        "auprc": 0.9554042833952152
+      },
+      "regression_scalar_all": {
+        "mae": 0.5421165227890015,
+        "rmse": 0.78098064661026,
+        "pearson": 0.6069118976593018,
+        "spearman": 0.6599718004355934,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8092406988143921,
+        "rmse": 1.054335355758667,
+        "pearson": 0.2878879904747009,
+        "spearman": 0.34528385078729656,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.27499234676361084,
+        "rmse": 0.328996479511261,
+        "pearson": 0.1260325014591217,
+        "spearman": 0.14744210488600445,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4263400881294349,
+        "rmse": 0.5874720102211922,
+        "pearson": 0.4310943034812836
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.5650378761121154,
+        "rmse": 0.7507158346821067,
+        "pearson": 0.08696982064567908
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.2873745905705352,
+        "rmse": 0.35531790684144576,
+        "pearson": 0.08545777544511293
+      }
+    },
+    "sampling": {
+      "epoch": 29,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.14697488584476,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 30,
+    "learning_rate_used": 0.0001133208618688542,
+    "learning_rate_next": 0.00010430195934094542,
+    "elapsed_seconds": 64.51300883293152,
+    "train": {
+      "loss": {
+        "classification": 0.22358643467779027,
+        "regression": 0.0,
+        "total": 0.22358643467779027
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9273208612777973,
+        "balanced_accuracy": 0.9273208612777974,
+        "precision": 0.9210489705063996,
+        "recall": 0.9347687963289799,
+        "specificity": 0.9198729262266149,
+        "negative_predictive_value": 0.9337824279776408,
+        "f1": 0.9278581689499317,
+        "mcc": 0.8547365552584072,
+        "true_negative": 13030.0,
+        "false_positive": 1135.0,
+        "false_negative": 924.0,
+        "true_positive": 13241.0,
+        "auroc": 0.9775560040763085,
+        "auprc": 0.9752531065393812
+      },
+      "regression_scalar_all": {
+        "mae": 0.5880815982818604,
+        "rmse": 0.7871025800704956,
+        "pearson": 0.6082326769828796,
+        "spearman": 0.6797458469809478,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.8125932216644287,
+        "rmse": 1.0334588289260864,
+        "pearson": 0.2739788889884949,
+        "spearman": 0.29696193334702636,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.36357003450393677,
+        "rmse": 0.4135500490665436,
+        "pearson": 0.1185569018125534,
+        "spearman": 0.13853847037529113,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999353.0,
+        "mae": 0.5079550257902654,
+        "rmse": 0.6676729829763861,
+        "pearson": 0.39330636484634507
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.647420508715955,
+        "rmse": 0.8408164055728462,
+        "pearson": 0.013806576738657272
+      },
+      "regression_profile_negative": {
+        "n_values": 14494495.0,
+        "mae": 0.3683898304703489,
+        "rmse": 0.42943621108171415,
+        "pearson": 0.08496344261491176
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4253616660828625,
+        "regression": 0.0,
+        "total": 0.4253616660828625
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.883418043202033,
+        "balanced_accuracy": 0.8834180432020331,
+        "precision": 0.8552089464390819,
+        "recall": 0.923125794155019,
+        "specificity": 0.843710292249047,
+        "negative_predictive_value": 0.9164941338854382,
+        "f1": 0.8878704552398411,
+        "mcc": 0.7692657343090342,
+        "true_negative": 1328.0,
+        "false_positive": 246.0,
+        "false_negative": 121.0,
+        "true_positive": 1453.0,
+        "auroc": 0.9544364910093982,
+        "auprc": 0.9558701485884719
+      },
+      "regression_scalar_all": {
+        "mae": 0.5033712983131409,
+        "rmse": 0.6924242973327637,
+        "pearson": 0.6656166315078735,
+        "spearman": 0.7306966139929032,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.6666922569274902,
+        "rmse": 0.892853319644928,
+        "pearson": 0.3277936577796936,
+        "spearman": 0.3829230970007647,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.34005028009414673,
+        "rmse": 0.4021388590335846,
+        "pearson": 0.16669248044490814,
+        "spearman": 0.20732484054179445,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5433877908548305,
+        "rmse": 0.7080569100291274,
+        "pearson": 0.45846535261341126
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7060781245059887,
+        "rmse": 0.878542772042079,
+        "pearson": 0.07928389573360753
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.38038343806241415,
+        "rmse": 0.4799267420001124,
+        "pearson": 0.1043355904328894
+      }
+    },
+    "sampling": {
+      "epoch": 30,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.2807780119424,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 31,
+    "learning_rate_used": 0.00010430195934094542,
+    "learning_rate_next": 9.546537937364069e-05,
+    "elapsed_seconds": 64.1494574546814,
+    "train": {
+      "loss": {
+        "classification": 0.22036028871193733,
+        "regression": 0.0,
+        "total": 0.22036028871193733
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9301094246381927,
+        "balanced_accuracy": 0.9301094246381927,
+        "precision": 0.9241211277410373,
+        "recall": 0.937169078715143,
+        "specificity": 0.9230497705612425,
+        "negative_predictive_value": 0.9362692445399212,
+        "f1": 0.9305993690851735,
+        "mcc": 0.8603046065040028,
+        "true_negative": 13075.0,
+        "false_positive": 1090.0,
+        "false_negative": 890.0,
+        "true_positive": 13275.0,
+        "auroc": 0.9795018421012304,
+        "auprc": 0.9778825010853897
+      },
+      "regression_scalar_all": {
+        "mae": 0.56674724817276,
+        "rmse": 0.7510524392127991,
+        "pearson": 0.6425275802612305,
+        "spearman": 0.7037566066586063,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7643448710441589,
+        "rmse": 0.9753699898719788,
+        "pearson": 0.3246769309043884,
+        "spearman": 0.33844899931030553,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3691495954990387,
+        "rmse": 0.4204910397529602,
+        "pearson": 0.11703920364379883,
+        "spearman": 0.13927499831516008,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000495.0,
+        "mae": 0.5144575200875166,
+        "rmse": 0.6704303085685206,
+        "pearson": 0.41906173969825394
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6519272056108675,
+        "rmse": 0.8392032722694368,
+        "pearson": 0.04643918244846488
+      },
+      "regression_profile_negative": {
+        "n_values": 14495637.0,
+        "mae": 0.37690038701217393,
+        "rmse": 0.44105486103023145,
+        "pearson": 0.08925168850782232
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4394708382392662,
+        "regression": 0.0,
+        "total": 0.4394708382392662
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.883418043202033,
+        "balanced_accuracy": 0.8834180432020331,
+        "precision": 0.8846398980242193,
+        "recall": 0.8818297331639136,
+        "specificity": 0.8850063532401525,
+        "negative_predictive_value": 0.8822039265357822,
+        "f1": 0.8832325803372574,
+        "mcc": 0.766839955472273,
+        "true_negative": 1393.0,
+        "false_positive": 181.0,
+        "false_negative": 186.0,
+        "true_positive": 1388.0,
+        "auroc": 0.9529620064937058,
+        "auprc": 0.9534489718771848
+      },
+      "regression_scalar_all": {
+        "mae": 0.518415629863739,
+        "rmse": 0.71027672290802,
+        "pearson": 0.6631258726119995,
+        "spearman": 0.7215136951328692,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.712739884853363,
+        "rmse": 0.9299139976501465,
+        "pearson": 0.3535022437572479,
+        "spearman": 0.40005850379588725,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.3240913450717926,
+        "rmse": 0.3797973096370697,
+        "pearson": 0.16414158046245575,
+        "spearman": 0.2054629657946989,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.4946811978613734,
+        "rmse": 0.6498879488373744,
+        "pearson": 0.483914024375486
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.64720163715276,
+        "rmse": 0.8189167758260579,
+        "pearson": 0.15069862561176442
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3418663689999629,
+        "rmse": 0.41665909771617604,
+        "pearson": 0.11237140466842684
+      }
+    },
+    "sampling": {
+      "epoch": 31,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.00274411661398,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 32,
+    "learning_rate_used": 9.546537937364069e-05,
+    "learning_rate_next": 8.684599591102163e-05,
+    "elapsed_seconds": 63.820297718048096,
+    "train": {
+      "loss": {
+        "classification": 0.20769822487867387,
+        "regression": 0.0,
+        "total": 0.20769822487867387
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9360042357924462,
+        "balanced_accuracy": 0.9360042357924462,
+        "precision": 0.9298440979955457,
+        "recall": 0.9431697846805507,
+        "specificity": 0.9288386869043417,
+        "negative_predictive_value": 0.9423435037960177,
+        "f1": 0.9364595380787158,
+        "mcc": 0.8720980320890271,
+        "true_negative": 13157.0,
+        "false_positive": 1008.0,
+        "false_negative": 805.0,
+        "true_positive": 13360.0,
+        "auroc": 0.9815398418791987,
+        "auprc": 0.9797144502863336
+      },
+      "regression_scalar_all": {
+        "mae": 0.5112351179122925,
+        "rmse": 0.6950235962867737,
+        "pearson": 0.6407657861709595,
+        "spearman": 0.7072088719788105,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7043290138244629,
+        "rmse": 0.9091346263885498,
+        "pearson": 0.31364765763282776,
+        "spearman": 0.3369277621340106,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.31814131140708923,
+        "rmse": 0.3736172020435333,
+        "pearson": 0.14164748787879944,
+        "spearman": 0.16349521895358182,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 28999730.0,
+        "mae": 0.49667909316727116,
+        "rmse": 0.664234137429781,
+        "pearson": 0.4413188342561387
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.6602293973644501,
+        "rmse": 0.8465791565304387,
+        "pearson": 0.08654134072162181
+      },
+      "regression_profile_negative": {
+        "n_values": 14494872.0,
+        "mae": 0.3330161137193062,
+        "rmse": 0.40685122175596894,
+        "pearson": 0.1031402313830166
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.4374951539094308,
+        "regression": 0.0,
+        "total": 0.4374951539094308
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8818297331639136,
+        "balanced_accuracy": 0.8818297331639136,
+        "precision": 0.9116438356164384,
+        "recall": 0.8456162642947903,
+        "specificity": 0.9180432020330368,
+        "negative_predictive_value": 0.856042654028436,
+        "f1": 0.8773895847066578,
+        "mcc": 0.765670330487794,
+        "true_negative": 1445.0,
+        "false_positive": 129.0,
+        "false_negative": 243.0,
+        "true_positive": 1331.0,
+        "auroc": 0.952958979219173,
+        "auprc": 0.9545422182037782
+      },
+      "regression_scalar_all": {
+        "mae": 0.508338212966919,
+        "rmse": 0.700141191482544,
+        "pearson": 0.6636210680007935,
+        "spearman": 0.7247712465194923,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.7014543414115906,
+        "rmse": 0.9165349006652832,
+        "pearson": 0.35101792216300964,
+        "spearman": 0.402069810839546,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.31522226333618164,
+        "rmse": 0.3746453523635864,
+        "pearson": 0.1492532640695572,
+        "spearman": 0.1904523922910549,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5086406693017794,
+        "rmse": 0.6727038230171837,
+        "pearson": 0.4822679539605098
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.6827503769601454,
+        "rmse": 0.855380635296862,
+        "pearson": 0.13607977664461324
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3341949012293952,
+        "rmse": 0.41574756617482617,
+        "pearson": 0.0951385120596833
+      }
+    },
+    "sampling": {
+      "epoch": 32,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.53159027046013,
+      "max_abs_shift": 128
+    }
+  },
+  {
+    "epoch": 33,
+    "learning_rate_used": 8.684599591102163e-05,
+    "learning_rate_next": 7.847782572179354e-05,
+    "elapsed_seconds": 63.631428480148315,
+    "train": {
+      "loss": {
+        "classification": 0.20482849024751174,
+        "regression": 0.0,
+        "total": 0.20482849024751174
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.9374867631486057,
+        "balanced_accuracy": 0.9374867631486057,
+        "precision": 0.9306462821403753,
+        "recall": 0.9454288739851747,
+        "specificity": 0.9295446523120368,
+        "negative_predictive_value": 0.9445480631276901,
+        "f1": 0.9379793381194187,
+        "mcc": 0.8750839288174468,
+        "true_negative": 13167.0,
+        "false_positive": 998.0,
+        "false_negative": 773.0,
+        "true_positive": 13392.0,
+        "auroc": 0.9826274522361325,
+        "auprc": 0.9809024280521057
+      },
+      "regression_scalar_all": {
+        "mae": 0.47565901279449463,
+        "rmse": 0.6579838991165161,
+        "pearson": 0.6486182808876038,
+        "spearman": 0.7130823785382537,
+        "n_samples": 28330.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.6659725904464722,
+        "rmse": 0.861633837223053,
+        "pearson": 0.30101722478866577,
+        "spearman": 0.3215908500640735,
+        "n_samples": 14165.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2853454649448395,
+        "rmse": 0.3513869047164917,
+        "pearson": 0.12656940519809723,
+        "spearman": 0.1473164192913967,
+        "n_samples": 14165.0
+      },
+      "regression_profile_all": {
+        "n_values": 29000122.0,
+        "mae": 0.5258191266940442,
+        "rmse": 0.7199603642817427,
+        "pearson": 0.46196072307971525
+      },
+      "regression_profile_positive": {
+        "n_values": 14504858.0,
+        "mae": 0.7472058407464058,
+        "rmse": 0.9389649686276819,
+        "pearson": 0.11002570076894563
+      },
+      "regression_profile_negative": {
+        "n_values": 14495264.0,
+        "mae": 0.30428588311765187,
+        "rmse": 0.39343382412916433,
+        "pearson": 0.09619541690533807
+      }
+    },
+    "val": {
+      "loss": {
+        "classification": 0.40617541787986733,
+        "regression": 0.0,
+        "total": 0.40617541787986733
+      },
+      "classification": {
+        "threshold": 0.5,
+        "accuracy": 0.8923125794155019,
+        "balanced_accuracy": 0.8923125794155019,
+        "precision": 0.883302296710118,
+        "recall": 0.9040660736975857,
+        "specificity": 0.8805590851334181,
+        "negative_predictive_value": 0.9017566688353936,
+        "f1": 0.893563579277865,
+        "mcc": 0.7848420322159425,
+        "true_negative": 1386.0,
+        "false_positive": 188.0,
+        "false_negative": 151.0,
+        "true_positive": 1423.0,
+        "auroc": 0.9550062240764392,
+        "auprc": 0.9560430318377809
+      },
+      "regression_scalar_all": {
+        "mae": 0.4766484200954437,
+        "rmse": 0.6594083309173584,
+        "pearson": 0.6794363260269165,
+        "spearman": 0.7441887544957366,
+        "n_samples": 3148.0
+      },
+      "regression_scalar_positive": {
+        "mae": 0.6583924889564514,
+        "rmse": 0.8579311370849609,
+        "pearson": 0.3409210443496704,
+        "spearman": 0.3964467795155213,
+        "n_samples": 1574.0
+      },
+      "regression_scalar_negative": {
+        "mae": 0.2949043810367584,
+        "rmse": 0.3655035197734833,
+        "pearson": 0.17557503283023834,
+        "spearman": 0.21986137398067906,
+        "n_samples": 1574.0
+      },
+      "regression_profile_all": {
+        "n_values": 3220447.0,
+        "mae": 0.5213824581561115,
+        "rmse": 0.6959196022260314,
+        "pearson": 0.5154940441540874
+      },
+      "regression_profile_positive": {
+        "n_values": 1611776.0,
+        "mae": 0.7258929755139809,
+        "rmse": 0.8959077162428535,
+        "pearson": 0.18405474068827765
+      },
+      "regression_profile_negative": {
+        "n_values": 1608671.0,
+        "mae": 0.3164772018140768,
+        "rmse": 0.4066240133549542,
+        "pearson": 0.12137822562590601
+      }
+    },
+    "sampling": {
+      "epoch": 33,
+      "positive": 14165,
+      "positive_by_group": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_pool_size": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_unique_seen": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "positive_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      },
+      "negative_total": 14165,
+      "negative_drawn": {
+        "tss": 5100,
+        "genic": 1754,
+        "noncoding": 7311
+      },
+      "negative_unique_seen": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_pool_size": {
+        "tss": 6003,
+        "genic": 15768,
+        "noncoding": 9616
+      },
+      "negative_coverage": {
+        "tss": 1.0,
+        "genic": 1.0,
+        "noncoding": 1.0
+      }
+    },
+    "train_shift": {
+      "shift_max": 128,
+      "distribution": "uniform",
+      "mean_abs_shift": 64.41201264488936,
+      "max_abs_shift": 128
+    }
+  }
+]

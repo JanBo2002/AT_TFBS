@@ -1,0 +1,208 @@
+{
+  "tf": "AP1_WILDTYPE_GUO2025",
+  "variant": "res4bp_attnpool",
+  "architecture_variant": {
+    "name": "res4bp_attnpool",
+    "attention_position": "absolute",
+    "pool_stages": 2,
+    "bottleneck_tokens": 256,
+    "bp_per_token": 4,
+    "pool_type": "attention",
+    "encoder_channels": [
+      96,
+      128
+    ],
+    "parameters_total": 933540,
+    "parameters_trainable": 933540
+  },
+  "seed": 1,
+  "activation": "relu",
+  "reverse_complement_probability": 0.5,
+  "runs": [
+    {
+      "tf": "AP1_WILDTYPE_GUO2025",
+      "variant": "res4bp_attnpool",
+      "seed": 1,
+      "train_chromosomes": "2,3,4,5",
+      "test_chromosome": 1,
+      "checkpoint_epoch": 28,
+      "threshold": 0.6019377708435059,
+      "validation_mcc": 0.7110675562862002,
+      "test_positives_dropped": 943,
+      "auroc": 0.9203301587196271,
+      "auprc": 0.9191321882089646,
+      "balanced_accuracy": 0.8406858367565637,
+      "f1": 0.8404293381037568,
+      "mcc": 0.6813751946387596,
+      "precision": 0.8417846264110375,
+      "recall": 0.8390784068583675,
+      "specificity": 0.8422932666547598,
+      "epochs_run": 36,
+      "training_minutes": 37.37890641291936
+    },
+    {
+      "tf": "AP1_WILDTYPE_GUO2025",
+      "variant": "res4bp_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,3,4,5",
+      "test_chromosome": 2,
+      "checkpoint_epoch": 14,
+      "threshold": 0.4504060745239258,
+      "validation_mcc": 0.7020481344027419,
+      "test_positives_dropped": 429,
+      "auroc": 0.9188618700840684,
+      "auprc": 0.9172513883508012,
+      "balanced_accuracy": 0.8424159854677566,
+      "f1": 0.8431047475508666,
+      "mcc": 0.6848583681431935,
+      "precision": 0.8394357743097239,
+      "recall": 0.8468059339993945,
+      "specificity": 0.8380260369361187,
+      "epochs_run": 22,
+      "training_minutes": 25.532793136437736
+    },
+    {
+      "tf": "AP1_WILDTYPE_GUO2025",
+      "variant": "res4bp_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,4,5",
+      "test_chromosome": 3,
+      "checkpoint_epoch": 19,
+      "threshold": 0.6380146145820618,
+      "validation_mcc": 0.7060589383880098,
+      "test_positives_dropped": 729,
+      "auroc": 0.9217877898847426,
+      "auprc": 0.9207418953133221,
+      "balanced_accuracy": 0.8391171217147231,
+      "f1": 0.8397916401981959,
+      "mcc": 0.6782582898349373,
+      "precision": 0.8362854251012146,
+      "recall": 0.843327379433529,
+      "specificity": 0.8349068639959173,
+      "epochs_run": 27,
+      "training_minutes": 31.257567473252614
+    },
+    {
+      "tf": "AP1_WILDTYPE_GUO2025",
+      "variant": "res4bp_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,3,5",
+      "test_chromosome": 4,
+      "checkpoint_epoch": 18,
+      "threshold": 0.5953943133354187,
+      "validation_mcc": 0.7195719170675652,
+      "test_positives_dropped": 462,
+      "auroc": 0.9106098940331624,
+      "auprc": 0.9091867166786591,
+      "balanced_accuracy": 0.8248233782915864,
+      "f1": 0.8335621662852785,
+      "mcc": 0.6532584891104042,
+      "precision": 0.7939552455681488,
+      "recall": 0.8773281952472703,
+      "specificity": 0.7723185613359024,
+      "epochs_run": 26,
+      "training_minutes": 31.956474534670512
+    },
+    {
+      "tf": "AP1_WILDTYPE_GUO2025",
+      "variant": "res4bp_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,3,4",
+      "test_chromosome": 5,
+      "checkpoint_epoch": 31,
+      "threshold": 0.7527399063110352,
+      "validation_mcc": 0.6960589996081816,
+      "test_positives_dropped": 761,
+      "auroc": 0.9096795767013571,
+      "auprc": 0.9065169498919836,
+      "balanced_accuracy": 0.8265993265993266,
+      "f1": 0.8291165491497304,
+      "mcc": 0.6534823153026482,
+      "precision": 0.8172526573998364,
+      "recall": 0.8413299663299664,
+      "specificity": 0.8118686868686869,
+      "epochs_run": 39,
+      "training_minutes": 42.48563528458278
+    }
+  ],
+  "summary_overall": {
+    "checkpoint_epoch": {
+      "mean": 22.0,
+      "std": 7.176350047203662,
+      "min": 14.0,
+      "max": 31.0
+    },
+    "epochs_run": {
+      "mean": 30.0,
+      "std": 7.176350047203662,
+      "min": 22.0,
+      "max": 39.0
+    },
+    "training_minutes": {
+      "mean": 33.7222753683726,
+      "std": 6.450346588299133,
+      "min": 25.532793136437736,
+      "max": 42.48563528458278
+    },
+    "threshold": {
+      "mean": 0.6076985359191894,
+      "std": 0.1082607528955747,
+      "min": 0.4504060745239258,
+      "max": 0.7527399063110352
+    },
+    "validation_mcc": {
+      "mean": 0.7069611091505398,
+      "std": 0.008940114789935923,
+      "min": 0.6960589996081816,
+      "max": 0.7195719170675652
+    },
+    "auroc": {
+      "mean": 0.9162538578845916,
+      "std": 0.0056815020141045645,
+      "min": 0.9096795767013571,
+      "max": 0.9217877898847426
+    },
+    "auprc": {
+      "mean": 0.9145658276887462,
+      "std": 0.006323111671075767,
+      "min": 0.9065169498919836,
+      "max": 0.9207418953133221
+    },
+    "balanced_accuracy": {
+      "mean": 0.8347283297659913,
+      "std": 0.00833729858369633,
+      "min": 0.8248233782915864,
+      "max": 0.8424159854677566
+    },
+    "f1": {
+      "mean": 0.8372008882575657,
+      "std": 0.00571373947131881,
+      "min": 0.8291165491497304,
+      "max": 0.8431047475508666
+    },
+    "mcc": {
+      "mean": 0.6702465314059886,
+      "std": 0.015581830074665903,
+      "min": 0.6532584891104042,
+      "max": 0.6848583681431935
+    },
+    "precision": {
+      "mean": 0.8257427457579922,
+      "std": 0.020239292367741545,
+      "min": 0.7939552455681488,
+      "max": 0.8417846264110375
+    },
+    "recall": {
+      "mean": 0.8495739763737056,
+      "std": 0.015772597901529333,
+      "min": 0.8390784068583675,
+      "max": 0.8773281952472703
+    },
+    "specificity": {
+      "mean": 0.819882683158277,
+      "std": 0.02908483870535525,
+      "min": 0.7723185613359024,
+      "max": 0.8422932666547598
+    }
+  }
+}
