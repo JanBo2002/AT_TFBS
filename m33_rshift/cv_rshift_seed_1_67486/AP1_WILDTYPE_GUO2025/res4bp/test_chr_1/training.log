@@ -1,0 +1,134 @@
+Training groups with fewer negatives than positives: tss: 4677 negative < 7058 positive. Positives will be cycled between epochs without replacement inside an epoch.
+WARNING: validation: negative pool 'tss' has only 468 samples for 706 positives; 238 positives (33.7%) were dropped at random to keep the 1:1 pairing.
+WARNING: test: negative pool 'tss' has only 1,622 samples for 2,565 positives; 943 positives (36.8%) were dropped at random to keep the 1:1 pairing.
+Training pool 'tss': 6,352 positives, 4,209 negatives; 4,209 distinct pairs per epoch. Positive examples rotate across epochs.
+Window geometry: crop 1024 bp from 1416 bp context; train shift +/-128 (uniform); eval shift fixed +/-128
+Validation split: 81/650 non-overlapping block components; per-group counts: {'positive_tss': 706, 'positive_genic': 263, 'positive_noncoding': 778, 'negative_tss': 468, 'negative_genic': 1453, 'negative_noncoding': 952}
+train: n=41,573, positive=15,722, negative=25,851, positive_pools={'tss': 6352, 'genic': 2371, 'noncoding': 6999}, negative_pools={'tss': 4209, 'genic': 13072, 'noncoding': 8570}
+  val: n=3,018, positive=1,509, negative=1,509, positive_pools={'tss': 468, 'genic': 263, 'noncoding': 778}, negative_pools={'tss': 468, 'genic': 263, 'noncoding': 778}
+ test: n=11,198, positive=5,599, negative=5,599, positive_pools={'tss': 1622, 'genic': 973, 'noncoding': 3004}, negative_pools={'tss': 1622, 'genic': 973, 'noncoding': 3004}
+Device: cuda
+Hidden activation: RELU
+Architecture variant: res4bp (attention absolute, 2 pool stages -> 256 tokens, max pooling)
+Parameters: 920,228 total; 920,228 trainable
+Checkpoint selection and early stopping start at epoch 2 so positive pools can be traversed.
+Epoch 001 train: loss=0.6806 AUROC=0.6429 AUPRC=0.6269 BalAcc=0.5985 F1=0.6004 MCC=0.1971
+Epoch 001 val  : loss=0.5805 AUROC=0.7800 AUPRC=0.7578 BalAcc=0.7005 F1=0.6629 MCC=0.4113
+  learning_rate_used=3.000e-04; learning_rate_next=2.997e-04; elapsed=67.8s
+  checkpoint selection starts at epoch 2; current checkpoint skipped
+Epoch 002 train: loss=0.5723 AUROC=0.7777 AUPRC=0.7626 BalAcc=0.7083 F1=0.7111 MCC=0.4167
+Epoch 002 val  : loss=0.5749 AUROC=0.8137 AUPRC=0.7978 BalAcc=0.7008 F1=0.6352 MCC=0.4304
+  learning_rate_used=2.997e-04; learning_rate_next=2.988e-04; elapsed=64.6s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.797759)
+Epoch 003 train: loss=0.5352 AUROC=0.8112 AUPRC=0.8001 BalAcc=0.7322 F1=0.7350 MCC=0.4645
+Epoch 003 val  : loss=0.5522 AUROC=0.8492 AUPRC=0.8345 BalAcc=0.7412 F1=0.7793 MCC=0.5140
+  learning_rate_used=2.988e-04; learning_rate_next=2.974e-04; elapsed=64.8s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.834542)
+Epoch 004 train: loss=0.5102 AUROC=0.8320 AUPRC=0.8215 BalAcc=0.7519 F1=0.7544 MCC=0.5038
+Epoch 004 val  : loss=0.4415 AUROC=0.8759 AUPRC=0.8740 BalAcc=0.7956 F1=0.7962 MCC=0.5911
+  learning_rate_used=2.974e-04; learning_rate_next=2.953e-04; elapsed=76.7s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.874039)
+Epoch 005 train: loss=0.4905 AUROC=0.8473 AUPRC=0.8405 BalAcc=0.7678 F1=0.7690 MCC=0.5356
+Epoch 005 val  : loss=0.6662 AUROC=0.8657 AUPRC=0.8625 BalAcc=0.6829 F1=0.5612 MCC=0.4396
+  learning_rate_used=2.953e-04; learning_rate_next=2.927e-04; elapsed=128.1s
+Epoch 006 train: loss=0.4761 AUROC=0.8575 AUPRC=0.8515 BalAcc=0.7800 F1=0.7811 MCC=0.5600
+Epoch 006 val  : loss=0.5374 AUROC=0.8791 AUPRC=0.8785 BalAcc=0.7591 F1=0.7945 MCC=0.5519
+  learning_rate_used=2.927e-04; learning_rate_next=2.895e-04; elapsed=67.7s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.878488)
+Epoch 007 train: loss=0.4595 AUROC=0.8681 AUPRC=0.8613 BalAcc=0.7885 F1=0.7896 MCC=0.5770
+Epoch 007 val  : loss=0.4617 AUROC=0.8937 AUPRC=0.8906 BalAcc=0.7893 F1=0.8138 MCC=0.5998
+  learning_rate_used=2.895e-04; learning_rate_next=2.858e-04; elapsed=65.2s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.890557)
+Epoch 008 train: loss=0.4467 AUROC=0.8772 AUPRC=0.8716 BalAcc=0.7977 F1=0.7995 MCC=0.5954
+Epoch 008 val  : loss=0.4696 AUROC=0.8932 AUPRC=0.8948 BalAcc=0.7700 F1=0.8010 MCC=0.5684
+  learning_rate_used=2.858e-04; learning_rate_next=2.815e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.894783)
+Epoch 009 train: loss=0.4302 AUROC=0.8874 AUPRC=0.8821 BalAcc=0.8072 F1=0.8077 MCC=0.6145
+Epoch 009 val  : loss=0.4364 AUROC=0.8983 AUPRC=0.8957 BalAcc=0.8058 F1=0.8246 MCC=0.6261
+  learning_rate_used=2.815e-04; learning_rate_next=2.767e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.895699)
+Epoch 010 train: loss=0.4250 AUROC=0.8905 AUPRC=0.8872 BalAcc=0.8083 F1=0.8093 MCC=0.6167
+Epoch 010 val  : loss=0.4431 AUROC=0.9006 AUPRC=0.8972 BalAcc=0.7949 F1=0.7708 MCC=0.6033
+  learning_rate_used=2.767e-04; learning_rate_next=2.714e-04; elapsed=65.2s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.897202)
+Epoch 011 train: loss=0.4143 AUROC=0.8968 AUPRC=0.8938 BalAcc=0.8155 F1=0.8167 MCC=0.6310
+Epoch 011 val  : loss=0.4719 AUROC=0.9059 AUPRC=0.9049 BalAcc=0.8009 F1=0.8230 MCC=0.6214
+  learning_rate_used=2.714e-04; learning_rate_next=2.657e-04; elapsed=65.0s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.904882)
+Epoch 012 train: loss=0.4026 AUROC=0.9035 AUPRC=0.9002 BalAcc=0.8234 F1=0.8248 MCC=0.6470
+Epoch 012 val  : loss=0.4108 AUROC=0.9074 AUPRC=0.9067 BalAcc=0.8178 F1=0.8067 MCC=0.6397
+  learning_rate_used=2.657e-04; learning_rate_next=2.595e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.906726)
+Epoch 013 train: loss=0.3976 AUROC=0.9062 AUPRC=0.9050 BalAcc=0.8278 F1=0.8284 MCC=0.6556
+Epoch 013 val  : loss=0.3797 AUROC=0.9104 AUPRC=0.9085 BalAcc=0.8284 F1=0.8294 MCC=0.6568
+  learning_rate_used=2.595e-04; learning_rate_next=2.528e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.908510)
+Epoch 014 train: loss=0.3862 AUROC=0.9121 AUPRC=0.9096 BalAcc=0.8325 F1=0.8331 MCC=0.6651
+Epoch 014 val  : loss=0.3978 AUROC=0.9129 AUPRC=0.9121 BalAcc=0.8194 F1=0.8134 MCC=0.6402
+  learning_rate_used=2.528e-04; learning_rate_next=2.458e-04; elapsed=65.3s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.912146)
+Epoch 015 train: loss=0.3764 AUROC=0.9181 AUPRC=0.9146 BalAcc=0.8402 F1=0.8409 MCC=0.6804
+Epoch 015 val  : loss=0.4592 AUROC=0.9145 AUPRC=0.9132 BalAcc=0.8131 F1=0.8320 MCC=0.6428
+  learning_rate_used=2.458e-04; learning_rate_next=2.384e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.913198)
+Epoch 016 train: loss=0.3682 AUROC=0.9216 AUPRC=0.9202 BalAcc=0.8448 F1=0.8451 MCC=0.6895
+Epoch 016 val  : loss=0.4723 AUROC=0.9136 AUPRC=0.9140 BalAcc=0.8171 F1=0.8322 MCC=0.6448
+  learning_rate_used=2.384e-04; learning_rate_next=2.306e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.913958)
+Epoch 017 train: loss=0.3637 AUROC=0.9245 AUPRC=0.9233 BalAcc=0.8493 F1=0.8499 MCC=0.6987
+Epoch 017 val  : loss=0.3801 AUROC=0.9177 AUPRC=0.9162 BalAcc=0.8300 F1=0.8235 MCC=0.6618
+  learning_rate_used=2.306e-04; learning_rate_next=2.225e-04; elapsed=65.1s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.916154)
+Epoch 018 train: loss=0.3494 AUROC=0.9303 AUPRC=0.9284 BalAcc=0.8564 F1=0.8571 MCC=0.7128
+Epoch 018 val  : loss=0.3998 AUROC=0.9157 AUPRC=0.9153 BalAcc=0.8294 F1=0.8270 MCC=0.6590
+  learning_rate_used=2.225e-04; learning_rate_next=2.142e-04; elapsed=65.2s
+Epoch 019 train: loss=0.3470 AUROC=0.9319 AUPRC=0.9300 BalAcc=0.8554 F1=0.8568 MCC=0.7109
+Epoch 019 val  : loss=0.4008 AUROC=0.9182 AUPRC=0.9173 BalAcc=0.8343 F1=0.8323 MCC=0.6688
+  learning_rate_used=2.142e-04; learning_rate_next=2.055e-04; elapsed=66.8s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.917285)
+Epoch 020 train: loss=0.3403 AUROC=0.9347 AUPRC=0.9321 BalAcc=0.8588 F1=0.8599 MCC=0.7177
+Epoch 020 val  : loss=0.4648 AUROC=0.9153 AUPRC=0.9138 BalAcc=0.8337 F1=0.8288 MCC=0.6684
+  learning_rate_used=2.055e-04; learning_rate_next=1.967e-04; elapsed=65.2s
+Epoch 021 train: loss=0.3347 AUROC=0.9374 AUPRC=0.9349 BalAcc=0.8629 F1=0.8640 MCC=0.7259
+Epoch 021 val  : loss=0.4312 AUROC=0.9169 AUPRC=0.9152 BalAcc=0.8310 F1=0.8249 MCC=0.6637
+  learning_rate_used=1.967e-04; learning_rate_next=1.877e-04; elapsed=65.1s
+Epoch 022 train: loss=0.3298 AUROC=0.9400 AUPRC=0.9382 BalAcc=0.8685 F1=0.8697 MCC=0.7371
+Epoch 022 val  : loss=0.3769 AUROC=0.9244 AUPRC=0.9242 BalAcc=0.8496 F1=0.8525 MCC=0.6997
+  learning_rate_used=1.877e-04; learning_rate_next=1.785e-04; elapsed=65.2s
+  saved new best checkpoint: /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1/best_model.pt (objective=classification-auprc, score=0.924234)
+Epoch 023 train: loss=0.3247 AUROC=0.9420 AUPRC=0.9406 BalAcc=0.8715 F1=0.8724 MCC=0.7430
+Epoch 023 val  : loss=0.4317 AUROC=0.9213 AUPRC=0.9181 BalAcc=0.8436 F1=0.8504 MCC=0.6901
+  learning_rate_used=1.785e-04; learning_rate_next=1.692e-04; elapsed=65.0s
+Epoch 024 train: loss=0.3226 AUROC=0.9438 AUPRC=0.9429 BalAcc=0.8736 F1=0.8742 MCC=0.7471
+Epoch 024 val  : loss=0.4715 AUROC=0.9167 AUPRC=0.9162 BalAcc=0.8217 F1=0.8379 MCC=0.6566
+  learning_rate_used=1.692e-04; learning_rate_next=1.599e-04; elapsed=65.3s
+Epoch 025 train: loss=0.3135 AUROC=0.9479 AUPRC=0.9452 BalAcc=0.8786 F1=0.8796 MCC=0.7572
+Epoch 025 val  : loss=0.4433 AUROC=0.9226 AUPRC=0.9216 BalAcc=0.8373 F1=0.8334 MCC=0.6754
+  learning_rate_used=1.599e-04; learning_rate_next=1.505e-04; elapsed=64.9s
+Epoch 026 train: loss=0.3104 AUROC=0.9490 AUPRC=0.9474 BalAcc=0.8807 F1=0.8810 MCC=0.7614
+Epoch 026 val  : loss=0.4503 AUROC=0.9203 AUPRC=0.9187 BalAcc=0.8277 F1=0.8146 MCC=0.6621
+  learning_rate_used=1.505e-04; learning_rate_next=1.411e-04; elapsed=64.8s
+Epoch 027 train: loss=0.2999 AUROC=0.9540 AUPRC=0.9529 BalAcc=0.8864 F1=0.8863 MCC=0.7727
+Epoch 027 val  : loss=0.4357 AUROC=0.9175 AUPRC=0.9179 BalAcc=0.8264 F1=0.8174 MCC=0.6559
+  learning_rate_used=1.411e-04; learning_rate_next=1.318e-04; elapsed=64.8s
+Epoch 028 train: loss=0.2986 AUROC=0.9556 AUPRC=0.9547 BalAcc=0.8911 F1=0.8913 MCC=0.7822
+Epoch 028 val  : loss=0.4331 AUROC=0.9224 AUPRC=0.9208 BalAcc=0.8323 F1=0.8342 MCC=0.6648
+  learning_rate_used=1.318e-04; learning_rate_next=1.225e-04; elapsed=64.9s
+Epoch 029 train: loss=0.2918 AUROC=0.9575 AUPRC=0.9563 BalAcc=0.8937 F1=0.8937 MCC=0.7873
+Epoch 029 val  : loss=0.5127 AUROC=0.9212 AUPRC=0.9185 BalAcc=0.8400 F1=0.8462 MCC=0.6822
+  learning_rate_used=1.225e-04; learning_rate_next=1.133e-04; elapsed=64.9s
+Epoch 030 train: loss=0.2933 AUROC=0.9588 AUPRC=0.9576 BalAcc=0.8943 F1=0.8945 MCC=0.7886
+Epoch 030 val  : loss=0.4615 AUROC=0.9171 AUPRC=0.9149 BalAcc=0.8347 F1=0.8379 MCC=0.6699
+  learning_rate_used=1.133e-04; learning_rate_next=1.043e-04; elapsed=65.1s
+Early stopping after 30 epochs.
+Binary threshold: 0.480137 (strategy=val-mcc, validation_score=0.702729)
+TEST chr1: loss=0.4011 AUROC=0.9190 AUPRC=0.9175 BalAcc=0.8378 F1=0.8414 MCC=0.6764
+Outputs written to /home/jbossenz/AT_TFBS/m33_rshift/cv_rshift_seed_1_67486/AP1_WILDTYPE_GUO2025/res4bp/test_chr_1
+Binary predictions: binary_classification_results.tsv
+Binary metrics: binary_classification_metrics.json
+ROC plot: roc_curve.png
+Precision-recall plot: precision_recall_curve.png
+Regression predictions: regression_results.tsv
+Regression metrics: regression_metrics.json
+Joint summary: multitask_summary.txt
+Confusion matrix: binary_confusion_matrix.tsv

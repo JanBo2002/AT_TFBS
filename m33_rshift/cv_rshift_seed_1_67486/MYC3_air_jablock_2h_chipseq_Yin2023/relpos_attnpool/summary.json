@@ -1,0 +1,210 @@
+{
+  "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+  "variant": "relpos_attnpool",
+  "architecture_variant": {
+    "name": "relpos_attnpool",
+    "attention_position": "relative",
+    "pool_stages": 4,
+    "bottleneck_tokens": 64,
+    "bp_per_token": 16,
+    "pool_type": "attention",
+    "encoder_channels": [
+      80,
+      96,
+      112,
+      128
+    ],
+    "parameters_total": 1326566,
+    "parameters_trainable": 1326566
+  },
+  "seed": 1,
+  "activation": "relu",
+  "reverse_complement_probability": 0.5,
+  "runs": [
+    {
+      "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+      "variant": "relpos_attnpool",
+      "seed": 1,
+      "train_chromosomes": "2,3,4,5",
+      "test_chromosome": 1,
+      "checkpoint_epoch": 27,
+      "threshold": 0.31173470616340637,
+      "validation_mcc": 0.767006209913428,
+      "test_positives_dropped": 0,
+      "auroc": 0.9586830617841093,
+      "auprc": 0.9567966967503732,
+      "balanced_accuracy": 0.8907164480322907,
+      "f1": 0.8923994038748138,
+      "mcc": 0.7818155063537765,
+      "precision": 0.8788649706457926,
+      "recall": 0.9063572149344097,
+      "specificity": 0.8750756811301715,
+      "epochs_run": 35,
+      "training_minutes": 48.29210224151611
+    },
+    {
+      "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+      "variant": "relpos_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,3,4,5",
+      "test_chromosome": 2,
+      "checkpoint_epoch": 16,
+      "threshold": 0.15431131422519684,
+      "validation_mcc": 0.7642536057988595,
+      "test_positives_dropped": 0,
+      "auroc": 0.943002792914237,
+      "auprc": 0.9402948065308664,
+      "balanced_accuracy": 0.8735534377127298,
+      "f1": 0.8762697751873438,
+      "mcc": 0.7478280776795184,
+      "precision": 0.8578415389631562,
+      "recall": 0.8955071477195371,
+      "specificity": 0.8515997277059224,
+      "epochs_run": 24,
+      "training_minutes": 44.19253563086192
+    },
+    {
+      "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+      "variant": "relpos_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,4,5",
+      "test_chromosome": 3,
+      "checkpoint_epoch": 33,
+      "threshold": 0.27765175700187683,
+      "validation_mcc": 0.7838620524170938,
+      "test_positives_dropped": 0,
+      "auroc": 0.9549565179766963,
+      "auprc": 0.9522920074982275,
+      "balanced_accuracy": 0.8833240843507215,
+      "f1": 0.883887891757559,
+      "mcc": 0.7666843232840171,
+      "precision": 0.8796372629843363,
+      "recall": 0.8881798002219756,
+      "specificity": 0.8784683684794673,
+      "epochs_run": 41,
+      "training_minutes": 61.75298014481862
+    },
+    {
+      "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+      "variant": "relpos_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,3,5",
+      "test_chromosome": 4,
+      "checkpoint_epoch": 34,
+      "threshold": 0.11795565485954285,
+      "validation_mcc": 0.800142843230694,
+      "test_positives_dropped": 0,
+      "auroc": 0.9459136395065108,
+      "auprc": 0.9414082652776693,
+      "balanced_accuracy": 0.8717459215550156,
+      "f1": 0.878313848180471,
+      "mcc": 0.7478619946043399,
+      "precision": 0.8355263157894737,
+      "recall": 0.9257202360291565,
+      "specificity": 0.8177716070808747,
+      "epochs_run": 42,
+      "training_minutes": 66.72059006293615
+    },
+    {
+      "tf": "MYC3_air_jablock_2h_chipseq_Yin2023",
+      "variant": "relpos_attnpool",
+      "seed": 1,
+      "train_chromosomes": "1,2,3,4",
+      "test_chromosome": 5,
+      "checkpoint_epoch": 22,
+      "threshold": 0.07181071490049362,
+      "validation_mcc": 0.7817024111835711,
+      "test_positives_dropped": 43,
+      "auroc": 0.9450029807276152,
+      "auprc": 0.9455058492224602,
+      "balanced_accuracy": 0.8724696356275303,
+      "f1": 0.8723023727196852,
+      "mcc": 0.7449418274073852,
+      "precision": 0.873447946513849,
+      "recall": 0.8711597999523696,
+      "specificity": 0.8737794713026911,
+      "epochs_run": 30,
+      "training_minutes": 43.664325733979545
+    }
+  ],
+  "summary_overall": {
+    "checkpoint_epoch": {
+      "mean": 26.4,
+      "std": 7.569676347110225,
+      "min": 16.0,
+      "max": 34.0
+    },
+    "epochs_run": {
+      "mean": 34.4,
+      "std": 7.569676347110225,
+      "min": 24.0,
+      "max": 42.0
+    },
+    "training_minutes": {
+      "mean": 52.92450676282247,
+      "std": 10.62698570698254,
+      "min": 43.664325733979545,
+      "max": 66.72059006293615
+    },
+    "threshold": {
+      "mean": 0.1866928294301033,
+      "std": 0.10353774598630365,
+      "min": 0.07181071490049362,
+      "max": 0.31173470616340637
+    },
+    "validation_mcc": {
+      "mean": 0.7793934245087293,
+      "std": 0.014478394490975141,
+      "min": 0.7642536057988595,
+      "max": 0.800142843230694
+    },
+    "auroc": {
+      "mean": 0.9495117985818338,
+      "std": 0.006881140529898766,
+      "min": 0.943002792914237,
+      "max": 0.9586830617841093
+    },
+    "auprc": {
+      "mean": 0.9472595250559193,
+      "std": 0.007108154604330723,
+      "min": 0.9402948065308664,
+      "max": 0.9567966967503732
+    },
+    "balanced_accuracy": {
+      "mean": 0.8783619054556576,
+      "std": 0.008349691467357452,
+      "min": 0.8717459215550156,
+      "max": 0.8907164480322907
+    },
+    "f1": {
+      "mean": 0.8806346583439746,
+      "std": 0.007791952796947976,
+      "min": 0.8723023727196852,
+      "max": 0.8923994038748138
+    },
+    "mcc": {
+      "mean": 0.7578263458658074,
+      "std": 0.01596251909592703,
+      "min": 0.7449418274073852,
+      "max": 0.7818155063537765
+    },
+    "precision": {
+      "mean": 0.8650636069793216,
+      "std": 0.018693421804881757,
+      "min": 0.8355263157894737,
+      "max": 0.8796372629843363
+    },
+    "recall": {
+      "mean": 0.8973848397714898,
+      "std": 0.020367924484392754,
+      "min": 0.8711597999523696,
+      "max": 0.9257202360291565
+    },
+    "specificity": {
+      "mean": 0.8593389711398254,
+      "std": 0.02554333363419132,
+      "min": 0.8177716070808747,
+      "max": 0.8784683684794673
+    }
+  }
+}
