@@ -1,0 +1,1590 @@
+{
+  "script_version": "8.1.0-pooled-gc-soft-location-preference",
+  "gc_matcher_version": "1.5.0-pooled-soft-location-preference",
+  "command": "/home/jbossenz/miniforge3/envs/at_env/bin/python /home/jbossenz/AT_TFBS/maa_preferences/data_maa.py --fe-bigwig /home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.FE.bw --pval-bigwig /home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.pval.bw --summit-bigwig /home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.pval.called_summits.bw --fasta /home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa --fai /home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa.fai --chromosomes 1,2,3,4,5 --negative-location-preference gene-or-tss --negative-preference-distance 1000 --gene-annotation /home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz --tss-plus /home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed --tss-minus /home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed --output-dir /home/jbossenz/AT_TFBS/maa_preferences/maa_data/MYC2_ja_2h_chipseq_Yin2023 --context-per-side 196 --tmp-dir /home/jbossenz/AT_TFBS/maa_preferences/maa_data/.tmp/MYC2_ja_2h_chipseq_Yin2023.67757.sBaaSb --overwrite",
+  "arguments": {
+    "fe_bigwig": "/home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.FE.bw",
+    "pval_bigwig": "/home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.pval.bw",
+    "summit_bigwig": "/home/jbossenz/AT_TFBS/raw_data/MYC2_ja_2h_chipseq_Yin2023/signal/MYC2_ja_2h_chipseq_Yin2023.pooled_replicates.macs3.pval.called_summits.bw",
+    "fasta": "/home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa",
+    "fai": "/home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa.fai",
+    "output_dir": "/home/jbossenz/AT_TFBS/maa_preferences/maa_data/MYC2_ja_2h_chipseq_Yin2023",
+    "chromosomes": "1,2,3,4,5",
+    "negative_location_preference": "gene-or-tss",
+    "negative_preference_distance": 1000,
+    "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+    "gene_feature_types": "gene,pseudogene,transposable_element_gene",
+    "tss_plus": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+    "tss_minus": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+    "window_size": 1024,
+    "context_per_side": 196,
+    "pval_threshold": 1.3,
+    "summit_min_value": 0.0,
+    "wide_summit_policy": "error",
+    "gc_bin_width": 0.005,
+    "gc_ks_tolerance": 0.06,
+    "gc_quantile_tolerance": 0.015,
+    "candidate_scan_chunk_size": 1000000,
+    "save_candidate_pools": false,
+    "tmp_dir": "/home/jbossenz/AT_TFBS/maa_preferences/maa_data/.tmp/MYC2_ja_2h_chipseq_Yin2023.67757.sBaaSb",
+    "uncompressed_window_files": false,
+    "dinucleotide_shuffle": false,
+    "dinucleotide_shuffle_seed": 42,
+    "overwrite": true,
+    "log_level": "INFO"
+  },
+  "sample_class_definitions": {
+    "positive": "Ein vollstaendiges, auf einem gueltigen Peak-Summit zentriertes Kernfenster; keine TSS-/Genpositionsregeln.",
+    "negative": "Genomweit gewaehltes Kernfenster ohne positives Kernfenster-Overlap, mit p-Wert-Maximum unter der Schwelle und gemeinsamem GC-Matching."
+  },
+  "selection": {
+    "positive": "all_valid_summits",
+    "negative": "all_genomic_starts_1bp",
+    "tss_gene_filters": false,
+    "gc_matching_reference": "all_positive_core_windows",
+    "gc_matching_scope": "pooled",
+    "selection_and_filters_span": "core_window_only",
+    "positive_center_policy": "summit",
+    "candidate_grid_step": 1
+  },
+  "negative_location_preference": {
+    "mode": "gene-or-tss",
+    "distance_bp": 1000,
+    "distance_reference": "original_core_window_center_to_nearest_annotated_base",
+    "within_gene_distance_bp": 0,
+    "distance_threshold_inclusive": true,
+    "hard_location_filter": false,
+    "strategy": "preferred_first_within_gc_bin_then_distant_fallback",
+    "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+    "gene_feature_types": [
+      "gene",
+      "pseudogene",
+      "transposable_element_gene"
+    ],
+    "loaded_gene_features": 27445,
+    "gene_feature_counts": {
+      "gene": 27445
+    },
+    "gene_features_on_other_chromosomes": 210,
+    "tss_plus": {
+      "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+      "loaded_records": 13032,
+      "records_on_other_chromosomes": 0
+    },
+    "tss_minus": {
+      "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+      "loaded_records": 13529,
+      "records_on_other_chromosomes": 0
+    },
+    "chromosomes_with_genes": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "chromosomes_with_tss": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "unique_tss_positions": 26561,
+    "preferred_candidate_windows": 50133529,
+    "candidate_pool_size": 68340137,
+    "preferred_candidate_fraction": 0.7335883596487376,
+    "preferred_selected_windows": 12495,
+    "selected_total": 15048,
+    "preferred_selected_fraction": 0.8303429027113237,
+    "gc_priority_fallback_used": false
+  },
+  "counts": {
+    "positive_total": 26185,
+    "negative_total": 15048,
+    "summits_considered": 26185,
+    "summits_not_in_positive_output": 0,
+    "negative_candidate_pool": 68340137,
+    "wide_summit_intervals": 0
+  },
+  "window_geometry": {
+    "window_length": 1024,
+    "context_per_side": 196,
+    "context_length": 1416
+  },
+  "chromosomes": {
+    "1": {
+      "fasta_name": "1",
+      "length": 30427671
+    },
+    "2": {
+      "fasta_name": "2",
+      "length": 19698289
+    },
+    "3": {
+      "fasta_name": "3",
+      "length": 23459830
+    },
+    "4": {
+      "fasta_name": "4",
+      "length": 18585056
+    },
+    "5": {
+      "fasta_name": "5",
+      "length": 26975502
+    }
+  },
+  "positive_selection": {
+    "summits_considered": 26185,
+    "positive_samples": 26185,
+    "excluded_window_outside_chromosome": 0
+  },
+  "negative_selection": {
+    "pool_mode": "all_genomic_starts_1bp_then_hard_filters",
+    "candidate_pool_size": 68340137,
+    "candidate_grid_step": 1,
+    "tested_windows": 119141233,
+    "pval_valid_windows": 73510840,
+    "hard_valid_windows": 68502368,
+    "gc_measurable_windows": 68340137,
+    "rejected_pval": 45630393,
+    "rejected_positive_overlap": 5008472,
+    "rejected_unmeasurable_gc": 162231,
+    "preferred_candidate_windows": 50133529,
+    "selection_mode": "maximum_cardinality_gc_constrained_heuristic",
+    "global_optimum_guaranteed": false,
+    "positive_samples_unchanged": true,
+    "location_preference_requested": true,
+    "location_priority_used": true,
+    "location_preference_fallback_used": false,
+    "location_preference_global_optimum_guaranteed": false,
+    "location_preferred_selected": 12495,
+    "location_preferred_selected_fraction": 0.8303429027113237,
+    "created_total": 15048,
+    "selected_without_overlap": true,
+    "positive_gc_count": 26185,
+    "gc_binned_cdf_tolerance": 0.06,
+    "gc_binned_cdf_distance": 0.059994196408676426,
+    "gc_mean_quantile_tolerance": 0.015,
+    "gc_mean_quantile_distance": 0.0050693082932775435,
+    "gc_raw_ks_distance_diagnostic_only": 0.06594916634664183,
+    "per_window_gc_targets": "post_selection_quantile_audit_only",
+    "gc_search_size_upper_bound": 75747,
+    "candidate_global_nonoverlap_upper_bound": 75747,
+    "positive_gc_bins_without_negative_capacity": [],
+    "gc_bins": [
+      {
+        "bin_index": 0,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 10,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 1,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 2,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 3,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 4,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 5,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 6,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 7,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 8,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 9,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 10,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 11,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 12,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 13,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 14,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 15,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 16,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 17,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 18,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 19,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 20,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 21,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 22,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 23,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 24,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 25,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 26,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 27,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 28,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 29,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 30,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 31,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 32,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 33,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 34,
+        "positive_count": 4,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 35,
+        "positive_count": 10,
+        "nonoverlapping_capacity_upper_bound": 6,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 36,
+        "positive_count": 14,
+        "nonoverlapping_capacity_upper_bound": 11,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 37,
+        "positive_count": 34,
+        "nonoverlapping_capacity_upper_bound": 17,
+        "selected_count": 15
+      },
+      {
+        "bin_index": 38,
+        "positive_count": 32,
+        "nonoverlapping_capacity_upper_bound": 20,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 39,
+        "positive_count": 63,
+        "nonoverlapping_capacity_upper_bound": 34,
+        "selected_count": 19
+      },
+      {
+        "bin_index": 40,
+        "positive_count": 79,
+        "nonoverlapping_capacity_upper_bound": 57,
+        "selected_count": 4
+      },
+      {
+        "bin_index": 41,
+        "positive_count": 145,
+        "nonoverlapping_capacity_upper_bound": 88,
+        "selected_count": 52
+      },
+      {
+        "bin_index": 42,
+        "positive_count": 167,
+        "nonoverlapping_capacity_upper_bound": 121,
+        "selected_count": 34
+      },
+      {
+        "bin_index": 43,
+        "positive_count": 174,
+        "nonoverlapping_capacity_upper_bound": 141,
+        "selected_count": 23
+      },
+      {
+        "bin_index": 44,
+        "positive_count": 205,
+        "nonoverlapping_capacity_upper_bound": 194,
+        "selected_count": 54
+      },
+      {
+        "bin_index": 45,
+        "positive_count": 223,
+        "nonoverlapping_capacity_upper_bound": 238,
+        "selected_count": 45
+      },
+      {
+        "bin_index": 46,
+        "positive_count": 266,
+        "nonoverlapping_capacity_upper_bound": 305,
+        "selected_count": 69
+      },
+      {
+        "bin_index": 47,
+        "positive_count": 286,
+        "nonoverlapping_capacity_upper_bound": 389,
+        "selected_count": 88
+      },
+      {
+        "bin_index": 48,
+        "positive_count": 293,
+        "nonoverlapping_capacity_upper_bound": 501,
+        "selected_count": 117
+      },
+      {
+        "bin_index": 49,
+        "positive_count": 363,
+        "nonoverlapping_capacity_upper_bound": 660,
+        "selected_count": 160
+      },
+      {
+        "bin_index": 50,
+        "positive_count": 471,
+        "nonoverlapping_capacity_upper_bound": 902,
+        "selected_count": 235
+      },
+      {
+        "bin_index": 51,
+        "positive_count": 499,
+        "nonoverlapping_capacity_upper_bound": 1157,
+        "selected_count": 267
+      },
+      {
+        "bin_index": 52,
+        "positive_count": 564,
+        "nonoverlapping_capacity_upper_bound": 1447,
+        "selected_count": 304
+      },
+      {
+        "bin_index": 53,
+        "positive_count": 639,
+        "nonoverlapping_capacity_upper_bound": 1782,
+        "selected_count": 349
+      },
+      {
+        "bin_index": 54,
+        "positive_count": 746,
+        "nonoverlapping_capacity_upper_bound": 2223,
+        "selected_count": 452
+      },
+      {
+        "bin_index": 55,
+        "positive_count": 875,
+        "nonoverlapping_capacity_upper_bound": 2788,
+        "selected_count": 575
+      },
+      {
+        "bin_index": 56,
+        "positive_count": 966,
+        "nonoverlapping_capacity_upper_bound": 3417,
+        "selected_count": 614
+      },
+      {
+        "bin_index": 57,
+        "positive_count": 1030,
+        "nonoverlapping_capacity_upper_bound": 4091,
+        "selected_count": 304
+      },
+      {
+        "bin_index": 58,
+        "positive_count": 1384,
+        "nonoverlapping_capacity_upper_bound": 4951,
+        "selected_count": 916
+      },
+      {
+        "bin_index": 59,
+        "positive_count": 1202,
+        "nonoverlapping_capacity_upper_bound": 5775,
+        "selected_count": 795
+      },
+      {
+        "bin_index": 60,
+        "positive_count": 1258,
+        "nonoverlapping_capacity_upper_bound": 6666,
+        "selected_count": 832
+      },
+      {
+        "bin_index": 61,
+        "positive_count": 1284,
+        "nonoverlapping_capacity_upper_bound": 7573,
+        "selected_count": 850
+      },
+      {
+        "bin_index": 62,
+        "positive_count": 1188,
+        "nonoverlapping_capacity_upper_bound": 8510,
+        "selected_count": 786
+      },
+      {
+        "bin_index": 63,
+        "positive_count": 1076,
+        "nonoverlapping_capacity_upper_bound": 9503,
+        "selected_count": 712
+      },
+      {
+        "bin_index": 64,
+        "positive_count": 1106,
+        "nonoverlapping_capacity_upper_bound": 10544,
+        "selected_count": 732
+      },
+      {
+        "bin_index": 65,
+        "positive_count": 1012,
+        "nonoverlapping_capacity_upper_bound": 11549,
+        "selected_count": 670
+      },
+      {
+        "bin_index": 66,
+        "positive_count": 1107,
+        "nonoverlapping_capacity_upper_bound": 13231,
+        "selected_count": 711
+      },
+      {
+        "bin_index": 67,
+        "positive_count": 888,
+        "nonoverlapping_capacity_upper_bound": 14787,
+        "selected_count": 510
+      },
+      {
+        "bin_index": 68,
+        "positive_count": 726,
+        "nonoverlapping_capacity_upper_bound": 16733,
+        "selected_count": 418
+      },
+      {
+        "bin_index": 69,
+        "positive_count": 741,
+        "nonoverlapping_capacity_upper_bound": 19110,
+        "selected_count": 426
+      },
+      {
+        "bin_index": 70,
+        "positive_count": 668,
+        "nonoverlapping_capacity_upper_bound": 21633,
+        "selected_count": 383
+      },
+      {
+        "bin_index": 71,
+        "positive_count": 592,
+        "nonoverlapping_capacity_upper_bound": 24300,
+        "selected_count": 341
+      },
+      {
+        "bin_index": 72,
+        "positive_count": 571,
+        "nonoverlapping_capacity_upper_bound": 26755,
+        "selected_count": 328
+      },
+      {
+        "bin_index": 73,
+        "positive_count": 474,
+        "nonoverlapping_capacity_upper_bound": 29012,
+        "selected_count": 272
+      },
+      {
+        "bin_index": 74,
+        "positive_count": 457,
+        "nonoverlapping_capacity_upper_bound": 31021,
+        "selected_count": 263
+      },
+      {
+        "bin_index": 75,
+        "positive_count": 453,
+        "nonoverlapping_capacity_upper_bound": 32770,
+        "selected_count": 260
+      },
+      {
+        "bin_index": 76,
+        "positive_count": 321,
+        "nonoverlapping_capacity_upper_bound": 33001,
+        "selected_count": 185
+      },
+      {
+        "bin_index": 77,
+        "positive_count": 281,
+        "nonoverlapping_capacity_upper_bound": 32703,
+        "selected_count": 161
+      },
+      {
+        "bin_index": 78,
+        "positive_count": 242,
+        "nonoverlapping_capacity_upper_bound": 31820,
+        "selected_count": 139
+      },
+      {
+        "bin_index": 79,
+        "positive_count": 203,
+        "nonoverlapping_capacity_upper_bound": 30242,
+        "selected_count": 117
+      },
+      {
+        "bin_index": 80,
+        "positive_count": 163,
+        "nonoverlapping_capacity_upper_bound": 28194,
+        "selected_count": 94
+      },
+      {
+        "bin_index": 81,
+        "positive_count": 128,
+        "nonoverlapping_capacity_upper_bound": 25884,
+        "selected_count": 73
+      },
+      {
+        "bin_index": 82,
+        "positive_count": 117,
+        "nonoverlapping_capacity_upper_bound": 23383,
+        "selected_count": 67
+      },
+      {
+        "bin_index": 83,
+        "positive_count": 98,
+        "nonoverlapping_capacity_upper_bound": 21020,
+        "selected_count": 57
+      },
+      {
+        "bin_index": 84,
+        "positive_count": 66,
+        "nonoverlapping_capacity_upper_bound": 18001,
+        "selected_count": 38
+      },
+      {
+        "bin_index": 85,
+        "positive_count": 42,
+        "nonoverlapping_capacity_upper_bound": 15651,
+        "selected_count": 24
+      },
+      {
+        "bin_index": 86,
+        "positive_count": 38,
+        "nonoverlapping_capacity_upper_bound": 13433,
+        "selected_count": 22
+      },
+      {
+        "bin_index": 87,
+        "positive_count": 29,
+        "nonoverlapping_capacity_upper_bound": 11567,
+        "selected_count": 16
+      },
+      {
+        "bin_index": 88,
+        "positive_count": 22,
+        "nonoverlapping_capacity_upper_bound": 9841,
+        "selected_count": 13
+      },
+      {
+        "bin_index": 89,
+        "positive_count": 24,
+        "nonoverlapping_capacity_upper_bound": 8310,
+        "selected_count": 14
+      },
+      {
+        "bin_index": 90,
+        "positive_count": 14,
+        "nonoverlapping_capacity_upper_bound": 6999,
+        "selected_count": 8
+      },
+      {
+        "bin_index": 91,
+        "positive_count": 17,
+        "nonoverlapping_capacity_upper_bound": 5889,
+        "selected_count": 9
+      },
+      {
+        "bin_index": 92,
+        "positive_count": 8,
+        "nonoverlapping_capacity_upper_bound": 4755,
+        "selected_count": 5
+      },
+      {
+        "bin_index": 93,
+        "positive_count": 5,
+        "nonoverlapping_capacity_upper_bound": 4036,
+        "selected_count": 3
+      },
+      {
+        "bin_index": 94,
+        "positive_count": 6,
+        "nonoverlapping_capacity_upper_bound": 3388,
+        "selected_count": 3
+      },
+      {
+        "bin_index": 95,
+        "positive_count": 7,
+        "nonoverlapping_capacity_upper_bound": 2856,
+        "selected_count": 5
+      },
+      {
+        "bin_index": 96,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 2394,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 97,
+        "positive_count": 3,
+        "nonoverlapping_capacity_upper_bound": 2031,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 98,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 1752,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 99,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 1434,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 100,
+        "positive_count": 3,
+        "nonoverlapping_capacity_upper_bound": 1168,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 101,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 954,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 102,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 788,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 103,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 625,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 104,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 502,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 105,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 400,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 106,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 318,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 107,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 255,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 108,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 197,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 109,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 144,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 110,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 115,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 111,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 102,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 112,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 87,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 113,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 75,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 114,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 67,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 115,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 54,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 116,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 46,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 117,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 39,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 118,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 29,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 119,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 19,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 120,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 15,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 121,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 9,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 122,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 7,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 123,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 7,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 124,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 6,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 125,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 6,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 126,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 127,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 128,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 129,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 130,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 131,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 132,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 133,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 134,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 135,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 136,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 137,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 138,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 139,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 140,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 141,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 142,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 143,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 144,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 145,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 146,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 147,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 148,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 149,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 150,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 151,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 152,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 153,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 154,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 155,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 156,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 157,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 158,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 159,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 160,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 161,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 162,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 163,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 164,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 165,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 166,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 167,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 168,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 169,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 170,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 171,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 172,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 173,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 174,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 175,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 176,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 177,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 178,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 179,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 180,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 181,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 182,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 183,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 184,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 185,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 186,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 187,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 188,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 189,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 190,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 191,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 192,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 193,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 194,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 195,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 196,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 197,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 198,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 199,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      }
+    ],
+    "search_attempts": [
+      {
+        "requested": 75747,
+        "obtained": 35822,
+        "binned_cdf_distance": 0.3145213832674696,
+        "mean_absolute_quantile_difference": 0.029713954801780105,
+        "gc_repair_removed": 21968,
+        "gc_repair_retained": 13854
+      },
+      {
+        "requested": 68172,
+        "obtained": 33932,
+        "binned_cdf_distance": 0.29665239790029474,
+        "mean_absolute_quantile_difference": 0.02802896731193416,
+        "gc_repair_removed": 20074,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 61354,
+        "obtained": 32232,
+        "binned_cdf_distance": 0.27876168970306126,
+        "mean_absolute_quantile_difference": 0.02635643350785982,
+        "gc_repair_removed": 18374,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 55218,
+        "obtained": 30577,
+        "binned_cdf_distance": 0.2594662036695796,
+        "mean_absolute_quantile_difference": 0.02468369071318345,
+        "gc_repair_removed": 16719,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 49696,
+        "obtained": 29013,
+        "binned_cdf_distance": 0.2412974829368234,
+        "mean_absolute_quantile_difference": 0.02299970349241126,
+        "gc_repair_removed": 15155,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 44726,
+        "obtained": 27507,
+        "binned_cdf_distance": 0.2241045827770929,
+        "mean_absolute_quantile_difference": 0.021329033158482533,
+        "gc_repair_removed": 13649,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 40253,
+        "obtained": 26051,
+        "binned_cdf_distance": 0.20574876089290256,
+        "mean_absolute_quantile_difference": 0.019650398283928637,
+        "gc_repair_removed": 12193,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 36227,
+        "obtained": 24705,
+        "binned_cdf_distance": 0.1868551098880481,
+        "mean_absolute_quantile_difference": 0.017961465921352223,
+        "gc_repair_removed": 10847,
+        "gc_repair_retained": 13858
+      },
+      {
+        "requested": 32604,
+        "obtained": 23386,
+        "binned_cdf_distance": 0.16627333967151903,
+        "mean_absolute_quantile_difference": 0.016305381769327287,
+        "gc_repair_removed": 9524,
+        "gc_repair_retained": 13862
+      },
+      {
+        "requested": 29343,
+        "obtained": 22148,
+        "binned_cdf_distance": 0.15306970977163406,
+        "mean_absolute_quantile_difference": 0.014635515094026327,
+        "gc_repair_removed": 8202,
+        "gc_repair_retained": 13946
+      },
+      {
+        "requested": 26408,
+        "obtained": 20850,
+        "binned_cdf_distance": 0.14010025510239127,
+        "mean_absolute_quantile_difference": 0.012995705472695308,
+        "gc_repair_removed": 6646,
+        "gc_repair_retained": 14204
+      },
+      {
+        "requested": 23767,
+        "obtained": 19673,
+        "binned_cdf_distance": 0.12716224379741095,
+        "mean_absolute_quantile_difference": 0.011374392707395148,
+        "gc_repair_removed": 5258,
+        "gc_repair_retained": 14415
+      },
+      {
+        "requested": 21390,
+        "obtained": 18419,
+        "binned_cdf_distance": 0.11120383480445839,
+        "mean_absolute_quantile_difference": 0.009914883310152861,
+        "gc_repair_removed": 3753,
+        "gc_repair_retained": 14666
+      },
+      {
+        "requested": 19251,
+        "obtained": 16997,
+        "binned_cdf_distance": 0.09134328021515983,
+        "mean_absolute_quantile_difference": 0.00859121384616127,
+        "gc_repair_removed": 2120,
+        "gc_repair_retained": 14877
+      },
+      {
+        "requested": 17325,
+        "obtained": 15713,
+        "binned_cdf_distance": 0.07063085639619235,
+        "mean_absolute_quantile_difference": 0.007242910825258473,
+        "gc_repair_removed": 665,
+        "gc_repair_retained": 15048
+      },
+      {
+        "requested": 15592,
+        "obtained": 14557,
+        "binned_cdf_distance": 0.04904396089203589,
+        "mean_absolute_quantile_difference": 0.005883824939227036
+      }
+    ],
+    "continuous_balance_after_matching": {
+      "reference_mean": 0.3110172576404123,
+      "comparison_mean": 0.31607864832455856,
+      "mean_difference_comparison_minus_reference": 0.005061390684146239,
+      "standardized_mean_difference": 0.11495309779699175,
+      "kolmogorov_smirnov_distance": 0.06594916634664183,
+      "mean_absolute_quantile_difference": 0.0050693082932775435
+    },
+    "location_preference": {
+      "mode": "gene-or-tss",
+      "distance_bp": 1000,
+      "distance_reference": "original_core_window_center_to_nearest_annotated_base",
+      "within_gene_distance_bp": 0,
+      "distance_threshold_inclusive": true,
+      "hard_location_filter": false,
+      "strategy": "preferred_first_within_gc_bin_then_distant_fallback",
+      "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+      "gene_feature_types": [
+        "gene",
+        "pseudogene",
+        "transposable_element_gene"
+      ],
+      "loaded_gene_features": 27445,
+      "gene_feature_counts": {
+        "gene": 27445
+      },
+      "gene_features_on_other_chromosomes": 210,
+      "tss_plus": {
+        "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+        "loaded_records": 13032,
+        "records_on_other_chromosomes": 0
+      },
+      "tss_minus": {
+        "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+        "loaded_records": 13529,
+        "records_on_other_chromosomes": 0
+      },
+      "chromosomes_with_genes": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "chromosomes_with_tss": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "unique_tss_positions": 26561,
+      "preferred_candidate_windows": 50133529,
+      "candidate_pool_size": 68340137,
+      "preferred_candidate_fraction": 0.7335883596487376,
+      "preferred_selected_windows": 12495,
+      "selected_total": 15048,
+      "preferred_selected_fraction": 0.8303429027113237,
+      "gc_priority_fallback_used": false
+    },
+    "gc_comparison_outputs": {
+      "comparison_table": "distributions/pooled_gc_before_after.tsv",
+      "raw_gc_values": "distributions/pooled_gc_values.tsv",
+      "capacity_table": "distributions/pooled_gc_capacity.tsv",
+      "capacity_svg": "distributions/pooled_gc_capacity.svg",
+      "after_matching_svg": "distributions/pooled_gc_after_matching.svg"
+    },
+    "gc_capacity": {
+      "distinct_starts": 68340137,
+      "nonoverlapping_total": 75747,
+      "bound_strict": 5662.596418732783,
+      "bound_at_tolerance": 17115.99369255236,
+      "bottleneck_strict": {
+        "side": "low",
+        "bin_index": 43,
+        "capacity": 157
+      },
+      "bottleneck_at_tolerance": {
+        "side": "low",
+        "bin_index": 54,
+        "capacity": 2425
+      }
+    }
+  },
+  "context_flank_pval_exceedances": 4138
+}

@@ -1,0 +1,1508 @@
+{
+  "script_version": "8.1.0-pooled-gc-soft-location-preference",
+  "gc_matcher_version": "1.5.0-pooled-soft-location-preference",
+  "command": "/home/jbossenz/miniforge3/envs/at_env/bin/python /home/jbossenz/AT_TFBS/maa_preferences/data_maa.py --fe-bigwig /home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.FE.bw --pval-bigwig /home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.pval.bw --summit-bigwig /home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.pval.called_summits.bw --fasta /home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa --fai /home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa.fai --chromosomes 1,2,3,4,5 --negative-location-preference gene-or-tss --negative-preference-distance 1000 --gene-annotation /home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz --tss-plus /home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed --tss-minus /home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed --output-dir /home/jbossenz/AT_TFBS/maa_preferences/maa_data/AP1_WILDTYPE_GUO2025 --context-per-side 196 --tmp-dir /home/jbossenz/AT_TFBS/maa_preferences/maa_data/.tmp/AP1_WILDTYPE_GUO2025.67759.d7Mwla --overwrite",
+  "arguments": {
+    "fe_bigwig": "/home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.FE.bw",
+    "pval_bigwig": "/home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.pval.bw",
+    "summit_bigwig": "/home/jbossenz/AT_TFBS/raw_data/AP1_WILDTYPE_GUO2025/signal/AP1_WILDTYPE_GUO2025.pooled_replicates.macs3.pval.called_summits.bw",
+    "fasta": "/home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa",
+    "fai": "/home/jbossenz/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa.fai",
+    "output_dir": "/home/jbossenz/AT_TFBS/maa_preferences/maa_data/AP1_WILDTYPE_GUO2025",
+    "chromosomes": "1,2,3,4,5",
+    "negative_location_preference": "gene-or-tss",
+    "negative_preference_distance": 1000,
+    "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+    "gene_feature_types": "gene,pseudogene,transposable_element_gene",
+    "tss_plus": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+    "tss_minus": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+    "window_size": 1024,
+    "context_per_side": 196,
+    "pval_threshold": 1.3,
+    "summit_min_value": 0.0,
+    "wide_summit_policy": "error",
+    "gc_bin_width": 0.005,
+    "gc_ks_tolerance": 0.06,
+    "gc_quantile_tolerance": 0.015,
+    "candidate_scan_chunk_size": 1000000,
+    "save_candidate_pools": false,
+    "tmp_dir": "/home/jbossenz/AT_TFBS/maa_preferences/maa_data/.tmp/AP1_WILDTYPE_GUO2025.67759.d7Mwla",
+    "uncompressed_window_files": false,
+    "dinucleotide_shuffle": false,
+    "dinucleotide_shuffle_seed": 42,
+    "overwrite": true,
+    "log_level": "INFO"
+  },
+  "sample_class_definitions": {
+    "positive": "Ein vollstaendiges, auf einem gueltigen Peak-Summit zentriertes Kernfenster; keine TSS-/Genpositionsregeln.",
+    "negative": "Genomweit gewaehltes Kernfenster ohne positives Kernfenster-Overlap, mit p-Wert-Maximum unter der Schwelle und gemeinsamem GC-Matching."
+  },
+  "selection": {
+    "positive": "all_valid_summits",
+    "negative": "all_genomic_starts_1bp",
+    "tss_gene_filters": false,
+    "gc_matching_reference": "all_positive_core_windows",
+    "gc_matching_scope": "pooled",
+    "selection_and_filters_span": "core_window_only",
+    "positive_center_policy": "summit",
+    "candidate_grid_step": 1
+  },
+  "negative_location_preference": {
+    "mode": "gene-or-tss",
+    "distance_bp": 1000,
+    "distance_reference": "original_core_window_center_to_nearest_annotated_base",
+    "within_gene_distance_bp": 0,
+    "distance_threshold_inclusive": true,
+    "hard_location_filter": false,
+    "strategy": "preferred_first_within_gc_bin_then_distant_fallback",
+    "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+    "gene_feature_types": [
+      "gene",
+      "pseudogene",
+      "transposable_element_gene"
+    ],
+    "loaded_gene_features": 27445,
+    "gene_feature_counts": {
+      "gene": 27445
+    },
+    "gene_features_on_other_chromosomes": 210,
+    "tss_plus": {
+      "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+      "loaded_records": 13032,
+      "records_on_other_chromosomes": 0
+    },
+    "tss_minus": {
+      "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+      "loaded_records": 13529,
+      "records_on_other_chromosomes": 0
+    },
+    "chromosomes_with_genes": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "chromosomes_with_tss": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "unique_tss_positions": 26561,
+    "preferred_candidate_windows": 50431356,
+    "candidate_pool_size": 73129502,
+    "preferred_candidate_fraction": 0.6896171123932993,
+    "preferred_selected_windows": 37593,
+    "selected_total": 46430,
+    "preferred_selected_fraction": 0.8096704716777945,
+    "gc_priority_fallback_used": false
+  },
+  "counts": {
+    "positive_total": 26921,
+    "negative_total": 46430,
+    "summits_considered": 26921,
+    "summits_not_in_positive_output": 0,
+    "negative_candidate_pool": 73129502,
+    "wide_summit_intervals": 0
+  },
+  "window_geometry": {
+    "window_length": 1024,
+    "context_per_side": 196,
+    "context_length": 1416
+  },
+  "chromosomes": {
+    "1": {
+      "fasta_name": "1",
+      "length": 30427671
+    },
+    "2": {
+      "fasta_name": "2",
+      "length": 19698289
+    },
+    "3": {
+      "fasta_name": "3",
+      "length": 23459830
+    },
+    "4": {
+      "fasta_name": "4",
+      "length": 18585056
+    },
+    "5": {
+      "fasta_name": "5",
+      "length": 26975502
+    }
+  },
+  "positive_selection": {
+    "summits_considered": 26921,
+    "positive_samples": 26921,
+    "excluded_window_outside_chromosome": 0
+  },
+  "negative_selection": {
+    "pool_mode": "all_genomic_starts_1bp_then_hard_filters",
+    "candidate_pool_size": 73129502,
+    "candidate_grid_step": 1,
+    "tested_windows": 119141233,
+    "pval_valid_windows": 78639844,
+    "hard_valid_windows": 73291733,
+    "gc_measurable_windows": 73129502,
+    "rejected_pval": 40501389,
+    "rejected_positive_overlap": 5348111,
+    "rejected_unmeasurable_gc": 162231,
+    "preferred_candidate_windows": 50431356,
+    "selection_mode": "maximum_cardinality_gc_constrained_heuristic",
+    "global_optimum_guaranteed": false,
+    "positive_samples_unchanged": true,
+    "location_preference_requested": true,
+    "location_priority_used": true,
+    "location_preference_fallback_used": false,
+    "location_preference_global_optimum_guaranteed": false,
+    "location_preferred_selected": 37593,
+    "location_preferred_selected_fraction": 0.8096704716777945,
+    "created_total": 46430,
+    "selected_without_overlap": true,
+    "positive_gc_count": 26921,
+    "gc_binned_cdf_tolerance": 0.06,
+    "gc_binned_cdf_distance": 0.05999908811771054,
+    "gc_mean_quantile_tolerance": 0.015,
+    "gc_mean_quantile_distance": 0.00376111635142018,
+    "gc_raw_ks_distance_diagnostic_only": 0.0644594965736131,
+    "per_window_gc_targets": "post_selection_quantile_audit_only",
+    "gc_search_size_upper_bound": 79519,
+    "candidate_global_nonoverlap_upper_bound": 79519,
+    "positive_gc_bins_without_negative_capacity": [],
+    "gc_bins": [
+      {
+        "bin_index": 0,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 10,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 1,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 2,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 3,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 4,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 5,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 6,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 7,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 8,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 9,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 10,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 11,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 12,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 13,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 14,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 15,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 16,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 17,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 18,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 19,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 20,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 21,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 22,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 23,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 24,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 25,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 26,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 27,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 28,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 29,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 30,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 31,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 6,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 32,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 12,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 33,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 32,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 34,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 56,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 35,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 107,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 36,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 184,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 37,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 297,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 38,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 410,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 39,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 583,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 40,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 821,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 41,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 1148,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 42,
+        "positive_count": 3,
+        "nonoverlapping_capacity_upper_bound": 1418,
+        "selected_count": 7
+      },
+      {
+        "bin_index": 43,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1710,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 44,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 2068,
+        "selected_count": 4
+      },
+      {
+        "bin_index": 45,
+        "positive_count": 8,
+        "nonoverlapping_capacity_upper_bound": 2456,
+        "selected_count": 17
+      },
+      {
+        "bin_index": 46,
+        "positive_count": 8,
+        "nonoverlapping_capacity_upper_bound": 2897,
+        "selected_count": 17
+      },
+      {
+        "bin_index": 47,
+        "positive_count": 26,
+        "nonoverlapping_capacity_upper_bound": 3394,
+        "selected_count": 56
+      },
+      {
+        "bin_index": 48,
+        "positive_count": 30,
+        "nonoverlapping_capacity_upper_bound": 3883,
+        "selected_count": 65
+      },
+      {
+        "bin_index": 49,
+        "positive_count": 47,
+        "nonoverlapping_capacity_upper_bound": 4448,
+        "selected_count": 101
+      },
+      {
+        "bin_index": 50,
+        "positive_count": 84,
+        "nonoverlapping_capacity_upper_bound": 5128,
+        "selected_count": 178
+      },
+      {
+        "bin_index": 51,
+        "positive_count": 141,
+        "nonoverlapping_capacity_upper_bound": 5769,
+        "selected_count": 175
+      },
+      {
+        "bin_index": 52,
+        "positive_count": 191,
+        "nonoverlapping_capacity_upper_bound": 6448,
+        "selected_count": 230
+      },
+      {
+        "bin_index": 53,
+        "positive_count": 251,
+        "nonoverlapping_capacity_upper_bound": 7137,
+        "selected_count": 199
+      },
+      {
+        "bin_index": 54,
+        "positive_count": 402,
+        "nonoverlapping_capacity_upper_bound": 7940,
+        "selected_count": 213
+      },
+      {
+        "bin_index": 55,
+        "positive_count": 511,
+        "nonoverlapping_capacity_upper_bound": 8752,
+        "selected_count": 226
+      },
+      {
+        "bin_index": 56,
+        "positive_count": 668,
+        "nonoverlapping_capacity_upper_bound": 9597,
+        "selected_count": 276
+      },
+      {
+        "bin_index": 57,
+        "positive_count": 766,
+        "nonoverlapping_capacity_upper_bound": 10386,
+        "selected_count": 862
+      },
+      {
+        "bin_index": 58,
+        "positive_count": 1153,
+        "nonoverlapping_capacity_upper_bound": 11359,
+        "selected_count": 2483
+      },
+      {
+        "bin_index": 59,
+        "positive_count": 1059,
+        "nonoverlapping_capacity_upper_bound": 12020,
+        "selected_count": 2280
+      },
+      {
+        "bin_index": 60,
+        "positive_count": 1219,
+        "nonoverlapping_capacity_upper_bound": 12779,
+        "selected_count": 2625
+      },
+      {
+        "bin_index": 61,
+        "positive_count": 1243,
+        "nonoverlapping_capacity_upper_bound": 13513,
+        "selected_count": 2677
+      },
+      {
+        "bin_index": 62,
+        "positive_count": 1290,
+        "nonoverlapping_capacity_upper_bound": 14232,
+        "selected_count": 2778
+      },
+      {
+        "bin_index": 63,
+        "positive_count": 1198,
+        "nonoverlapping_capacity_upper_bound": 14871,
+        "selected_count": 2580
+      },
+      {
+        "bin_index": 64,
+        "positive_count": 1232,
+        "nonoverlapping_capacity_upper_bound": 15569,
+        "selected_count": 1191
+      },
+      {
+        "bin_index": 65,
+        "positive_count": 1235,
+        "nonoverlapping_capacity_upper_bound": 16248,
+        "selected_count": 1
+      },
+      {
+        "bin_index": 66,
+        "positive_count": 1380,
+        "nonoverlapping_capacity_upper_bound": 17450,
+        "selected_count": 2861
+      },
+      {
+        "bin_index": 67,
+        "positive_count": 1108,
+        "nonoverlapping_capacity_upper_bound": 18440,
+        "selected_count": 1636
+      },
+      {
+        "bin_index": 68,
+        "positive_count": 1045,
+        "nonoverlapping_capacity_upper_bound": 19896,
+        "selected_count": 2021
+      },
+      {
+        "bin_index": 69,
+        "positive_count": 995,
+        "nonoverlapping_capacity_upper_bound": 21619,
+        "selected_count": 2143
+      },
+      {
+        "bin_index": 70,
+        "positive_count": 945,
+        "nonoverlapping_capacity_upper_bound": 23486,
+        "selected_count": 2035
+      },
+      {
+        "bin_index": 71,
+        "positive_count": 883,
+        "nonoverlapping_capacity_upper_bound": 25434,
+        "selected_count": 1901
+      },
+      {
+        "bin_index": 72,
+        "positive_count": 847,
+        "nonoverlapping_capacity_upper_bound": 27258,
+        "selected_count": 1824
+      },
+      {
+        "bin_index": 73,
+        "positive_count": 780,
+        "nonoverlapping_capacity_upper_bound": 28851,
+        "selected_count": 1680
+      },
+      {
+        "bin_index": 74,
+        "positive_count": 762,
+        "nonoverlapping_capacity_upper_bound": 30175,
+        "selected_count": 1641
+      },
+      {
+        "bin_index": 75,
+        "positive_count": 801,
+        "nonoverlapping_capacity_upper_bound": 31474,
+        "selected_count": 1499
+      },
+      {
+        "bin_index": 76,
+        "positive_count": 557,
+        "nonoverlapping_capacity_upper_bound": 31200,
+        "selected_count": 961
+      },
+      {
+        "bin_index": 77,
+        "positive_count": 530,
+        "nonoverlapping_capacity_upper_bound": 30552,
+        "selected_count": 914
+      },
+      {
+        "bin_index": 78,
+        "positive_count": 509,
+        "nonoverlapping_capacity_upper_bound": 29379,
+        "selected_count": 878
+      },
+      {
+        "bin_index": 79,
+        "positive_count": 453,
+        "nonoverlapping_capacity_upper_bound": 27724,
+        "selected_count": 781
+      },
+      {
+        "bin_index": 80,
+        "positive_count": 375,
+        "nonoverlapping_capacity_upper_bound": 25658,
+        "selected_count": 647
+      },
+      {
+        "bin_index": 81,
+        "positive_count": 317,
+        "nonoverlapping_capacity_upper_bound": 23479,
+        "selected_count": 547
+      },
+      {
+        "bin_index": 82,
+        "positive_count": 312,
+        "nonoverlapping_capacity_upper_bound": 21214,
+        "selected_count": 538
+      },
+      {
+        "bin_index": 83,
+        "positive_count": 275,
+        "nonoverlapping_capacity_upper_bound": 18996,
+        "selected_count": 474
+      },
+      {
+        "bin_index": 84,
+        "positive_count": 192,
+        "nonoverlapping_capacity_upper_bound": 16119,
+        "selected_count": 331
+      },
+      {
+        "bin_index": 85,
+        "positive_count": 128,
+        "nonoverlapping_capacity_upper_bound": 13939,
+        "selected_count": 221
+      },
+      {
+        "bin_index": 86,
+        "positive_count": 138,
+        "nonoverlapping_capacity_upper_bound": 11907,
+        "selected_count": 238
+      },
+      {
+        "bin_index": 87,
+        "positive_count": 120,
+        "nonoverlapping_capacity_upper_bound": 10207,
+        "selected_count": 207
+      },
+      {
+        "bin_index": 88,
+        "positive_count": 107,
+        "nonoverlapping_capacity_upper_bound": 8609,
+        "selected_count": 185
+      },
+      {
+        "bin_index": 89,
+        "positive_count": 84,
+        "nonoverlapping_capacity_upper_bound": 7225,
+        "selected_count": 144
+      },
+      {
+        "bin_index": 90,
+        "positive_count": 72,
+        "nonoverlapping_capacity_upper_bound": 6047,
+        "selected_count": 125
+      },
+      {
+        "bin_index": 91,
+        "positive_count": 78,
+        "nonoverlapping_capacity_upper_bound": 5078,
+        "selected_count": 134
+      },
+      {
+        "bin_index": 92,
+        "positive_count": 45,
+        "nonoverlapping_capacity_upper_bound": 4067,
+        "selected_count": 78
+      },
+      {
+        "bin_index": 93,
+        "positive_count": 43,
+        "nonoverlapping_capacity_upper_bound": 3436,
+        "selected_count": 74
+      },
+      {
+        "bin_index": 94,
+        "positive_count": 36,
+        "nonoverlapping_capacity_upper_bound": 2885,
+        "selected_count": 62
+      },
+      {
+        "bin_index": 95,
+        "positive_count": 34,
+        "nonoverlapping_capacity_upper_bound": 2405,
+        "selected_count": 59
+      },
+      {
+        "bin_index": 96,
+        "positive_count": 35,
+        "nonoverlapping_capacity_upper_bound": 2008,
+        "selected_count": 60
+      },
+      {
+        "bin_index": 97,
+        "positive_count": 33,
+        "nonoverlapping_capacity_upper_bound": 1710,
+        "selected_count": 57
+      },
+      {
+        "bin_index": 98,
+        "positive_count": 25,
+        "nonoverlapping_capacity_upper_bound": 1468,
+        "selected_count": 43
+      },
+      {
+        "bin_index": 99,
+        "positive_count": 28,
+        "nonoverlapping_capacity_upper_bound": 1205,
+        "selected_count": 48
+      },
+      {
+        "bin_index": 100,
+        "positive_count": 16,
+        "nonoverlapping_capacity_upper_bound": 989,
+        "selected_count": 28
+      },
+      {
+        "bin_index": 101,
+        "positive_count": 17,
+        "nonoverlapping_capacity_upper_bound": 809,
+        "selected_count": 29
+      },
+      {
+        "bin_index": 102,
+        "positive_count": 10,
+        "nonoverlapping_capacity_upper_bound": 673,
+        "selected_count": 17
+      },
+      {
+        "bin_index": 103,
+        "positive_count": 9,
+        "nonoverlapping_capacity_upper_bound": 535,
+        "selected_count": 16
+      },
+      {
+        "bin_index": 104,
+        "positive_count": 3,
+        "nonoverlapping_capacity_upper_bound": 429,
+        "selected_count": 5
+      },
+      {
+        "bin_index": 105,
+        "positive_count": 5,
+        "nonoverlapping_capacity_upper_bound": 342,
+        "selected_count": 9
+      },
+      {
+        "bin_index": 106,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 266,
+        "selected_count": 3
+      },
+      {
+        "bin_index": 107,
+        "positive_count": 5,
+        "nonoverlapping_capacity_upper_bound": 209,
+        "selected_count": 9
+      },
+      {
+        "bin_index": 108,
+        "positive_count": 4,
+        "nonoverlapping_capacity_upper_bound": 157,
+        "selected_count": 7
+      },
+      {
+        "bin_index": 109,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 115,
+        "selected_count": 3
+      },
+      {
+        "bin_index": 110,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 93,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 111,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 84,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 112,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 71,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 113,
+        "positive_count": 3,
+        "nonoverlapping_capacity_upper_bound": 60,
+        "selected_count": 5
+      },
+      {
+        "bin_index": 114,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 53,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 115,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 44,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 116,
+        "positive_count": 2,
+        "nonoverlapping_capacity_upper_bound": 37,
+        "selected_count": 3
+      },
+      {
+        "bin_index": 117,
+        "positive_count": 1,
+        "nonoverlapping_capacity_upper_bound": 31,
+        "selected_count": 2
+      },
+      {
+        "bin_index": 118,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 23,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 119,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 14,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 120,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 10,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 121,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 122,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 123,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 124,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 4,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 125,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 4,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 126,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 127,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 128,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 3,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 129,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 130,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 131,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 132,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 133,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 5,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 134,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 135,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 136,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 137,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 138,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 139,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 140,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 141,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 142,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 143,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 144,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 145,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 146,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 147,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 148,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 149,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 150,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 151,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 152,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 153,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 154,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 155,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 156,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 157,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 158,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 159,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 160,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 1,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 161,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 162,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 163,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 164,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 165,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 166,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 167,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 168,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 169,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 170,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 171,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 172,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 173,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 174,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 175,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 176,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 177,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 178,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 179,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 180,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 181,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 182,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 183,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 184,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 185,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 186,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 187,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 188,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 189,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 190,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 191,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 192,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 193,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 194,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 195,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 196,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 197,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 198,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 0,
+        "selected_count": 0
+      },
+      {
+        "bin_index": 199,
+        "positive_count": 0,
+        "nonoverlapping_capacity_upper_bound": 2,
+        "selected_count": 0
+      }
+    ],
+    "search_attempts": [
+      {
+        "requested": 79519,
+        "obtained": 56328,
+        "binned_cdf_distance": 0.1460428896669005,
+        "mean_absolute_quantile_difference": 0.012109658825734865,
+        "gc_repair_removed": 13449,
+        "gc_repair_retained": 42879
+      },
+      {
+        "requested": 71567,
+        "obtained": 53677,
+        "binned_cdf_distance": 0.12430073308558054,
+        "mean_absolute_quantile_difference": 0.010229898657150394,
+        "gc_repair_removed": 11805,
+        "gc_repair_retained": 41872
+      },
+      {
+        "requested": 64410,
+        "obtained": 51080,
+        "binned_cdf_distance": 0.10124878640095386,
+        "mean_absolute_quantile_difference": 0.00835635599859513,
+        "gc_repair_removed": 9049,
+        "gc_repair_retained": 42031
+      },
+      {
+        "requested": 57969,
+        "obtained": 48628,
+        "binned_cdf_distance": 0.078558070969731,
+        "mean_absolute_quantile_difference": 0.006745260333687124,
+        "gc_repair_removed": 2198,
+        "gc_repair_retained": 46430
+      },
+      {
+        "requested": 52172,
+        "obtained": 46321,
+        "binned_cdf_distance": 0.05703602661405016,
+        "mean_absolute_quantile_difference": 0.005260355506055801
+      },
+      {
+        "requested": 46954,
+        "obtained": 43983,
+        "binned_cdf_distance": 0.04622151057966521,
+        "mean_absolute_quantile_difference": 0.0038857019277903893
+      }
+    ],
+    "continuous_balance_after_matching": {
+      "reference_mean": 0.33865852252788536,
+      "comparison_mean": 0.342258278884464,
+      "mean_difference_comparison_minus_reference": 0.0035997563565786095,
+      "standardized_mean_difference": 0.08114253033896342,
+      "kolmogorov_smirnov_distance": 0.0644594965736131,
+      "mean_absolute_quantile_difference": 0.00376111635142018
+    },
+    "location_preference": {
+      "mode": "gene-or-tss",
+      "distance_bp": 1000,
+      "distance_reference": "original_core_window_center_to_nearest_annotated_base",
+      "within_gene_distance_bp": 0,
+      "distance_threshold_inclusive": true,
+      "hard_location_filter": false,
+      "strategy": "preferred_first_within_gc_bin_then_distant_fallback",
+      "gene_annotation": "/home/jbossenz/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",
+      "gene_feature_types": [
+        "gene",
+        "pseudogene",
+        "transposable_element_gene"
+      ],
+      "loaded_gene_features": 27445,
+      "gene_feature_counts": {
+        "gene": 27445
+      },
+      "gene_features_on_other_chromosomes": 210,
+      "tss_plus": {
+        "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_plus.bed",
+        "loaded_records": 13032,
+        "records_on_other_chromosomes": 0
+      },
+      "tss_minus": {
+        "path": "/home/jbossenz/AT_TFBS/raw_data/general_data/AT_TSS/clustered_TSS_Le_2022_sup2_wt_minus.bed",
+        "loaded_records": 13529,
+        "records_on_other_chromosomes": 0
+      },
+      "chromosomes_with_genes": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "chromosomes_with_tss": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "unique_tss_positions": 26561,
+      "preferred_candidate_windows": 50431356,
+      "candidate_pool_size": 73129502,
+      "preferred_candidate_fraction": 0.6896171123932993,
+      "preferred_selected_windows": 37593,
+      "selected_total": 46430,
+      "preferred_selected_fraction": 0.8096704716777945,
+      "gc_priority_fallback_used": false
+    },
+    "gc_comparison_outputs": {
+      "comparison_table": "distributions/pooled_gc_before_after.tsv",
+      "raw_gc_values": "distributions/pooled_gc_values.tsv",
+      "capacity_table": "distributions/pooled_gc_capacity.tsv",
+      "capacity_svg": "distributions/pooled_gc_capacity.svg",
+      "after_matching_svg": "distributions/pooled_gc_after_matching.svg"
+    },
+    "gc_capacity": {
+      "distinct_starts": 73129502,
+      "nonoverlapping_total": 79519,
+      "bound_strict": 50144.834110828386,
+      "bound_at_tolerance": 56345.51717868678,
+      "bottleneck_strict": {
+        "side": "low",
+        "bin_index": 66,
+        "capacity": 26353
+      },
+      "bottleneck_at_tolerance": {
+        "side": "low",
+        "bin_index": 67,
+        "capacity": 28550
+      }
+    }
+  },
+  "context_flank_pval_exceedances": 6102
+}
