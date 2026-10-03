@@ -141,6 +141,7 @@ METRIC_COLUMNS = [
     "tss_enrichment",
     "peaks_raw", "peaks_filtered", "FRiP",
     "fixed_depth_applied", "fixed_depth_fragments", "peaks_fixed_depth", "FRiP_fixed_depth",
+    "greenscreen",
 ]
 
 
@@ -1304,9 +1305,96 @@ def fragment_size_distribution(bam: Path, label: str, data: dict[str, Any]) -> d
 # Signal tracks: Tn5-shifted cut sites and CPM fragment coverage
 # ----------------------------------------------------------------------------------------------
 
-def mask_option(data: dict[str, Any]) -> str:
+def log_issue(data: dict[str, Any], level: str, message: str) -> None:
+    """Print a prominent ERROR/WARNING line and keep it for the experiment summary (the run continues)."""
+
+    line = f"{level}: {message}"
+    print(f"\n{'!' * 8} {line}\n", flush=True)
+    data.setdefault("_issues", []).append(line)
+
+
+def check_mask_bed(data: dict[str, Any], bam: Path) -> Path | None:
+    """Validate the greenscreen/blacklist BED against the BAM contig names, once per experiment.
+
+    Chromosome names that differ from the alignment index (e.g. Chr1 vs 1) would make bedtools and
+    bamCoverage match nothing without any error. Names are therefore checked explicitly: known
+    aliases are converted into a renamed copy (WARNING), unresolvable names or a missing/empty
+    file raise a loud ERROR and the mask is not applied, which is also recorded in the QC tables.
+    """
+
+    if "_mask_bed_effective" in data:
+        return data["_mask_bed_effective"]
+
     reference = data["reference"]
     mask_bed = reference.get("mask_bed")
+    effective: Path | None = None
+    status = "none"
+
+    if not mask_bed:
+        status = "none"
+        print(f"{timestamp()}  NOTE: no reference.mask_bed given; peaks are not greenscreen-filtered.")
+    elif not Path(mask_bed).is_file() or Path(mask_bed).stat().st_size == 0:
+        status = "not_applied"
+        log_issue(data, "ERROR", f"mask_bed {mask_bed} is missing or empty; greenscreen filter NOT applied.")
+    else:
+        bed_chroms: list[str] = []
+        n_regions = 0
+        with Path(mask_bed).open("r", encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if not line.strip() or line.startswith(("#", "track", "browser")):
+                    continue
+                fields = line.rstrip("\n").split("\t")
+                if len(fields) < 3:
+                    continue
+                n_regions += 1
+                if fields[0] not in bed_chroms:
+                    bed_chroms.append(fields[0])
+        contigs = bam_contigs(bam)
+        alias_map = contig_alias_map(contigs)
+        matched = [c for c in bed_chroms if c in contigs]
+        mappable = {c: alias_map[c] for c in bed_chroms if c not in contigs and c in alias_map}
+        unresolved = [c for c in bed_chroms if c not in contigs and c not in alias_map]
+
+        if n_regions == 0:
+            status = "not_applied"
+            log_issue(data, "ERROR", f"mask_bed {mask_bed} contains no BED regions; greenscreen filter NOT applied.")
+        elif not matched and not mappable:
+            status = "not_applied"
+            log_issue(
+                data, "ERROR",
+                f"mask_bed chromosome names {bed_chroms} do not match the alignment index ({', '.join(contigs)}); "
+                "greenscreen filter and bigWig blacklist NOT applied. Rename the chromosomes in the BED file.",
+            )
+        elif mappable:
+            renamed = Path(data["experiment_dir"]) / "qc" / "greenscreen_renamed.bed"
+            with Path(mask_bed).open("r", encoding="utf-8", errors="replace") as src, renamed.open("w", encoding="utf-8") as dst:
+                for line in src:
+                    fields = line.rstrip("\n").split("\t")
+                    if len(fields) >= 3 and fields[0] in mappable:
+                        fields[0] = mappable[fields[0]]
+                        line = "\t".join(fields) + "\n"
+                    dst.write(line)
+            effective = renamed
+            status = "renamed"
+            log_issue(
+                data, "WARNING",
+                f"mask_bed chromosome names were converted to the index naming ({', '.join(f'{a}->{b}' for a, b in mappable.items())}); "
+                f"using {renamed}" + (f"; unresolved names ignored: {unresolved}" if unresolved else ""),
+            )
+        else:
+            effective = Path(mask_bed)
+            status = "applied"
+            if unresolved:
+                log_issue(data, "WARNING", f"mask_bed contains chromosome names not in the index, their regions are ignored: {unresolved}")
+            print(f"{timestamp()}  Greenscreen mask OK: {n_regions} regions on {', '.join(matched)} ({mask_bed})")
+
+    data["_mask_bed_effective"] = effective
+    data["_mask_status"] = status
+    return effective
+
+
+def mask_option(data: dict[str, Any]) -> str:
+    mask_bed = data.get("_mask_bed_effective")
     if mask_bed and Path(mask_bed).is_file():
         return f"--blackListFileName {shlex.quote(str(mask_bed))}"
     return ""
@@ -1631,18 +1719,19 @@ def call_peaks_macs3(bam: Path, peak_name: str, layout: str, data: dict[str, Any
 def greenscreen_filter(peaks_raw: Path, peak_name: str, data: dict[str, Any], peaks_dir: Path) -> Path:
     """Remove peaks overlapping artefact regions with bedtools intersect -v (identical to the ChIP pipeline)."""
 
-    reference = data["reference"]
     filtered_peaks = peaks_dir / f"{peak_name}.greenscreen.narrowPeak"
-    mask_bed = reference.get("mask_bed")
+    mask_bed = data.get("_mask_bed_effective")
 
     if mask_bed and Path(mask_bed).is_file() and Path(mask_bed).stat().st_size > 0:
         run_command(f"bedtools intersect -v -a {shlex.quote(str(peaks_raw))} -b {shlex.quote(str(mask_bed))} > {shlex.quote(str(filtered_peaks))}")
         n_before = count_lines(peaks_raw)
         n_after = count_lines(filtered_peaks)
         print(f"\t\t  Greenscreen: removed {n_before - n_after}/{n_before} peaks, {n_after} retained.")
+        if n_before > 0 and n_before == n_after:
+            print(f"\t\t  NOTE: no peak of {peak_name} overlapped a greenscreen region (possible, but check the mask if this happens for every sample).")
     else:
         shutil.copy2(peaks_raw, filtered_peaks)
-        print(f"\t\t  No valid mask file; all {count_lines(filtered_peaks)} raw peaks passed through.")
+        print(f"\t\t  Greenscreen filter not applied ({data.get('_mask_status', 'none')}); all {count_lines(filtered_peaks)} raw peaks passed through.")
 
     return filtered_peaks
 
@@ -2060,6 +2149,7 @@ def process_replicate(
 
     print(f"{timestamp()}  Processing replicate {rep_id}")
     sample_out = process_sample(data, rep, download_futures)
+    check_mask_bed(data, Path(sample_out["filtered_bam"]))
     label = sample_out["label"]
     layout = sample_out["layout"]
     filtered_bam = Path(sample_out["filtered_bam"])
@@ -2147,6 +2237,7 @@ def collect_metrics(data: dict[str, Any], rep_result: dict[str, Any]) -> dict[st
         "fixed_depth_fragments": fd["fixed_depth_fragments"] if fd["fixed_depth_applied"] else s["usable_fragments"],
         "peaks_fixed_depth": fd["peaks_fixed_depth"] if fd["fixed_depth_applied"] else rep_result["filtered_peak_count"],
         "FRiP_fixed_depth": fd["FRiP_fixed_depth"] if fd["fixed_depth_applied"] else rep_result["frip"]["FRiP"],
+        "greenscreen": data.get("_mask_status", "none"),
         "metadata": dict(data.get("metadata", {})),
     }
     metrics["status"] = status_summary(metrics, thresholds)
@@ -2235,6 +2326,9 @@ def write_summary(
         fh.write(f"genome_size\t{data['reference']['genome_size']}\n")
         fh.write(f"replicates\t{len(replicate_results)}\n")
         fh.write("control_used\tno (ATAC-seq)\n")
+        fh.write(f"greenscreen\t{data.get('_mask_status', 'none')}\t{data.get('_mask_bed_effective') or '-'}\n")
+        for issue in data.get("_issues", []):
+            fh.write(f"issue\t{issue}\n")
         fh.write(f"consensus_peaks\t{consensus}\n")
         fh.write(f"consensus_summits\t{consensus_summits}\n")
         fh.write(f"idr_peaks\t{idr_peaks if idr_peaks else 'not_run'}\n")
@@ -2312,6 +2406,11 @@ def run_experiment(
         run_multiqc(experiment_dir, experiment_dir / "multiqc", f"ATAC-seq {data['experiment_id']}")
 
     elapsed = datetime.now() - start
+    issues = data.get("_issues", [])
+    if issues:
+        print(f"\n{'!' * 8} {len(issues)} issue(s) in {data['experiment_id']} (also listed in the summary file):")
+        for issue in issues:
+            print(f"{'!' * 8}   {issue}")
     print(f"\n{timestamp()}  Experiment complete: {data['experiment_id']} ({elapsed})")
     return {k: v for k, v in next_download_futures.items() if k not in download_futures}
 
