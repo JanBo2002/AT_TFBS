@@ -65,19 +65,33 @@ CONFIG_SUFFIXES = {".yaml", ".yml"}
 DOWNLOAD_RETRY_DELAYS = [30, 60, 120, 300]
 NEXTERA_ADAPTER = "CTGTCTCTTATACACATCT"
 
+# Fixed reference for Arabidopsis thaliana (TAIR10.1, Ensembl-style chromosome names 1-5, Mt, Pt).
+# Set the paths ONCE here; a config needs a `reference:` block only to deviate from these values
+# (e.g. another assembly). genome_size: nuclear chromosomes 1-5 of TAIR10.1 = 119,146,348 bp.
+DEFAULT_REFERENCE = {
+    "genome_index": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas",          # Bowtie2 index prefix, MUST contain Mt and Pt
+    "genome_size": "1.19e8",                                          # MACS3 -g, same value as in the ChIP configs
+    "mask_bed": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed",      # Greenscreen (Klasfeld et al. 2022); None = no mask
+    "annotation_gtf": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",                       # TSS source for the TSS enrichment; None = skip
+    "tss_bed": None,                                                  # ready-made TSS BED instead of the GTF
+}
+
 DEFAULT_PARAMS = {
     "threads": 6,
-    "min_mapq": 30,                      # identical to ChIP pipeline
+    "min_mapq": 30,                      # identical to ChIP pipeline; MAPQ > 30 also used for Arabidopsis ATAC-seq (Zhu et al. 2020, UMI-ATAC)
     "macs_qvalue": 0.01,                 # identical to ChIP pipeline
-    "macs_se_shift": -100,               # ATAC convention for single-end data (cut-site centring)
-    "macs_se_extsize": 200,              # ATAC convention for single-end data
+    "macs_se_shift": -100,               # cut-site centring for SE data; used for Arabidopsis ATAC-seq (Hernando-Herraez et al. 2023, Sci Data)
+    "macs_se_extsize": 200,
+    "bowtie2_extra": "--dovetail",       # PE only: keep mates that overhang each other (short ATAC fragments); as in the Arabidopsis
+                                         # ATAC-seq analysis of Hernando-Herraez et al. 2023. "" restores the exact ChIP command.
     "idr_threshold": 0.05,
     "download_workers": 1,
     "keep_chroms": ["1", "2", "3", "4", "5"],      # nuclear chromosomes, names exactly as in the index
     "organelle_chroms": ["Mt", "Pt"],              # organelle contigs, names as in the index (ChrM/ChrC in TAIR style)
     "fastp_extra": "--dont_eval_duplication --detect_adapter_for_pe --cut_front --cut_tail --cut_mean_quality 20 --length_required 20",
     "nextera_adapter": NEXTERA_ADAPTER,  # passed explicitly for SE data (PE uses overlap detection as in ChIP)
-    "subsample_fragments": 10_000_000,   # fixed depth for comparable peak counts / FRiP; 0 disables
+    "subsample_fragments": 5_000_000,    # fixed depth for comparable peak counts / FRiP (= 10 M paired reads, the depth at which
+                                         # ACR detection saturates in Arabidopsis, Lu et al. 2017); 0 disables
     "subsample_seed": 42,
     "tss_window": 2000,                  # bp on each side of the TSS
     "tss_flank": 100,                    # bp at each window end used as background
@@ -93,18 +107,29 @@ DEFAULT_PARAMS = {
     "sort_memory": "2G",
 }
 
-# Orientation values. NRF/PBC/FRiP/TSS follow the ENCODE ATAC-seq standards (calibrated on
-# human data); organelle fraction and usable fragments are plant/Arabidopsis working values.
-# Treat them as starting points and recalibrate from the cohort ranking in the batch table.
+# QC tiers. Values with an Arabidopsis source:
+#   organelle_fraction : crude/sucrose nuclei ~50 % organellar reads (Maher et al. 2018 Plant Cell; Bajic et al.
+#                        2018 MiMB), FANS ~30 % (Lu et al. 2017 NAR), INTACT >90 % nuclear (Maher 2018)
+#   usable_fragments   : >=10-20 M nuclear-mapped reads per library recommended (Bajic et al. 2018); 10 M aligned
+#                        chromosome reads recover ~92 % of the ACRs found with 100 M (Lu et al. 2017); >15 M filtered
+#                        reads "more than sufficient" (Sijacic et al. 2018). 5 M fragments = 10 M paired reads.
+#   NRF/PBC1/PBC2      : ENCODE library-complexity definitions, species-independent (PCR bottlenecking)
+#   tss_enrichment/FRiP: no published Arabidopsis thresholds. PlantCADB (Ding et al. 2023) sets its plant QC
+#                        thresholds from the cohort distribution; the same is done here ("cohort" mode): a sample is
+#                        "poor" below an absolute floor (no enrichment at all), otherwise "good" at or above the
+#                        cohort median and "ok" below it. Tiers of cohort metrics are assigned in the batch summary.
+#                        For reference only: ENCODE human TSS >7 ideal / 5-7 acceptable; FRiP >0.3 / >0.2 acceptable.
+# subsample_fragments (DEFAULT_PARAMS) should sit at or below the usable_fragments "good" level: only samples
+# with more usable fragments than the target are standardised (column fixed_depth_applied).
 DEFAULT_QC_THRESHOLDS = {
-    "organelle_fraction": {"good_max": 0.20, "ok_max": 0.50},
+    "organelle_fraction": {"good_max": 0.30, "ok_max": 0.55},
     "alignment_rate": {"good_min": 0.95, "ok_min": 0.80},
-    "usable_fragments": {"good_min": 10_000_000, "ok_min": 5_000_000},
+    "usable_fragments": {"good_min": 5_000_000, "ok_min": 2_500_000},
     "NRF": {"good_min": 0.90, "ok_min": 0.80},
     "PBC1": {"good_min": 0.90, "ok_min": 0.70},
     "PBC2": {"good_min": 3.0, "ok_min": 1.0},
-    "tss_enrichment": {"good_min": 7.0, "ok_min": 5.0},
-    "FRiP": {"good_min": 0.30, "ok_min": 0.20},
+    "tss_enrichment": {"mode": "cohort", "floor": 2.0},
+    "FRiP": {"mode": "cohort", "floor": 0.10},
 }
 
 DEFAULT_SAVE = {
@@ -274,6 +299,8 @@ def tier_status(metric: str, value: Any, thresholds: dict[str, Any]) -> str:
         return "NA"
     if isinstance(value, float) and math.isnan(value):
         return "NA"
+    if spec.get("mode") == "cohort":
+        return "poor" if value < float(spec.get("floor", 0.0)) else "cohort"
     if "good_max" in spec:
         if value <= float(spec["good_max"]):
             return "good"
@@ -344,6 +371,7 @@ def get_sample_layout(sample: dict[str, Any]) -> str:
 
 
 def merge_defaults(data: dict[str, Any]) -> None:
+    data["reference"] = {**DEFAULT_REFERENCE, **require_mapping(data.get("reference", {}) or {}, "reference")}
     data["params"] = {**DEFAULT_PARAMS, **require_mapping(data.get("params", {}) or {}, "params")}
     data["save"] = {**DEFAULT_SAVE, **require_mapping(data.get("save", {}) or {}, "save")}
     data["qc_thresholds"] = merge_thresholds(data.get("qc_thresholds"))
@@ -359,13 +387,17 @@ def validate_config(data: dict[str, Any]) -> None:
         raise ValueError(f"'layout' must be one of {sorted(ALLOWED_LAYOUTS)} or AUTO (GEO samples only), got {layout!r}.")
     data["layout"] = layout
 
-    reference = require_mapping(require_key(data, "reference", "root"), "reference")
-    require_key(reference, "genome_index", "reference")
+    reference = require_mapping(data["reference"], "reference")
+    hint = " (set DEFAULT_REFERENCE at the top of the script or a 'reference:' block in the config)"
+    genome_index = str(require_key(reference, "genome_index", "reference"))
     require_key(reference, "genome_size", "reference")
+    validate_number(reference["genome_size"], "reference.genome_size", float)
+    if not any(Path(f"{genome_index}.1.{ext}").is_file() for ext in ("bt2", "bt2l")):
+        raise ValueError(f"'reference.genome_index' is not a Bowtie2 index prefix: {genome_index}{hint}")
     for optional_file in ("mask_bed", "annotation_gtf", "tss_bed"):
         value = reference.get(optional_file)
         if value and not Path(str(value)).is_file():
-            raise ValueError(f"'reference.{optional_file}' does not exist: {value}")
+            raise ValueError(f"'reference.{optional_file}' does not exist: {value}{hint}")
 
     params = require_mapping(data["params"], "params")
     for key, cast_type in [
@@ -931,6 +963,7 @@ def align_bowtie2(t1: Path, t2: Path | None, layout: str, label: str, data: dict
             "--no-mixed",
             "--no-discordant",
             "-X 2000",
+            str(params.get("bowtie2_extra", "") or ""),
             f"2> {log_bt2}",
             "| samtools view -bS -",
             f"| samtools sort -@ {sort_threads} -o {bam}",
@@ -2239,6 +2272,7 @@ def collect_metrics(data: dict[str, Any], rep_result: dict[str, Any]) -> dict[st
         "FRiP_fixed_depth": fd["FRiP_fixed_depth"] if fd["fixed_depth_applied"] else rep_result["frip"]["FRiP"],
         "greenscreen": data.get("_mask_status", "none"),
         "metadata": dict(data.get("metadata", {})),
+        "qc_thresholds": thresholds,
     }
     metrics["status"] = status_summary(metrics, thresholds)
     return metrics
@@ -2253,6 +2287,8 @@ def status_summary(metrics: dict[str, Any], thresholds: dict[str, Any]) -> dict[
     order = {"poor": 0, "ok": 1, "good": 2}
     rated = [t for t in tiers.values() if t in order]
     overall = min(rated, key=lambda t: order[t]) if rated else "NA"
+    if "cohort" in tiers.values() and overall != "poor":
+        overall = "pending"          # final tier of cohort-relative metrics is assigned in the batch summary
     flagged = sorted(m for m, t in tiers.items() if t == "poor")
     return {"tiers": tiers, "overall": overall, "flagged": flagged}
 
@@ -2434,6 +2470,34 @@ def percentile_ranks(values: list[tuple[str, float]], higher_is_better: bool = T
     return ranks
 
 
+def apply_cohort_tiers(rows: list[dict[str, Any]]) -> None:
+    """Assign good/ok to cohort-relative metrics (PlantCADB approach): good at or above the cohort median,
+    ok below it; "poor" (below the absolute floor) stays. Recomputes the overall status of every sample."""
+
+    order = {"poor": 0, "ok": 1, "good": 2}
+    tier_metrics = ["organelle_fraction", "alignment_rate", "usable_fragments", "NRF", "PBC1", "PBC2", "tss_enrichment", "FRiP"]
+    medians: dict[str, float] = {}
+    for metric in tier_metrics:
+        if not any(r["status"]["tiers"].get(metric) == "cohort" for r in rows):
+            continue
+        values = sorted(r[metric] for r in rows if isinstance(r.get(metric), (int, float)) and r["status"]["tiers"].get(metric) in ("cohort", "good", "ok"))
+        if not values:
+            continue
+        mid = len(values) // 2
+        medians[metric] = values[mid] if len(values) % 2 else (values[mid - 1] + values[mid]) / 2
+    for r in rows:
+        tiers = r["status"]["tiers"]
+        for metric, med in medians.items():
+            if tiers.get(metric) == "cohort":
+                tiers[metric] = "good" if r[metric] >= med else "ok"
+        rated = [t for t in tiers.values() if t in order]
+        r["status"]["overall"] = min(rated, key=lambda t: order[t]) if rated else "NA"
+        r["status"]["flagged"] = sorted(m for m, t in tiers.items() if t == "poor")
+        r["status"]["cohort_medians"] = medians
+    if medians:
+        print(f"{timestamp()}  Cohort medians used for relative tiers: " + ", ".join(f"{m}={v:.3g}" for m, v in medians.items()))
+
+
 def batch_qc_summary(outdir: Path) -> Path | None:
     metric_files = sorted(outdir.glob("*/reports/*.metrics.json"))
     if not metric_files:
@@ -2447,6 +2511,8 @@ def batch_qc_summary(outdir: Path) -> Path | None:
                 rows.append(json.load(fh))
         except (OSError, ValueError) as exc:
             print(f"\t\t  WARNING: could not read {path}: {exc}")
+
+    apply_cohort_tiers(rows)
 
     rank_specs = [
         ("tss_enrichment", True), ("FRiP_fixed_depth", True), ("usable_fragments", True),
@@ -2464,8 +2530,8 @@ def batch_qc_summary(outdir: Path) -> Path | None:
         + ["status", "flagged"]
         + [f"cohort_pct.{m}" for m, _ in rank_specs]
     )
-    order = {"good": 0, "ok": 1, "poor": 2, "NA": 3}
-    rows.sort(key=lambda r: (order.get(r["status"]["overall"], 3), -(r.get("tss_enrichment") or 0.0)))
+    order = {"good": 0, "ok": 1, "pending": 2, "poor": 3, "NA": 4}
+    rows.sort(key=lambda r: (order.get(r["status"]["overall"], 4), -(r.get("tss_enrichment") or 0.0)))
     with summary.open("w", encoding="utf-8") as out:
         out.write("\t".join(header) + "\n")
         for r in rows:
