@@ -1,0 +1,68 @@
+# ATAC-seq: zwei biologische Col-0-Kontrollreplikate aus GSE233416.
+# GSM7986436 -> SRX22985778 -> SRR27308509 (bio1)
+# GSM7986437 -> SRX22985779 -> SRR27308508 (bio2)
+# SRR-Zuordnung, ATAC-seq-Strategie und PAIRED-Layout über ENA geprüft.
+# GEO: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE233416
+# Lokale Referenzpfade und Contignamen vor dem Lauf anpassen.
+
+experiment_id: GSE233416_Col0_dark_5d_ATAC
+sample_id: Col0_dark_5d_ATAC
+layout: PE
+
+metadata:
+  geo_series: GSE233416
+  geo_sample: "GSM7986436; GSM7986437"
+  tissue: "seedlings"
+  genotype: Col-0
+  age_or_stage: "5 d etiolated seedlings"
+  nuclei_isolation: protoplasts
+  sequencer: "Illumina NovaSeq 6000"
+  publication: "Zhu et al., Developmental Cell (2024); doi:10.1016/j.devcel.2024.01.021"
+  notes: >-
+    Col-0 control samples ATAC_Col-bio1 and ATAC_Col-bio2;
+    grown for five days in darkness at 22 C on 1/2 MS medium.
+    No JA or PPZ treatment is listed for these two samples.
+    Nuclei were isolated from approximately 40,000 protoplasts;
+    no GFP/FANS selection of epidermal nuclei is described.
+    Intended as an accessibility reference for MYC3 Air ChIP-seq;
+    ATAC seedling age is 5 d versus 3 d for the MYC3 samples.
+
+reference:
+  # Index mit Kerngenom UND Organellen verwenden.
+  genome_index: /path/to/bowtie2_index/TAIR10_with_organelles
+  genome_size: "1.2e8"
+  mask_bed: /path/to/greenscreen_TAIR10.bed
+  annotation_gtf: /path/to/Araport11.gtf
+  # Alternativ annotation_gtf durch einen passenden tss_bed-Eintrag ersetzen.
+  # tss_bed: /path/to/tss.bed
+  # Optionale mask_bed-/annotation_gtf-Einträge entfernen, falls nicht verwendet.
+
+params:
+  # Namen am eigenen Index prüfen; hier die Ensembl-Namen des Templates.
+  # Bei TAIR-Namen: Chr1..Chr5 und ChrM/ChrC entsprechend einsetzen.
+  keep_chroms: ["1", "2", "3", "4", "5"]
+  organelle_chroms: ["Mt", "Pt"]
+  threads: 6
+  subsample_fragments: 10000000
+  run_fingerprint: true
+  fingerprint_timeout: 3600
+  run_ataqv: true
+
+# Optional: nach den ersten echten Läufen passend kalibrieren.
+# qc_thresholds:
+#   usable_fragments: {good_min: 8000000, ok_min: 4000000}
+#   tss_enrichment: {good_min: 6.0, ok_min: 4.0}
+
+save:
+  filtered_bam: false
+  cutsite_bigwig: true
+
+replicates:
+  - rep_id: rep1
+    sample:
+      source: sra
+      accession: SRR27308509
+  - rep_id: rep2
+    sample:
+      source: sra
+      accession: SRR27308508
