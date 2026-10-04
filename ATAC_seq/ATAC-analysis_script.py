@@ -69,10 +69,10 @@ NEXTERA_ADAPTER = "CTGTCTCTTATACACATCT"
 # Set the paths ONCE here; a config needs a `reference:` block only to deviate from these values
 # (e.g. another assembly). genome_size: nuclear chromosomes 1-5 of TAIR10.1 = 119,146,348 bp.
 DEFAULT_REFERENCE = {
-    "genome_index": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas",          # Bowtie2 index prefix, MUST contain Mt and Pt
+    "genome_index": "/path/to/bowtie2_index/TAIR10.1.atlas",          # Bowtie2 index prefix, MUST contain Mt and Pt
     "genome_size": "1.19e8",                                          # MACS3 -g, same value as in the ChIP configs
-    "mask_bed": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed",      # Greenscreen (Klasfeld et al. 2022); None = no mask
-    "annotation_gtf": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",                       # TSS source for the TSS enrichment; None = skip
+    "mask_bed": "/path/to/arabidopsis_greenscreen_20inputs.bed",      # Greenscreen (Klasfeld et al. 2022); None = no mask
+    "annotation_gtf": "/path/to/Araport11.gtf",                       # TSS source for the TSS enrichment; None = skip
     "tss_bed": None,                                                  # ready-made TSS BED instead of the GTF
 }
 
@@ -103,6 +103,8 @@ DEFAULT_PARAMS = {
     "di_min": 315, "di_max": 473,        # di-nucleosomal fragments
     "run_ataqv": True,
     "run_fingerprint": True,             # deepTools plotFingerprint (optional QC; skipped on failure)
+    "pooled_peaks": True,                # MACS3 on the merged replicate BAM (additional peak set; consensus stays IDR-based)
+    "macs_signal_tracks": True,          # MACS3 fold-enrichment and -log10(p) bigWigs over the local background (all replicates combined)
     "fingerprint_timeout": 3600,         # seconds; plotFingerprint is killed after this and reported as a warning
     "sort_memory": "2G",
 }
@@ -113,7 +115,8 @@ DEFAULT_PARAMS = {
 #   usable_fragments   : >=10-20 M nuclear-mapped reads per library recommended (Bajic et al. 2018); 10 M aligned
 #                        chromosome reads recover ~92 % of the ACRs found with 100 M (Lu et al. 2017); >15 M filtered
 #                        reads "more than sufficient" (Sijacic et al. 2018). 5 M fragments = 10 M paired reads.
-#   NRF/PBC1/PBC2      : ENCODE library-complexity definitions, species-independent (PCR bottlenecking)
+#   NRF/PBC1/PBC2      : ENCODE library-complexity bands, species-independent (PCR bottlenecking); NRF tiers identical
+#                        to the ChIP pipeline (>=0.8 good, >=0.5 moderate). Informational: they do not veto a sample.
 #   tss_enrichment/FRiP: no published Arabidopsis thresholds. PlantCADB (Ding et al. 2023) sets its plant QC
 #                        thresholds from the cohort distribution; the same is done here ("cohort" mode): a sample is
 #                        "poor" below an absolute floor (no enrichment at all), otherwise "good" at or above the
@@ -121,12 +124,19 @@ DEFAULT_PARAMS = {
 #                        For reference only: ENCODE human TSS >7 ideal / 5-7 acceptable; FRiP >0.3 / >0.2 acceptable.
 # subsample_fragments (DEFAULT_PARAMS) should sit at or below the usable_fragments "good" level: only samples
 # with more usable fragments than the target are standardised (column fixed_depth_applied).
+# The overall status of a sample is the worst tier over OVERALL_METRICS only (depth and signal-to-noise);
+# organelle fraction, alignment rate and library complexity are reported, tiered and listed in "flagged",
+# but describe the protocol/library rather than the usability of the data and therefore do not veto.
+# Tiers are (re)computed in the batch summary from the stored metrics, so changing thresholds here and
+# running --summary-only re-rates all experiments without reprocessing.
+OVERALL_METRICS = ["usable_fragments", "tss_enrichment", "FRiP"]
+TIER_METRICS = ["organelle_fraction", "alignment_rate", "usable_fragments", "NRF", "PBC1", "PBC2", "tss_enrichment", "FRiP"]
 DEFAULT_QC_THRESHOLDS = {
     "organelle_fraction": {"good_max": 0.30, "ok_max": 0.55},
     "alignment_rate": {"good_min": 0.95, "ok_min": 0.80},
     "usable_fragments": {"good_min": 5_000_000, "ok_min": 2_500_000},
-    "NRF": {"good_min": 0.90, "ok_min": 0.80},
-    "PBC1": {"good_min": 0.90, "ok_min": 0.70},
+    "NRF": {"good_min": 0.80, "ok_min": 0.50},
+    "PBC1": {"good_min": 0.80, "ok_min": 0.50},
     "PBC2": {"good_min": 3.0, "ok_min": 1.0},
     "tss_enrichment": {"mode": "cohort", "floor": 2.0},
     "FRiP": {"mode": "cohort", "floor": 0.10},
@@ -139,6 +149,7 @@ DEFAULT_SAVE = {
     "sorted_bam": False,
     "filtered_bam": False,
     "shifted_bam": False,
+    "pooled_bam": False,
     "subsampled_bam": False,
     "cpm_bigwig": True,
     "cutsite_bigwig": True,
@@ -150,7 +161,7 @@ DEFAULT_SAVE = {
 
 EXPERIMENT_SUBDIRS = [
     "downloads", "trim", "fastqc/raw", "fastqc/trimmed", "align", "peaks", "peaks_fixed_depth",
-    "signal", "qc/idxstats", "qc/flagstat", "qc/pbc", "qc/fragsize", "qc/tss", "qc/frip",
+    "signal", "pooled", "qc/idxstats", "qc/flagstat", "qc/pbc", "qc/fragsize", "qc/tss", "qc/frip",
     "qc/fingerprint", "qc/ataqv", "idr", "consensus", "logs", "reports", "tmp",
 ]
 
@@ -158,7 +169,7 @@ EXPERIMENT_SUBDIRS = [
 METRIC_COLUMNS = [
     "sample", "experiment_id", "sample_id", "rep_id", "layout", "accession",
     "read_length_raw", "read_length_trimmed", "raw_reads", "reads_after_trimming", "trimming_loss_fraction",
-    "alignment_rate", "unique_alignment_fraction", "multi_alignment_fraction", "discordant_fraction",
+    "alignment_rate", "unique_alignment_fraction", "multi_alignment_fraction",
     "mapped_reads_unfiltered", "organelle_fraction", "nuclear_fraction",
     "reads_after_mapq_whitelist", "duplicate_rate", "NRF", "PBC1", "PBC2", "estimated_library_size",
     "usable_fragments",
@@ -374,6 +385,7 @@ def merge_defaults(data: dict[str, Any]) -> None:
     data["reference"] = {**DEFAULT_REFERENCE, **require_mapping(data.get("reference", {}) or {}, "reference")}
     data["params"] = {**DEFAULT_PARAMS, **require_mapping(data.get("params", {}) or {}, "params")}
     data["save"] = {**DEFAULT_SAVE, **require_mapping(data.get("save", {}) or {}, "save")}
+    data["_qc_thresholds_custom"] = dict(data.get("qc_thresholds") or {})
     data["qc_thresholds"] = merge_thresholds(data.get("qc_thresholds"))
     data["metadata"] = require_mapping(data.get("metadata", {}) or {}, "metadata")
 
@@ -1710,7 +1722,7 @@ def tss_enrichment(cutsite_bw: Path, tss_bed: Path, label: str, data: dict[str, 
 # Peak calling without control, greenscreen filter, FRiP, fixed-depth metrics
 # ----------------------------------------------------------------------------------------------
 
-def call_peaks_macs3(bam: Path, peak_name: str, layout: str, data: dict[str, Any], peaks_dir: Path) -> tuple[Path, Path]:
+def call_peaks_macs3(bam: Path, peak_name: str, layout: str, data: dict[str, Any], peaks_dir: Path, bedgraph: bool = False) -> tuple[Path, Path]:
     """MACS3 peak calling WITHOUT control (ATAC-seq has no input).
 
     PE: fragment-based BAMPE mode, parameters as in the ChIP pipeline (-q, --keep-dup all, summits).
@@ -1740,6 +1752,8 @@ def call_peaks_macs3(bam: Path, peak_name: str, layout: str, data: dict[str, Any
     ]
     if layout != "PE":
         cmd += ["--nomodel", "--shift", str(int(params["macs_se_shift"])), "--extsize", str(int(params["macs_se_extsize"]))]
+    if bedgraph:
+        cmd += ["-B", "--SPMR"]          # pileup and local-lambda bedGraphs (per million reads) for the signal tracks
     run_command(" ".join(cmd), experiment_dir / "logs" / f"{peak_name}.macs3.log")
 
     run_command(f"mv {shlex.quote(str(peaks_dir / (peak_name + '_peaks.narrowPeak')))} {shlex.quote(str(raw_peaks))}")
@@ -1929,6 +1943,9 @@ def run_ataqv(bam: Path, peaks: Path, tss_bed: Path | None, label: str, data: di
 def run_idr(peak_files: list[Path], data: dict[str, Any]) -> Path | None:
     if len(peak_files) < 2:
         return None
+    if shutil.which("idr") is None:
+        log_issue(data, "ERROR", "idr not found in PATH; IDR skipped, consensus falls back to the first replicate.")
+        return None
 
     sample_id = str(data["sample_id"])
     experiment_dir = Path(data["experiment_dir"])
@@ -2029,6 +2046,232 @@ def make_consensus_peaks(source_peaks: Path, data: dict[str, Any]) -> tuple[Path
         igv_bed.touch()
 
     return consensus, summits
+
+
+# ----------------------------------------------------------------------------------------------
+# MACS3 signal tracks (fold enrichment and -log10 p over the local background)
+# ----------------------------------------------------------------------------------------------
+
+def bam_chrom_sizes(bam: Path) -> list[tuple[str, int]]:
+    out = run_capture(f"samtools view -H {shlex.quote(str(bam))} | awk '$1==\"@SQ\"{{sub(\"SN:\",\"\",$2); sub(\"LN:\",\"\",$3); print $2\"\\t\"$3}}'")
+    sizes = []
+    for line in out.splitlines():
+        fields = line.split("\t")
+        if len(fields) == 2 and fields[1].isdigit():
+            sizes.append((fields[0], int(fields[1])))
+    return sizes
+
+
+def bedgraph_to_bigwig(bedgraph: Path, chrom_sizes: list[tuple[str, int]], out_bw: Path, tmp_dir: Path) -> bool:
+    """Clip to chromosome ends, sort, and write a bigWig (pyBigWig; falls back to bedGraphToBigWig)."""
+
+    sizes_file = tmp_dir / f"{out_bw.stem}.chrom.sizes"
+    clipped = tmp_dir / f"{out_bw.stem}.clipped.bdg"
+    order = sorted(chrom_sizes, key=lambda item: item[0])
+    sizes_file.write_text("".join(f"{c}\t{n}\n" for c, n in order), encoding="utf-8")
+    run_command(
+        "awk 'BEGIN{OFS=\"\\t\"} NR==FNR{len[$1]=$2; next} ($1 in len){e=($3>len[$1])?len[$1]:$3; if(e>$2) print $1,$2,e,$4}' "
+        f"{shlex.quote(str(sizes_file))} {shlex.quote(str(bedgraph))} | LC_ALL=C sort -k1,1 -k2,2n > {shlex.quote(str(clipped))}"
+    )
+    try:
+        import pyBigWig  # bundled with deepTools
+
+        bw = pyBigWig.open(str(out_bw), "w")
+        bw.addHeader(order)
+        chunk_chroms: list[str] = []
+        chunk_starts: list[int] = []
+        chunk_ends: list[int] = []
+        chunk_values: list[float] = []
+        with clipped.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                c, a, b, v = line.rstrip("\n").split("\t")
+                chunk_chroms.append(c)
+                chunk_starts.append(int(a))
+                chunk_ends.append(int(b))
+                chunk_values.append(float(v))
+                if len(chunk_chroms) >= 500_000:
+                    bw.addEntries(chunk_chroms, chunk_starts, ends=chunk_ends, values=chunk_values)
+                    chunk_chroms, chunk_starts, chunk_ends, chunk_values = [], [], [], []
+            if chunk_chroms:
+                bw.addEntries(chunk_chroms, chunk_starts, ends=chunk_ends, values=chunk_values)
+        bw.close()
+        ok = True
+    except ImportError:
+        if shutil.which("bedGraphToBigWig") is None:
+            ok = False
+        else:
+            run_command(f"bedGraphToBigWig {shlex.quote(str(clipped))} {shlex.quote(str(sizes_file))} {shlex.quote(str(out_bw))}")
+            ok = True
+    clipped.unlink(missing_ok=True)
+    sizes_file.unlink(missing_ok=True)
+    return ok
+
+
+def macs_signal_tracks(bam: Path, name: str, data: dict[str, Any], work_dir: Path) -> dict[str, Path]:
+    """Fold-enrichment and -log10(Poisson p) bigWigs from the MACS3 pileup against its local lambda.
+
+    Without a control, MACS3 estimates the local background from the sample itself (genome-wide
+    lambda and the 10-kb llocal window), so the tracks show signal relative to the local
+    background, the ATAC analogue of the ChIP pipeline's fold-enrichment track (ENCODE ATAC
+    produces the same two tracks). Requires the bedGraphs of a callpeak run with -B --SPMR.
+    """
+
+    experiment_dir = Path(data["experiment_dir"])
+    signal_dir = experiment_dir / "signal"
+    tmp_dir = experiment_dir / "tmp"
+    treat = work_dir / f"{name}_treat_pileup.bdg"
+    ctrl = work_dir / f"{name}_control_lambda.bdg"
+    result: dict[str, Path] = {}
+    if not treat.exists() or not ctrl.exists():
+        log_issue(data, "ERROR", f"MACS3 bedGraphs for {name} not found; FE/-log10p tracks skipped.")
+        return result
+
+    sizes = bam_chrom_sizes(bam)
+    sample_id = str(data["sample_id"])
+
+    # --SPMR scaled the pileups to "per million fragments"; the Poisson p-values must be computed on
+    # the real counts, so bdgcmp gets the number of fragments / 1e6 as scaling factor (as in the
+    # ENCODE pipeline). Fold enrichment is a ratio and unaffected by the scaling.
+    n_tags = None
+    xls = work_dir / f"{name}_peaks.xls"
+    if xls.exists():
+        for line in xls.read_text(encoding="utf-8", errors="replace").splitlines():
+            # BAMPE mode: "# total fragments in treatment: N"; BAM/SE mode: "# total tags in treatment: N"
+            # and "# tags after filtering in treatment: N" (identical with --keep-dup all)
+            if line.startswith(("# tags after filtering in treatment:", "# fragments after filtering in treatment:")):
+                n_tags = int(line.split(":")[1].strip())
+                break
+            if line.startswith(("# total tags in treatment:", "# total fragments in treatment:")) and n_tags is None:
+                n_tags = int(line.split(":")[1].strip())
+    if not n_tags:
+        paired = int(run_capture(f"samtools view -c -f 0x1 {shlex.quote(str(bam))} | head -c 20")) > 0
+        n_tags = count_usable_fragments(bam, "PE" if paired else "SE")
+    scaling = max(n_tags, 1) / 1e6
+
+    for method, suffix in (("FE", "FE"), ("ppois", "log10p")):
+        bdg = work_dir / f"{name}.{suffix}.bdg"
+        run_command(
+            f"macs3 bdgcmp -t {shlex.quote(str(treat))} -c {shlex.quote(str(ctrl))} -m {method} "
+            f"-p 0.00001 -S {scaling:.6f} -o {shlex.quote(str(bdg))}",
+            experiment_dir / "logs" / f"{name}.bdgcmp.{suffix}.log",
+        )
+        out_bw = signal_dir / f"{sample_id}.{suffix}.bw"
+        if bedgraph_to_bigwig(bdg, sizes, out_bw, tmp_dir):
+            result[suffix] = out_bw
+        else:
+            log_issue(data, "WARNING", f"neither pyBigWig nor bedGraphToBigWig available; {suffix} track for {sample_id} not written.")
+        bdg.unlink(missing_ok=True)
+    treat.unlink(missing_ok=True)
+    ctrl.unlink(missing_ok=True)
+    if result:
+        print(f"\t\t  MACS3 signal tracks: {', '.join(p.name for p in result.values())}")
+    return result
+
+
+# ----------------------------------------------------------------------------------------------
+# Pooled replicate outputs (merged BAM -> CPM and cut-site bigWigs, optional pooled peak set)
+# ----------------------------------------------------------------------------------------------
+
+def make_pooled_outputs(data: dict[str, Any], replicate_results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge the filtered BAMs of all replicates and derive pooled signal tracks (as the ChIP pipeline
+    does for its pooled track) plus, optionally, a pooled MACS3 peak set.
+
+    The pooled peak set does not replace the IDR consensus; it is the better choice for shallow
+    datasets, where single replicates are depth-limited. Overlap of the pooled peaks with every
+    single-replicate peak set is reported so the support of the extra peaks is visible.
+    """
+
+    result: dict[str, Any] = {}
+    sample_id = str(data["sample_id"])
+    experiment_dir = Path(data["experiment_dir"])
+    params = data["params"]
+    threads = int(params["threads"])
+    pooled_dir = experiment_dir / "pooled"
+    signal_dir = experiment_dir / "signal"
+    pooled_dir.mkdir(parents=True, exist_ok=True)
+
+    layouts = {r["sample"]["layout"] for r in replicate_results}
+    layout = "PE" if layouts == {"PE"} else "SE"
+    bams = [Path(r["sample"]["filtered_bam"]) for r in replicate_results]
+    missing = [b for b in bams if not b.exists()]
+    if missing:
+        log_issue(data, "ERROR", f"pooled outputs skipped, filtered BAMs missing: {missing}")
+        return result
+
+    if len(replicate_results) < 2:
+        # Single replicate: no pooling, but the MACS3 signal tracks are still produced from it.
+        if bool(params.get("macs_signal_tracks", True)):
+            call_peaks_macs3(bams[0], f"{sample_id}.signal", layout, data, pooled_dir, bedgraph=True)
+            result["signal_tracks"] = macs_signal_tracks(bams[0], f"{sample_id}.signal", data, pooled_dir)
+            for leftover in pooled_dir.glob(f"{sample_id}.signal*"):
+                leftover.unlink(missing_ok=True)
+        return result
+
+    print(f"{timestamp()}  Pooling {len(bams)} replicates of {sample_id}: in progress ..")
+    pooled_bam = pooled_dir / f"{sample_id}.pooled.filtered.dedup.bam"
+    run_command(f"samtools merge -f -@ {threads} -o {shlex.quote(str(pooled_bam))} {' '.join(shlex.quote(str(b)) for b in bams)}")
+    run_command(f"samtools index {shlex.quote(str(pooled_bam))}")
+    result["pooled_bam"] = pooled_bam
+    result["pooled_fragments"] = count_usable_fragments(pooled_bam, layout)
+
+    cpm_bw = signal_dir / f"{sample_id}.pooled.cpm.bw"
+    run_command(
+        " ".join([
+            "bamCoverage", "-b", shlex.quote(str(pooled_bam)), "-o", shlex.quote(str(cpm_bw)),
+            "--normalizeUsing CPM", "--extendReads" if layout == "PE" else "", mask_option(data),
+            "--binSize 10", "-p", str(threads),
+        ]),
+        experiment_dir / "logs" / f"{sample_id}.pooled.bamCoverage.log",
+    )
+    result["pooled_cpm_bigwig"] = cpm_bw
+
+    shifted = [r.get("shifted_bam") for r in replicate_results]
+    cut_source = pooled_bam
+    if all(shifted) and all(Path(str(b)).exists() for b in shifted):
+        pooled_shifted = pooled_dir / f"{sample_id}.pooled.shifted.bam"
+        run_command(f"samtools merge -f -@ {threads} -o {shlex.quote(str(pooled_shifted))} {' '.join(shlex.quote(str(b)) for b in shifted)}")
+        run_command(f"samtools index {shlex.quote(str(pooled_shifted))}")
+        cut_source = pooled_shifted
+        result["pooled_shifted_bam"] = pooled_shifted
+    cut_bw = signal_dir / f"{sample_id}.pooled.cutsites.cpm.bw"
+    run_command(
+        " ".join([
+            "bamCoverage", "-b", shlex.quote(str(cut_source)), "-o", shlex.quote(str(cut_bw)),
+            "--Offset 1", "--binSize 1", "--normalizeUsing CPM", mask_option(data), "-p", str(threads),
+        ]),
+        experiment_dir / "logs" / f"{sample_id}.pooled.cutsites.bamCoverage.log",
+    )
+    result["pooled_cutsite_bigwig"] = cut_bw
+    print(f"\t\t  Pooled tracks: {cpm_bw.name}, {cut_bw.name} ({result['pooled_fragments']} fragments)")
+
+    want_tracks = bool(params.get("macs_signal_tracks", True))
+    if bool(params.get("pooled_peaks", True)) or want_tracks:
+        peak_name = f"{sample_id}.pooled"
+        raw_peaks, _ = call_peaks_macs3(pooled_bam, peak_name, layout, data, pooled_dir, bedgraph=want_tracks)
+        if want_tracks:
+            result["signal_tracks"] = macs_signal_tracks(pooled_bam, peak_name, data, pooled_dir)
+    if bool(params.get("pooled_peaks", True)):
+        filtered = greenscreen_filter(raw_peaks, peak_name, data, pooled_dir)
+        n_pooled = count_lines(filtered)
+        support = {}
+        for r in replicate_results:
+            rep_peaks = Path(r["filtered_peaks"])
+            n_overlap = int(run_capture(
+                f"bedtools intersect -u -a {shlex.quote(str(filtered))} -b {shlex.quote(str(rep_peaks))} | wc -l"
+            )) if n_pooled else 0
+            support[r["rep_id"]] = n_overlap / n_pooled if n_pooled else None
+        frip = compute_frip(pooled_bam, filtered, experiment_dir / "qc" / "frip" / f"{peak_name}.frip.tsv", layout)
+        result.update({"pooled_peaks": filtered, "pooled_peak_count": n_pooled, "pooled_support": support, "pooled_FRiP": frip["FRiP"]})
+        print(f"\t\t  Pooled peaks: {n_pooled} (FRiP {frip['FRiP']:.3f}); supported by " +
+              ", ".join(f"{k}: {fmt(v, 2)}" for k, v in support.items()))
+
+    if not data["save"].get("pooled_bam", False):
+        for key in ("pooled_bam", "pooled_shifted_bam"):
+            bam = result.get(key)
+            if bam:
+                unlink_if(bam)
+                unlink_if(f"{bam}.bai")
+    return result
 
 
 # ----------------------------------------------------------------------------------------------
@@ -2273,6 +2516,7 @@ def collect_metrics(data: dict[str, Any], rep_result: dict[str, Any]) -> dict[st
         "greenscreen": data.get("_mask_status", "none"),
         "metadata": dict(data.get("metadata", {})),
         "qc_thresholds": thresholds,
+        "qc_thresholds_custom": dict(data.get("_qc_thresholds_custom", {})),
     }
     metrics["status"] = status_summary(metrics, thresholds)
     return metrics
@@ -2282,15 +2526,22 @@ def status_summary(metrics: dict[str, Any], thresholds: dict[str, Any]) -> dict[
     """Per-metric tiers and an overall status (worst tier over the tiered metrics)."""
 
     tiers: dict[str, str] = {}
-    for metric in ("organelle_fraction", "alignment_rate", "usable_fragments", "NRF", "PBC1", "PBC2", "tss_enrichment", "FRiP"):
+    for metric in TIER_METRICS:
         tiers[metric] = tier_status(metric, metrics.get(metric), thresholds)
+    return {"tiers": tiers, **overall_from_tiers(tiers)}
+
+
+def overall_from_tiers(tiers: dict[str, str]) -> dict[str, Any]:
+    """Overall status = worst tier over OVERALL_METRICS; "flagged" lists every metric rated poor."""
+
     order = {"poor": 0, "ok": 1, "good": 2}
-    rated = [t for t in tiers.values() if t in order]
+    core = [tiers.get(m, "NA") for m in OVERALL_METRICS]
+    rated = [t for t in core if t in order]
     overall = min(rated, key=lambda t: order[t]) if rated else "NA"
-    if "cohort" in tiers.values() and overall != "poor":
+    if "cohort" in core and overall != "poor":
         overall = "pending"          # final tier of cohort-relative metrics is assigned in the batch summary
     flagged = sorted(m for m, t in tiers.items() if t == "poor")
-    return {"tiers": tiers, "overall": overall, "flagged": flagged}
+    return {"overall": overall, "flagged": flagged}
 
 
 # ----------------------------------------------------------------------------------------------
@@ -2340,8 +2591,10 @@ def write_summary(
     consensus: Path,
     consensus_summits: Path,
     idr_peaks: Path | None,
+    pooled: dict[str, Any] | None = None,
 ) -> Path:
     experiment_id = str(data["experiment_id"])
+    pooled = pooled or {}
     reports_dir = Path(data["experiment_dir"]) / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     summary = reports_dir / f"{experiment_id}.summary.txt"
@@ -2368,6 +2621,16 @@ def write_summary(
         fh.write(f"consensus_peaks\t{consensus}\n")
         fh.write(f"consensus_summits\t{consensus_summits}\n")
         fh.write(f"idr_peaks\t{idr_peaks if idr_peaks else 'not_run'}\n")
+        fh.write(f"pooled_fragments\t{pooled.get('pooled_fragments', 'NA')}\n")
+        fh.write(f"pooled_cpm_bigwig\t{pooled.get('pooled_cpm_bigwig', 'NA')}\n")
+        fh.write(f"pooled_cutsite_bigwig\t{pooled.get('pooled_cutsite_bigwig', 'NA')}\n")
+        fh.write(f"pooled_peaks\t{pooled.get('pooled_peaks', 'not_run')}\n")
+        fh.write(f"pooled_peak_count\t{pooled.get('pooled_peak_count', 'NA')}\n")
+        fh.write(f"pooled_FRiP\t{fmt(pooled.get('pooled_FRiP'))}\n")
+        for suffix, path in (pooled.get("signal_tracks") or {}).items():
+            fh.write(f"macs_signal_{suffix}\t{path}\n")
+        for rep_id, frac in (pooled.get("pooled_support") or {}).items():
+            fh.write(f"pooled_peaks_supported_by_{rep_id}\t{fmt(frac)}\n")
         fh.write(f"mean_FRiP\t{mean(frips):.6f}\n")
         fh.write(f"sd_FRiP\t{stdev(frips):.6f}\n" if len(frips) > 1 else "sd_FRiP\tNA\n")
         fh.write(f"mean_filtered_peak_count\t{mean(peak_counts):.2f}\n")
@@ -2433,7 +2696,8 @@ def run_experiment(
     idr_peaks = run_idr(peak_files, data)
     consensus_source = idr_peaks if idr_peaks else peak_files[0]
     consensus, consensus_summits = make_consensus_peaks(consensus_source, data)
-    write_summary(data, replicate_results, consensus, consensus_summits, idr_peaks)
+    pooled = make_pooled_outputs(data, replicate_results)
+    write_summary(data, replicate_results, consensus, consensus_summits, idr_peaks, pooled)
 
     cleanup_final_bam_files(replicate_results, data)
     cleanup_tmp_dir(data)
@@ -2474,10 +2738,10 @@ def apply_cohort_tiers(rows: list[dict[str, Any]]) -> None:
     """Assign good/ok to cohort-relative metrics (PlantCADB approach): good at or above the cohort median,
     ok below it; "poor" (below the absolute floor) stays. Recomputes the overall status of every sample."""
 
-    order = {"poor": 0, "ok": 1, "good": 2}
-    tier_metrics = ["organelle_fraction", "alignment_rate", "usable_fragments", "NRF", "PBC1", "PBC2", "tss_enrichment", "FRiP"]
+    for r in rows:   # re-rate with the thresholds currently in the script (+ per-config overrides)
+        r["status"] = status_summary(r, merge_thresholds(r.get("qc_thresholds_custom")))
     medians: dict[str, float] = {}
-    for metric in tier_metrics:
+    for metric in TIER_METRICS:
         if not any(r["status"]["tiers"].get(metric) == "cohort" for r in rows):
             continue
         values = sorted(r[metric] for r in rows if isinstance(r.get(metric), (int, float)) and r["status"]["tiers"].get(metric) in ("cohort", "good", "ok"))
@@ -2490,9 +2754,7 @@ def apply_cohort_tiers(rows: list[dict[str, Any]]) -> None:
         for metric, med in medians.items():
             if tiers.get(metric) == "cohort":
                 tiers[metric] = "good" if r[metric] >= med else "ok"
-        rated = [t for t in tiers.values() if t in order]
-        r["status"]["overall"] = min(rated, key=lambda t: order[t]) if rated else "NA"
-        r["status"]["flagged"] = sorted(m for m, t in tiers.items() if t == "poor")
+        r["status"].update(overall_from_tiers(tiers))
         r["status"]["cohort_medians"] = medians
     if medians:
         print(f"{timestamp()}  Cohort medians used for relative tiers: " + ", ".join(f"{m}={v:.3g}" for m, v in medians.items()))
@@ -2520,7 +2782,7 @@ def batch_qc_summary(outdir: Path) -> Path | None:
     ]
     ranks = {metric: percentile_ranks([(r["sample"], r.get(metric)) for r in rows], better) for metric, better in rank_specs}
     meta_keys = sorted({k for r in rows for k in (r.get("metadata") or {}).keys()})
-    tier_metrics = ["organelle_fraction", "alignment_rate", "usable_fragments", "NRF", "PBC1", "PBC2", "tss_enrichment", "FRiP"]
+    tier_metrics = TIER_METRICS
 
     summary = outdir / "atac_qc_summary.tsv"
     header = (
@@ -2632,6 +2894,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--threads", type=int, default=None, help="Override params.threads of all configs (e.g. $SLURM_CPUS_PER_TASK).")
     parser.add_argument("--summary-only", action="store_true", help="Only rebuild the batch-level summary from existing results.")
     parser.add_argument("--no-batch-multiqc", action="store_true", help="Skip the MultiQC report over all experiments.")
+    parser.add_argument("--skip-existing", action="store_true",
+                        help="Skip experiments that already have reports/<experiment_id>.summary.txt in --outdir (batch summary still covers them).")
     args = parser.parse_args()
     if not args.summary_only and args.config_dir is None:
         parser.error("--config-dir is required unless --summary-only is given.")
@@ -2655,6 +2919,20 @@ def main() -> None:
             cfg["params"]["threads"] = int(args.threads)
 
     print(f"\nParsed {len(configs)} config(s) successfully.")
+
+    if args.skip_existing:
+        remaining = []
+        for cfg in configs:
+            summary = Path(cfg["experiment_dir"]) / "reports" / f"{cfg['experiment_id']}.summary.txt"
+            if summary.exists():
+                print(f"{timestamp()}  Skipping {cfg['experiment_id']}: already processed ({summary}).")
+            else:
+                remaining.append(cfg)
+        configs = remaining
+        if not configs:
+            print(f"{timestamp()}  Nothing to process; rebuilding the batch summary only.")
+            run_batch_summary(args.outdir, with_multiqc=not args.no_batch_multiqc)
+            return
 
     try:
         download_workers = max(int(cfg["params"]["download_workers"]) for cfg in configs)
