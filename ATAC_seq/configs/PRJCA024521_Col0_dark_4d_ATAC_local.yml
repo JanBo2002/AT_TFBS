@@ -1,0 +1,63 @@
+# ATAC-seq: Col-0, 4 d, Dunkelheit; REF6/phyB-Studie (PNAS 2025).
+# CNCB/GSA: https://ngdc.cncb.ac.cn/gsa/browse/CRA022771
+# BioProject: PRJCA024521
+# Auswahl: beide biologischen Col-0-Dunkel-ATAC-Replikate (Col_D).
+# Verifizierte Einzelprobe: Col_D_ATAC-2 (SAMC4680064).
+# Die BioSample-/Run-ID des ersten Replikats konnte nicht verifiziert werden.
+# Keine SRR-IDs: lokale, separat heruntergeladene Roh-FASTQs verwenden.
+# Die vier fastq1/fastq2-Pfade unten sind festgelegte ZIELNAMEN, keine
+# verifizierten Original-Dateinamen des Archivs. Dateien dort ablegen/umbenennen
+# oder die Pfade auf die vorhandenen Roh-FASTQs anpassen.
+# Nur Col_D_ATAC-Proben verwenden: keine ref6-Mutanten, Rotlicht-, RNA- oder ChIP-Proben.
+# Referenz, Contignamen, Analyseparameter und QC-Schwellen werden wie in der
+# hochgeladenen Vorlage aus den Defaults des unveraenderten Skripts uebernommen.
+
+experiment_id: PRJCA024521_Col0_dark_4d_ATAC
+sample_id: Col0_dark_4d_REF6study_ATAC
+layout: PE
+
+metadata:
+  geo_series: ""
+  geo_sample: ""
+  repository: CNCB/GSA
+  bioproject: PRJCA024521
+  archive_accession: CRA022771
+  biosample: "SAMC4680064 (Col_D_ATAC-2); first-replicate accession not verified"
+  tissue: seedlings
+  genotype: Col-0
+  age_or_stage: "4 d etiolated seedlings"
+  nuclei_isolation: crude
+  sequencer: "Illumina (platform reported in publication)"
+  publication: "Yan et al., PNAS (2025); doi:10.1073/pnas.2417253122"
+  notes: >-
+    Two biological wild-type Col_D ATAC replicates; Col_D_ATAC-2 is verified
+    as BioSample SAMC4680064. First-replicate archive accession and original
+    FASTQ file names could not be verified; local target names are specified below.
+    The dark condition follows the Col_D sample names and the DK comparison
+    described in the publication. The generic BioSample description also
+    mentions continuous red light for these D-labelled samples; this metadata
+    inconsistency should be retained when documenting sample selection.
+    Bulk nuclei were isolated directly from macerated four-day-old seedlings,
+    without protoplast preparation or selection of epidermal 2C/16C nuclei.
+    ATAC libraries used 100,000 nuclei and paired-end sequencing
+    (150 bp according to the publication). No JA treatment is reported.
+    Intended as an untreated accessibility reference for etiolated MYC3 Air
+    and MYC2 ChIP-seq samples; not an exact match to a JA-treated MYC2 sample.
+    Seedling age is 4 d versus 3 d for the original MYC ChIP samples.
+    Technical quality must be assessed by the same pipeline as the other datasets.
+
+save:
+  filtered_bam: false
+  cutsite_bigwig: true
+
+replicates:
+  - rep_id: rep1
+    sample:
+      source: local
+      fastq1: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/input/PRJCA024521_Col0_dark_4d/Col_D_ATAC-1_R1.fastq.gz
+      fastq2: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/input/PRJCA024521_Col0_dark_4d/Col_D_ATAC-1_R2.fastq.gz
+  - rep_id: rep2
+    sample:
+      source: local
+      fastq1: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/input/PRJCA024521_Col0_dark_4d/Col_D_ATAC-2_R1.fastq.gz
+      fastq2: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/input/PRJCA024521_Col0_dark_4d/Col_D_ATAC-2_R2.fastq.gz

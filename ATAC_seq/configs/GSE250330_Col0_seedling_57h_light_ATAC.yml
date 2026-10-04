@@ -1,0 +1,51 @@
+# ATAC-seq: zwei biologische Col-0-Keimlingsreplikate aus GSE250330.
+# GSM7977734 -> SRX22906051 -> SRR27227496 (Seedling, 57h light, rep1).
+# GSM7977735 -> SRX22906052 -> SRR27227495 (Seedling, 57h light, rep2).
+# SRR-Zuordnung und PAIRED-Layout ueber ENA geprueft.
+# GEO: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE250330
+# ACHTUNG: Dauerlicht, keine etiolierten Keimlinge. Ergaenzende Referenz;
+# kein vollstaendiger Ersatz fuer den Dunkelzustand der MYC-ChIP-Proben.
+# Referenz, Contignamen, Analyseparameter und QC-Schwellen werden wie in der
+# hochgeladenen Vorlage aus den Defaults des unveraenderten Skripts uebernommen.
+
+experiment_id: GSE250330_Col0_seedling_57h_light_ATAC
+sample_id: Col0_seedling_57h_light_ATAC
+layout: PE
+
+metadata:
+  geo_series: GSE250330
+  geo_sample: "GSM7977734; GSM7977735"
+  tissue: seedlings
+  genotype: Col-0
+  age_or_stage: "57 h in light after stratification"
+  nuclei_isolation: crude
+  sequencer: "Illumina HiSeq 2500"
+  publication: >-
+    Interplay between coding and non-coding regulation drives the Arabidopsis
+    seed-to-seedling transition (2024); PMID:38409232
+  notes: >-
+    Two biological wild-type replicates, Seedling, 57h light, rep1/rep2, ATAC-seq.
+    Seeds were stratified in water in darkness at 4 C, then grown for 57 h
+    in continuous light at 22 C, in liquid 1/2 MS medium with shaking at 180 RPM.
+    Bulk nuclei were purified from ground tissue using nuclear extraction
+    buffers and sucrose-based purification. No protoplast preparation or
+    GFP/FANS selection of epidermal nuclei is described.
+    Approximately 50,000 nuclei were used per ATAC library. Paired-end data.
+    No JA treatment is listed. Useful as an additional accessibility reference
+    for young Col-0 seedlings, but light-grown and not condition-matched to
+    etiolated MYC3 Air or JA-treated MYC2 ChIP-seq samples.
+    Technical quality must be assessed by the same pipeline as the other datasets.
+
+save:
+  filtered_bam: false
+  cutsite_bigwig: true
+
+replicates:
+  - rep_id: rep1
+    sample:
+      source: sra
+      accession: SRR27227496
+  - rep_id: rep2
+    sample:
+      source: sra
+      accession: SRR27227495
