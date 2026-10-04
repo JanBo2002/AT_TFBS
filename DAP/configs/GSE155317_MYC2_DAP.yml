@@ -1,0 +1,77 @@
+# MYC2 DAP-seq, GSE155317 (Lopez-Vidriero et al., Plant Communications, 2021).
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE155317
+# Fuer DAP-analysis_script.py; in dessen --config-dir ablegen.
+# Referenz und Chromosomennamen werden aus DEFAULT_REFERENCE / DEFAULT_PARAMS
+# der Pipeline uebernommen. Kein reference-Block in dieser Config.
+
+experiment_id: GSE155317_MYC2_DAP
+sample_id: MYC2_GSE155317_DAP
+assay: dap
+tf: MYC2
+tf_family: bHLH
+layout: PE
+control_type: input_library
+
+# Gemeinsame Bibliothekskennung fuer die vier MYC2/MYC3-Proben und ihre Inputs.
+# AthDNAa ist die Bezeichnung aus den GEO-Inputtiteln; die Kennung mit GSE-Praefix
+# ist fuer diese Configs vergeben. Eine konkrete Praeparationscharge ist unbekannt.
+gdna_library: GSE155317_AthDNAa
+preparation_batch: unknown
+
+gdna_metadata:
+  geo_series: GSE155317
+  geo_superseries: GSE155321
+  organism: Arabidopsis thaliana
+  ecotype: not_reported
+  tissue: whole_seedlings
+  age_or_stage: "10 days-old seedlings"
+  growth_medium: MS
+  light_conditions: not_reported
+  plant_treatment: not_reported
+  extraction: "CTAB, RNase A treatment"
+  fragmentation: "approximately 200 bp"
+  publication_doi: "10.1016/j.xplc.2021.100232"
+  notes: "Genomic DAP-seq; no Air/JA-2h condition assigned. MYC2 expressed in E. coli as an MBP fusion; amylose beads. GEO labels the sequencing strategy OTHER, but describes DAP-seq."
+
+params:
+  threads: 6                 # Kann mit --threads ueberschrieben werden.
+  download_workers: 1
+
+# Erzeugt auch die gepoolten FE-, p-value- und Summit-Tracks.
+# Alle weiteren Verarbeitungsparameter bleiben auf den Pipeline-Defaults.
+save:
+  raw_fastq: false
+  trimmed_fastq: false
+  fastqc: true
+  sorted_bam: false
+  filtered_bam: false
+  control_filtered_bam: false
+  cpm_bigwig_ip: true
+  cpm_bigwig_control: true
+  fold_enrichment_bigwig: true
+  pooled_log2_bigwig: true
+  pooled_macs3_fe_bigwig: true
+  peaks_raw: true
+  peaks_filtered: true
+  logs: true
+  qc_reports: true
+
+# Beide Inputs sind in GEO explizit als "Input DNA for samples 1-4" beschrieben:
+# MYC2_rep1, MYC2_rep2, MYC3_rep1, MYC3_rep2.
+# Die Pipeline uebernimmt diese Liste fuer jedes Replikat und verarbeitet jeden
+# Input innerhalb dieses Experiments nur einmal; keine angenommene 1:1-Paarung.
+control:
+  - source: sra
+    accession: SRR12341144   # GSM4699040: Input AthDNAa_rep1
+  - source: sra
+    accession: SRR12341145   # GSM4699041: Input AthDNAa_rep2
+
+replicates:
+  - rep_id: rep1
+    ip:
+      source: sra
+      accession: SRR12341140 # GSM4699036: DAP-MYC2_rep1
+  - rep_id: rep2
+    ip:
+      source: sra
+      accession: SRR12341141 # GSM4699037: DAP-MYC2_rep2
