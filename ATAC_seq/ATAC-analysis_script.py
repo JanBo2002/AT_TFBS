@@ -69,10 +69,10 @@ NEXTERA_ADAPTER = "CTGTCTCTTATACACATCT"
 # Set the paths ONCE here; a config needs a `reference:` block only to deviate from these values
 # (e.g. another assembly). genome_size: nuclear chromosomes 1-5 of TAIR10.1 = 119,146,348 bp.
 DEFAULT_REFERENCE = {
-    "genome_index": "/path/to/bowtie2_index/TAIR10.1.atlas",          # Bowtie2 index prefix, MUST contain Mt and Pt
+    "genome_index": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas",          # Bowtie2 index prefix, MUST contain Mt and Pt
     "genome_size": "1.19e8",                                          # MACS3 -g, same value as in the ChIP configs
-    "mask_bed": "/path/to/arabidopsis_greenscreen_20inputs.bed",      # Greenscreen (Klasfeld et al. 2022); None = no mask
-    "annotation_gtf": "/path/to/Araport11.gtf",                       # TSS source for the TSS enrichment; None = skip
+    "mask_bed": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed",      # Greenscreen (Klasfeld et al. 2022); None = no mask
+    "annotation_gtf": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/Arabidopsis_thaliana.TAIR10.63.gff3.gz",                       # TSS source for the TSS enrichment; None = skip
     "tss_bed": None,                                                  # ready-made TSS BED instead of the GTF
 }
 
