@@ -1,0 +1,175 @@
+Start: 2026-10-04T03:16:41+02:00 | Host: gpubig03 | Job: 67906
+Conda: at_env | Python: /home/jbossenz/miniforge3/envs/at_env/bin/python | Threads: 8
+Ausgabe: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC
+PyYAML und matplotlib: OK
+Config und Referenz: OK (GSE233416_Col0_dark_5d_ATAC.yml)
+Config und Referenz: OK (GSE254654_Col0_ifl_forAP1_ATAC.yml)
+
+Parsed 2 config(s) successfully.
+
+======================================================================
+  ATAC-seq pipeline | experiment: GSE233416_Col0_dark_5d_ATAC
+  layout: PE | replicates: 2
+======================================================================
+
+04.10.2026 03:16  Started 2 remote FASTQ download job(s) for GSE233416_Col0_dark_5d_ATAC with 1 worker(s).
+04.10.2026 03:16  Started 2 remote FASTQ download job(s) for GSE254654_Col0_ifl_forAP1_ATAC with 1 worker(s).
+04.10.2026 03:16  Processing replicate rep1
+04.10.2026 03:16  Waiting for FASTQ download for GSE233416_Col0_dark_5d_ATAC.rep1 if needed ..
+04.10.2026 03:16  Downloading GSE233416_Col0_dark_5d_ATAC.rep1 from sra: in progress ..
+		  Download complete: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/downloads/GSE233416_Col0_dark_5d_ATAC.rep1.R1.raw.fastq.gz
+04.10.2026 03:21  FastQC raw for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:21  Downloading GSE233416_Col0_dark_5d_ATAC.rep2 from sra: in progress ..
+04.10.2026 03:23  Trimming reads for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:25  FastQC trimmed for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+		  Download complete: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/downloads/GSE233416_Col0_dark_5d_ATAC.rep2.R1.raw.fastq.gz
+04.10.2026 03:25  Downloading GSE254654_Col0_ifl_forAP1_ATAC.rep1 from sra: in progress ..
+		  Mean read length: 150.0 bp raw, 112.5 bp after trimming
+04.10.2026 03:27  Aligning GSE233416_Col0_dark_5d_ATAC.rep1 with Bowtie2: in progress ..
+		  Download complete: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/downloads/GSE254654_Col0_ifl_forAP1_ATAC.rep1.R1.raw.fastq.gz
+04.10.2026 03:50  Downloading GSE254654_Col0_ifl_forAP1_ATAC.rep2 from sra: in progress ..
+		  Bowtie2: 92.68% overall alignment rate
+		  Organelle fraction (unfiltered): 0.737; nuclear fraction: 0.263
+04.10.2026 03:53  Filtering and deduplicating GSE233416_Col0_dark_5d_ATAC.rep1 (MAPQ>=30): in progress ..
+		  Deduplicated BAM: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/align/GSE233416_Col0_dark_5d_ATAC.rep1.filtered.dedup.bam
+		  PBC1: 0.809  PBC2: 5.19
+		  Usable fragments after all filters: 2210979
+04.10.2026 03:55  Fragment size distribution for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+		  NFR fraction: 0.341; mono-nucleosomal: 0.124; median: 151 bp
+04.10.2026 03:55  Greenscreen mask OK: 36 regions on 1, 2, 3, 4, 5 (/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed)
+04.10.2026 03:55  Calling peaks with MACS3 (no control) for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+		  Called 8395 raw peaks.
+		  Greenscreen: removed 75/8395 peaks, 8320 retained.
+04.10.2026 03:55  Generating CPM bigWig for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:56  Tn5 shift (+4/-5) for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:56  Generating cut-site bigWig for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:56  TSS BED with 27438 unique positions: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/qc/tss/tss.bed
+04.10.2026 03:56  TSS enrichment for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+		  TSS enrichment: 2.17
+		  Fixed-depth metrics: 2210979 usable fragments <= target 5000000; using full data.
+04.10.2026 03:58  Fingerprint for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:58  ataqv for GSE233416_Col0_dark_5d_ATAC.rep1: in progress ..
+04.10.2026 03:59  Processing replicate rep2
+04.10.2026 03:59  Waiting for FASTQ download for GSE233416_Col0_dark_5d_ATAC.rep2 if needed ..
+04.10.2026 03:59  FastQC raw for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:01  Trimming reads for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:03  FastQC trimmed for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+		  Download complete: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/downloads/GSE254654_Col0_ifl_forAP1_ATAC.rep2.R1.raw.fastq.gz
+		  Mean read length: 150.0 bp raw, 114.0 bp after trimming
+04.10.2026 04:05  Aligning GSE233416_Col0_dark_5d_ATAC.rep2 with Bowtie2: in progress ..
+		  Bowtie2: 92.66% overall alignment rate
+		  Organelle fraction (unfiltered): 0.734; nuclear fraction: 0.266
+04.10.2026 04:20  Filtering and deduplicating GSE233416_Col0_dark_5d_ATAC.rep2 (MAPQ>=30): in progress ..
+		  Deduplicated BAM: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/align/GSE233416_Col0_dark_5d_ATAC.rep2.filtered.dedup.bam
+		  PBC1: 0.828  PBC2: 5.82
+		  Usable fragments after all filters: 1998553
+04.10.2026 04:22  Fragment size distribution for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+		  NFR fraction: 0.328; mono-nucleosomal: 0.126; median: 158 bp
+04.10.2026 04:22  Calling peaks with MACS3 (no control) for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+		  Called 7545 raw peaks.
+		  Greenscreen: removed 73/7545 peaks, 7472 retained.
+04.10.2026 04:22  Generating CPM bigWig for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:22  Tn5 shift (+4/-5) for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:22  Generating cut-site bigWig for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:23  TSS enrichment for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+		  TSS enrichment: 2.14
+		  Fixed-depth metrics: 1998553 usable fragments <= target 5000000; using full data.
+04.10.2026 04:24  Fingerprint for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:24  ataqv for GSE233416_Col0_dark_5d_ATAC.rep2: in progress ..
+04.10.2026 04:24  IDR analysis for Col0_dark_5d_ATAC (2 replicates): in progress ..
+		  Consensus IDR peaks: 4509 -> /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/idr/Col0_dark_5d_ATAC.idr.narrowPeak
+		  Summary: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/reports/GSE233416_Col0_dark_5d_ATAC.summary.txt
+04.10.2026 04:25  Running MultiQC: ATAC-seq GSE233416_Col0_dark_5d_ATAC
+		  MultiQC report: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE233416_Col0_dark_5d_ATAC/multiqc/ATAC-seq-GSE233416_Col0_dark_5d_ATAC_multiqc_report.html
+
+04.10.2026 04:25  Experiment complete: GSE233416_Col0_dark_5d_ATAC (1:08:23.256938)
+
+======================================================================
+  ATAC-seq pipeline | experiment: GSE254654_Col0_ifl_forAP1_ATAC
+  layout: PE | replicates: 2
+======================================================================
+
+04.10.2026 04:25  Processing replicate rep1
+04.10.2026 04:25  Waiting for FASTQ download for GSE254654_Col0_ifl_forAP1_ATAC.rep1 if needed ..
+04.10.2026 04:25  FastQC raw for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 04:31  Trimming reads for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 04:33  FastQC trimmed for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+		  Mean read length: 112.0 bp raw, 111.0 bp after trimming
+04.10.2026 04:40  Aligning GSE254654_Col0_ifl_forAP1_ATAC.rep1 with Bowtie2: in progress ..
+		  Bowtie2: 99.26% overall alignment rate
+		  Organelle fraction (unfiltered): 0.728; nuclear fraction: 0.272
+04.10.2026 05:46  Filtering and deduplicating GSE254654_Col0_ifl_forAP1_ATAC.rep1 (MAPQ>=30): in progress ..
+		  Deduplicated BAM: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/align/GSE254654_Col0_ifl_forAP1_ATAC.rep1.filtered.dedup.bam
+		  PBC1: 0.743  PBC2: 4.11
+		  Usable fragments after all filters: 10150981
+04.10.2026 05:53  Fragment size distribution for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+		  NFR fraction: 0.427; mono-nucleosomal: 0.105; median: 114 bp
+04.10.2026 05:53  Greenscreen mask OK: 36 regions on 1, 2, 3, 4, 5 (/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed)
+04.10.2026 05:53  Calling peaks with MACS3 (no control) for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+		  Called 25357 raw peaks.
+		  Greenscreen: removed 103/25357 peaks, 25254 retained.
+04.10.2026 05:55  Generating CPM bigWig for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 05:55  Tn5 shift (+4/-5) for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 05:56  Generating cut-site bigWig for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 05:57  TSS BED with 27438 unique positions: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/qc/tss/tss.bed
+04.10.2026 05:57  TSS enrichment for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+		  TSS enrichment: 2.64
+04.10.2026 05:59  Fixed-depth metrics for GSE254654_Col0_ifl_forAP1_ATAC.rep1: subsampling 10150981 -> ~5000000 fragments ..
+04.10.2026 05:59  Calling peaks with MACS3 (no control) for GSE254654_Col0_ifl_forAP1_ATAC.rep1.fixed_depth: in progress ..
+		  Called 18783 raw peaks.
+		  Greenscreen: removed 97/18783 peaks, 18686 retained.
+		  Fixed depth (4998533 fragments): 18686 peaks, FRiP 0.340
+04.10.2026 06:00  Fingerprint for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 06:01  ataqv for GSE254654_Col0_ifl_forAP1_ATAC.rep1: in progress ..
+04.10.2026 06:03  Processing replicate rep2
+04.10.2026 06:03  Waiting for FASTQ download for GSE254654_Col0_ifl_forAP1_ATAC.rep2 if needed ..
+04.10.2026 06:03  FastQC raw for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 06:09  Trimming reads for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 06:11  FastQC trimmed for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+		  Mean read length: 112.0 bp raw, 112.0 bp after trimming
+04.10.2026 06:17  Aligning GSE254654_Col0_ifl_forAP1_ATAC.rep2 with Bowtie2: in progress ..
+		  Bowtie2: 99.30% overall alignment rate
+		  Organelle fraction (unfiltered): 0.737; nuclear fraction: 0.263
+04.10.2026 07:20  Filtering and deduplicating GSE254654_Col0_ifl_forAP1_ATAC.rep2 (MAPQ>=30): in progress ..
+		  Deduplicated BAM: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/align/GSE254654_Col0_ifl_forAP1_ATAC.rep2.filtered.dedup.bam
+		  PBC1: 0.752  PBC2: 4.27
+		  Usable fragments after all filters: 9349564
+04.10.2026 07:27  Fragment size distribution for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+		  NFR fraction: 0.416; mono-nucleosomal: 0.108; median: 116 bp
+04.10.2026 07:27  Calling peaks with MACS3 (no control) for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+		  Called 25136 raw peaks.
+		  Greenscreen: removed 102/25136 peaks, 25034 retained.
+04.10.2026 07:28  Generating CPM bigWig for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 07:28  Tn5 shift (+4/-5) for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 07:29  Generating cut-site bigWig for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 07:30  TSS enrichment for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+		  TSS enrichment: 2.75
+04.10.2026 07:32  Fixed-depth metrics for GSE254654_Col0_ifl_forAP1_ATAC.rep2: subsampling 9349564 -> ~5000000 fragments ..
+04.10.2026 07:32  Calling peaks with MACS3 (no control) for GSE254654_Col0_ifl_forAP1_ATAC.rep2.fixed_depth: in progress ..
+		  Called 19529 raw peaks.
+		  Greenscreen: removed 100/19529 peaks, 19429 retained.
+		  Fixed depth (5000403 fragments): 19429 peaks, FRiP 0.359
+04.10.2026 07:33  Fingerprint for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 07:34  ataqv for GSE254654_Col0_ifl_forAP1_ATAC.rep2: in progress ..
+04.10.2026 07:36  IDR analysis for Col0_ifl_forAP1_ATAC (2 replicates): in progress ..
+		  Consensus IDR peaks: 16189 -> /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/idr/Col0_ifl_forAP1_ATAC.idr.narrowPeak
+		  Summary: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/reports/GSE254654_Col0_ifl_forAP1_ATAC.summary.txt
+04.10.2026 07:36  Running MultiQC: ATAC-seq GSE254654_Col0_ifl_forAP1_ATAC
+		  MultiQC report: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/GSE254654_Col0_ifl_forAP1_ATAC/multiqc/ATAC-seq-GSE254654_Col0_ifl_forAP1_ATAC_multiqc_report.html
+
+04.10.2026 07:36  Experiment complete: GSE254654_Col0_ifl_forAP1_ATAC (3:11:08.305355)
+
+======================================================================
+  Batch summary over /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC
+======================================================================
+
+04.10.2026 07:36  Cohort medians used for relative tiers: tss_enrichment=2.4, FRiP=0.291
+04.10.2026 07:36  Batch QC summary (4 samples): /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/atac_qc_summary.tsv
+		  status: 0 good, 0 ok, 4 poor
+04.10.2026 07:36  Peak overlap matrix over 2 experiments ..
+		  Jaccard matrix and merged peak set: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/consensus_all
+04.10.2026 07:36  Building ataqv viewer for 4 samples ..
+		  ataqv viewer: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/ataqv_viewer/index.html
+04.10.2026 07:36  Running MultiQC: ATAC-seq all experiments
+		  MultiQC report: /data/projects/SFB_A03/jan/AT_TFBS/ATAC_seq/raw_data/ATAC/multiqc_all/ATAC-seq-all-experiments_multiqc_report.html
+Fertig: 2026-10-04T07:36:24+02:00
