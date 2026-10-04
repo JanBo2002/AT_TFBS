@@ -1,0 +1,48 @@
+experiment_id	GSE155317_MYC2_DAP
+sample_id	MYC2_GSE155317_DAP
+assay	dap
+control_type	input_library
+tf	MYC2
+tf_family	bHLH
+gdna_library	GSE155317_AthDNAa
+preparation_batch	unknown
+layout	PE
+reference	{"genome_index": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas", "genome_size": "1.19e8", "mask_bed": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/masks/arabidopsis_greenscreen_20inputs.bed", "genome_fasta": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas.fa"}
+gdna_metadata	{"geo_series": "GSE155317", "geo_superseries": "GSE155321", "organism": "Arabidopsis thaliana", "ecotype": "not_reported", "tissue": "whole_seedlings", "age_or_stage": "10 days-old seedlings", "growth_medium": "MS", "light_conditions": "not_reported", "plant_treatment": "not_reported", "extraction": "CTAB, RNase A treatment", "fragmentation": "approximately 200 bp", "publication_doi": "10.1016/j.xplc.2021.100232", "notes": "Genomic DAP-seq; no Air/JA-2h condition assigned. MYC2 expressed in E. coli as an MBP fusion; amylose beads. GEO labels the sequencing strategy OTHER, but describes DAP-seq."}
+control_used	yes
+replicates	2
+consensus_source	idr
+idr_status	completed
+consensus_peaks	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/consensus/MYC2_GSE155317_DAP.consensus.narrowPeak
+consensus_summits	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/consensus/MYC2_GSE155317_DAP.consensus.summits.bed
+idr_peaks	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/idr/MYC2_GSE155317_DAP.idr.narrowPeak
+idr_threshold	0.050000
+pooled_log2_bigwig	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/signal/GSE155317_MYC2_DAP.pooled_replicates.log2_ip_vs_control.bw
+pooled_macs3_fe_bigwig	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/signal/GSE155317_MYC2_DAP.pooled_replicates.macs3.FE.bw
+pooled_macs3_pval_bigwig	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/signal/GSE155317_MYC2_DAP.pooled_replicates.macs3.pval.bw
+control_track_status	available_or_disabled_by_save
+background_source	matched_control
+macs_qvalue	0.010000
+consensus_peak_count	11605
+mean_FRiP	0.448714
+sd_FRiP	0.011133
+mean_filtered_peak_count	26095
+sd_filtered_peak_count	1211.981023
+pooled_fragment_length	{"bp": 200, "source": "configured_fallback"}
+recoverable_error_count	6
+issues	["SPP failed for GSE155317_MYC2_DAP.rep1.ip; NSC/RSC unavailable. See /data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/logs/GSE155317_MYC2_DAP.rep1.ip.spp.log.", "SPP failed for GSE155317_MYC2_DAP.rep1.control1; NSC/RSC unavailable. See /data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/logs/GSE155317_MYC2_DAP.rep1.control1.spp.log.", "SPP failed for GSE155317_MYC2_DAP.rep1.control2; NSC/RSC unavailable. See /data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/logs/GSE155317_MYC2_DAP.rep1.control2.spp.log.", "SPP failed for GSE155317_MYC2_DAP.rep2.ip; NSC/RSC unavailable. See /data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/logs/GSE155317_MYC2_DAP.rep2.ip.spp.log.", "SPP failed for GSE155317_MYC2_DAP.pooled_replicates.macs3; NSC/RSC unavailable. See /data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/logs/GSE155317_MYC2_DAP.pooled_replicates.macs3.spp.log.", "No usable SPP fragment length for GSE155317_MYC2_DAP.pooled_replicates.macs3; using configured macs_extsize=200 bp."]
+genome_index	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/TAIR10.1.atlas
+genome_size	1.19e8
+sample_metrics	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/reports/GSE155317_MYC2_DAP.sample_metrics.tsv
+
+library_complexity
+sample	role	total_reads	nonredundant_reads	duplicate_reads	duplicate_rate	NRF	status	estimated_library_size
+GSE155317_MYC2_DAP.rep1.ip	ip	10882302	8410806	2471496	0.227112	0.772888	not_interpreted	10086828
+GSE155317_MYC2_DAP.rep1.control1	control	5054488	5033150	21338	0.004222	0.995778	not_interpreted	298480369
+GSE155317_MYC2_DAP.rep1.control2	control	4297942	4282662	15280	0.003555	0.996445	not_interpreted	301513379
+GSE155317_MYC2_DAP.rep2.ip	ip	9237494	7394932	1842562	0.199466	0.800534	not_interpreted	9980745
+
+per_replicate
+rep_id	raw_peaks	filtered_peaks	FRiP	ip_bam	control_bams	filtered_peaks_path	macs_mode	fragment_length_bp	fragment_length_source	peak_count_notice	mapped_reads_before_mapq	mapped_reads_after_mapq	mapq_loss_fraction
+rep1	26953	26952	0.456586	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/ip/GSE155317_MYC2_DAP.rep1.ip.filtered.dedup.bam	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/control/GSE155317_MYC2_DAP.rep1.control1.filtered.dedup.bam,/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/control/GSE155317_MYC2_DAP.rep1.control2.filtered.dedup.bam	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/peaks/GSE155317_MYC2_DAP.rep1.greenscreen.narrowPeak	paired_end_fragments	NA	not_required_for_BAMPE	none	11899616	10882302	0.085491
+rep2	25239	25238	0.440842	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/ip/GSE155317_MYC2_DAP.rep2.ip.filtered.dedup.bam	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/control/GSE155317_MYC2_DAP.rep1.control1.filtered.dedup.bam,/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/align/control/GSE155317_MYC2_DAP.rep1.control2.filtered.dedup.bam	/data/projects/SFB_A03/jan/AT_TFBS/raw_data/DAP/GSE155317_MYC2_DAP/peaks/GSE155317_MYC2_DAP.rep2.greenscreen.narrowPeak	paired_end_fragments	NA	not_required_for_BAMPE	none	10116296	9237494	0.086870
