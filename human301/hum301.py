@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Compact DNA classifier for fixed, imbalanced 301-bp datasets.
 
-Default: random 256-bp training crops, three encoder stages, one Transformer,
-global max+mean pooling; no decoder or profile regression. Train uses cyclic
-1:5 batches with pos_weight=5; validation/test retain every supplied example.
+Default: random 256-bp training crops, parallel 9/12-bp motif filters,
+three encoder blocks with two pooling steps (256 -> 128 -> 64), one
+Transformer and global max+mean pooling. Train uses cyclic 1:10 batches
+with pos_weight=10; validation/test retain every supplied example.
+Hard-negative mining is optional and uses training negatives only.
 """
 from __future__ import annotations
 
@@ -18,7 +20,7 @@ from pathlib import Path
 
 import numpy as np
 
-from at301_data import (STORED_LENGTH, SPLIT_NAMES, CyclicNegativePool, balanced_batches,
+from hum301_data import (STORED_LENGTH, SPLIT_NAMES, CyclicNegativePool, balanced_batches,
                         classification_metrics, counts, crop_bounds, evaluation_crop_starts,
                         load_cache, select_mcc_threshold, sha256_file)
 
@@ -28,9 +30,9 @@ try:
     from torch.nn import functional as F
     from torch.utils.data import Dataset, DataLoader
 except ImportError:
-    raise SystemExit("PyTorch is required for maa301.py. Activate your PyTorch environment; data preparation uses NumPy only.")
+    raise SystemExit("PyTorch is required for hum301.py. Activate your PyTorch environment; data preparation uses NumPy only.")
 
-VERSION = "1.0.0-at301-fixed-test"
+VERSION = "2.0.0-human301-motif64"
 ONE_HOT = np.vstack((np.eye(4, dtype=np.float32), np.zeros((1, 4), dtype=np.float32)))
 
 
@@ -82,10 +84,34 @@ class ConvBlock(nn.Module):
         return self.conv(self.act(self.norm(x)))
 
 
-class DNAEmbedder(nn.Module):
-    def __init__(self, channels, act):
+class MotifConv1d(nn.Module):
+    """Parallel motif filters with a shared output length and channel budget."""
+    def __init__(self, channels, kernels):
         super().__init__()
-        self.initial = nn.Conv1d(4, channels, kernel_size=15, padding=7)
+        self.kernels = tuple(kernels)
+        base, remainder = divmod(channels, len(self.kernels))
+        self.branches = nn.ModuleList([
+            nn.Conv1d(4, base + (i < remainder), kernel_size=kernel)
+            for i, kernel in enumerate(self.kernels)
+        ])
+
+    def forward(self, x):
+        outputs = []
+        for kernel, conv in zip(self.kernels, self.branches):
+            # An even kernel needs asymmetric padding: 12 bp -> 5 left, 6 right.
+            left = (kernel - 1) // 2
+            outputs.append(conv(F.pad(x, (left, kernel - 1 - left))))
+        return torch.cat(outputs, dim=1)
+
+
+class DNAEmbedder(nn.Module):
+    def __init__(self, channels, act, kernels):
+        super().__init__()
+        if len(kernels) == 1 and kernels[0] % 2:
+            # Preserve the original parameter names for existing 15-bp models.
+            self.initial = nn.Conv1d(4, channels, kernel_size=kernels[0], padding=kernels[0] // 2)
+        else:
+            self.initial = MotifConv1d(channels, kernels)
         self.residual = ConvBlock(channels, channels, act=act)
 
     def forward(self, x):
@@ -126,6 +152,8 @@ class TransformerBlock(nn.Module):
 class ModelConfig:
     input_length: int = 256
     embed_channels: int = 32
+    motif_kernels: tuple = (9, 12)
+    pooling_stages: int = 2
     encoder_channels: tuple = (48, 64, 96)
     transformer_blocks: int = 1
     heads: int = 4
@@ -144,13 +172,19 @@ class TFBindingModel301(nn.Module):
             raise ValueError("Exactly three positive encoder channel counts are required")
         if config.embed_channels < 1 or config.ffn_channels < 1 or config.head_channels < 1:
             raise ValueError("Embedding, FFN and head channel counts must be positive")
+        if not config.motif_kernels or any(k < 1 for k in config.motif_kernels):
+            raise ValueError("Motif kernel sizes must be positive")
+        if config.embed_channels < len(config.motif_kernels):
+            raise ValueError("At least one embedding channel per motif kernel is required")
+        if config.pooling_stages not in (2, 3):
+            raise ValueError("Use two pooling stages, or three for the original baseline")
         if not 0 <= config.dropout < 1 or config.activation not in ("relu", "gelu"):
             raise ValueError("Invalid dropout or activation")
         channels = config.encoder_channels[-1]
         if config.heads <= 0 or channels % config.heads or config.transformer_blocks < 1:
             raise ValueError("Invalid attention heads or block count")
         self.config = config
-        self.embedder = DNAEmbedder(config.embed_channels, config.activation)
+        self.embedder = DNAEmbedder(config.embed_channels, config.activation, config.motif_kernels)
         self.pool = nn.MaxPool1d(2, 2)
         previous = config.embed_channels
         encoders = []
@@ -158,7 +192,7 @@ class TFBindingModel301(nn.Module):
             encoders.append(DownresBlock(previous, outgoing, config.activation))
             previous = outgoing
         self.encoders = nn.ModuleList(encoders)
-        self.position_embedding = nn.Parameter(torch.zeros(1, channels, config.input_length // 8))
+        self.position_embedding = nn.Parameter(torch.zeros(1, channels, config.input_length // (2 ** config.pooling_stages)))
         nn.init.trunc_normal_(self.position_embedding, std=0.02)
         self.transformers = nn.ModuleList([TransformerBlock(channels, config.heads, config.ffn_channels,
                                                            config.dropout, config.activation)
@@ -171,8 +205,10 @@ class TFBindingModel301(nn.Module):
         if sequence.ndim != 3 or sequence.shape[1:] != (4, self.config.input_length):
             raise ValueError(f"Expected [B,4,{self.config.input_length}], got {tuple(sequence.shape)}")
         x = self.embedder(sequence)
-        for block in self.encoders:
-            x = block(self.pool(x))
+        for stage, block in enumerate(self.encoders):
+            if stage < self.config.pooling_stages:
+                x = self.pool(x)
+            x = block(x)
         x = x + self.position_embedding
         for block in self.transformers:
             x = block(x)
@@ -211,7 +247,7 @@ class SequenceDataset(Dataset):
 
 
 class EpochBatchSampler:
-    def __init__(self, labels, negatives_per_positive, batch_size, seed):
+    def __init__(self, labels, negatives_per_positive, batch_size, seed, hard_negative_fraction=0.0):
         self.positives = np.flatnonzero(labels == 1)
         self.pool = CyclicNegativePool(np.flatnonzero(labels == 0), seed + 71)
         self.k, self.batch_size = negatives_per_positive, batch_size
@@ -220,18 +256,60 @@ class EpochBatchSampler:
             raise ValueError("Not enough distinct training negatives for requested per-epoch ratio")
         if self.k < 1 or self.batch_size < self.k + 1 or self.batch_size % (self.k + 1):
             raise ValueError("batch_size must be a multiple of negatives_per_positive + 1")
+        if not 0 <= hard_negative_fraction < 1:
+            raise ValueError("hard_negative_fraction must be at least zero and below one")
+        self.hard_count = int(self.k * len(self.positives) * hard_negative_fraction)
+        if hard_negative_fraction > 0 and self.hard_count == 0:
+            raise ValueError("Hard-negative fraction is too small for this training set")
+        self.hard_candidates = np.empty(0, dtype=np.int64)
         self.last_summary = {}
+
+    def update_hard_negatives(self, scores):
+        """Scores must follow pool.positions, which contains training negatives only."""
+        scores = np.asarray(scores)
+        if scores.shape != self.pool.positions.shape or not np.isfinite(scores).all():
+            raise ValueError("One finite score per training negative is required")
+        # Randomly draw the hard part from the highest-scoring candidates.
+        bank_size = min(len(scores), 2 * self.hard_count)
+        order = np.argsort(-scores, kind="stable")[:bank_size]
+        self.hard_candidates = self.pool.positions[order]
+
+    def _draw_random_without(self, count, excluded):
+        """Continue the cyclic pool while keeping this epoch's negatives unique."""
+        drawn, used = [], set(excluded)
+        while len(drawn) < count:
+            if self.pool.cursor == len(self.pool.order):
+                self.pool.order = self.pool.rng.permutation(self.pool.positions)
+                self.pool.cursor = 0
+            value = int(self.pool.order[self.pool.cursor])
+            self.pool.cursor += 1
+            if value not in used:
+                drawn.append(value)
+                used.add(value)
+        self.pool.seen.update(used)
+        return np.asarray(drawn, dtype=np.int64)
 
     def __len__(self):
         return math.ceil(len(self.positives) / (self.batch_size // (self.k + 1)))
 
     def __iter__(self):
-        negatives = self.pool.draw(self.k * len(self.positives))
+        # Keep this a generator: DataLoader can create an unused iterator when
+        # starting workers. Pool/RNG state advances only when batches are read.
+        total = self.k * len(self.positives)
+        hard = np.empty(0, dtype=np.int64)
+        if len(self.hard_candidates):
+            hard = self.rng.choice(self.hard_candidates, size=self.hard_count, replace=False)
+        if len(hard):
+            random_negatives = self._draw_random_without(total - len(hard), hard)
+            negatives = self.rng.permutation(np.concatenate((hard, random_negatives)))
+        else:
+            negatives = self.pool.draw(total)
         batches = balanced_batches(self.positives, negatives, self.k, self.batch_size, self.rng)
         self.last_summary = {"positive": len(self.positives), "negative": len(negatives),
+                             "hard_negative": len(hard), "random_negative": total - len(hard),
                              "negatives_seen": len(self.pool.seen), "negative_pool_size": len(self.pool.positions),
                              "negative_pool_coverage": len(self.pool.seen) / len(self.pool.positions)}
-        return iter(batches)
+        yield from batches
 
 
 def seed_everything(seed):
@@ -314,6 +392,8 @@ def train(args):
         raise ValueError("Invalid dropout/workers/weight decay")
     if args.eval_batch_size < 1 or not 0 <= args.min_learning_rate <= args.learning_rate:
         raise ValueError("Invalid evaluation batch size or minimum learning rate")
+    if args.hard_negative_start_epoch < 2 or args.hard_negative_refresh < 1:
+        raise ValueError("Hard-negative mining needs at least one warmup epoch and a positive refresh interval")
     seed_everything(args.seed)
     cache = load_cache(args.cache)
     # Report shared sequences across splits and continue with the fixed data.
@@ -332,6 +412,7 @@ def train(args):
         raise ValueError("Output directory must be new or empty; existing runs are never overwritten")
     device = resolve_device(args.device)
     config = ModelConfig(input_length=args.input_length, embed_channels=args.embed_channels,
+                         motif_kernels=tuple(args.motif_kernels), pooling_stages=args.pooling_stages,
                          encoder_channels=tuple(args.encoder_channels), transformer_blocks=args.transformer_blocks,
                          heads=args.heads, ffn_channels=args.ffn_channels, head_channels=args.head_channels,
                          dropout=args.dropout, activation=args.activation)
@@ -339,12 +420,19 @@ def train(args):
     indices = {name: np.flatnonzero(cache["split"] == code) for code, name in enumerate(SPLIT_NAMES)}
     train_data = SequenceDataset(cache, indices["train"], args.input_length, training=True,
                                  seed=args.seed, rc_probability=args.rc_probability)
-    sampler = EpochBatchSampler(cache["labels"][indices["train"]], args.negatives_per_positive, args.batch_size, args.seed)
+    sampler = EpochBatchSampler(cache["labels"][indices["train"]], args.negatives_per_positive,
+                                args.batch_size, args.seed, args.hard_negative_fraction)
     loader_kwargs = {"num_workers": args.num_workers, "pin_memory": device.type == "cuda"}
     # Workers are recreated each epoch so they receive the new crop/RC arrays.
     train_loader = DataLoader(train_data, batch_sampler=sampler, **loader_kwargs)
     val_data = SequenceDataset(cache, indices["validation"], args.input_length)
     val_loader = DataLoader(val_data, batch_size=args.eval_batch_size, shuffle=False, **loader_kwargs)
+    mining_loader = None
+    if sampler.hard_count:
+        # Local sampler positions are mapped exclusively into the training split.
+        mining_indices = indices["train"][sampler.pool.positions]
+        mining_data = SequenceDataset(cache, mining_indices, args.input_length)
+        mining_loader = DataLoader(mining_data, batch_size=args.eval_batch_size, shuffle=False, **loader_kwargs)
     pos_weight = float(args.negatives_per_positive)
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(pos_weight, device=device))
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
@@ -360,6 +448,7 @@ def train(args):
     output.mkdir(parents=True, exist_ok=True)
     dump_json(output / "configuration.json", metadata)
     print(f"Device: {device}; parameters: {metadata['parameter_count']:,}; training pos_weight: {pos_weight:g}")
+    print(f"Motif kernels: {config.motif_kernels}; attention positions: {model.position_embedding.shape[-1]}")
     for name in SPLIT_NAMES:
         print(name, counts(cache["labels"][indices[name]]))
     best_ap, best_epoch, stale, history = -math.inf, 0, 0, []
@@ -367,6 +456,11 @@ def train(args):
     beginning = time.perf_counter()
     for epoch in range(1, args.epochs + 1):
         tick = time.perf_counter()
+        if mining_loader is not None and epoch >= args.hard_negative_start_epoch and (epoch - args.hard_negative_start_epoch) % args.hard_negative_refresh == 0:
+            _, mining_scores = predict(model, mining_loader, device, args.eval_crops, args.eval_rc)
+            sampler.update_hard_negatives(mining_scores)
+            print(f"Epoch {epoch:03d}: refreshed hard candidates from training negatives; "
+                  f"{sampler.hard_count} hard + {sampler.k * len(sampler.positives) - sampler.hard_count} random negatives", flush=True)
         train_data.set_epoch(epoch)
         loss = train_epoch(model, train_loader, optimizer, criterion, device)
         y_val, p_val = predict(model, val_loader, device, args.eval_crops, args.eval_rc)
@@ -431,7 +525,11 @@ def evaluate(args):
         raise ValueError("Evaluation output directory must be new or empty")
     if args.eval_batch_size < 1 or args.num_workers < 0:
         raise ValueError("Invalid evaluation loader parameters")
-    model = TFBindingModel301(ModelConfig(**checkpoint["model_config"])).to(device)
+    model_config = dict(checkpoint["model_config"])
+    # Old checkpoints predate the configurable motif stem and pooling count.
+    model_config.setdefault("motif_kernels", (15,))
+    model_config.setdefault("pooling_stages", 3)
+    model = TFBindingModel301(ModelConfig(**model_config)).to(device)
     model.load_state_dict(checkpoint["state_dict"])
     index = np.flatnonzero(cache["split"] == 2)
     data = SequenceDataset(cache, index, model.config.input_length)
@@ -457,29 +555,30 @@ def smoke_test(args):
     device = resolve_device(args.device)
     for length in (256, 301):
         model = TFBindingModel301(ModelConfig(input_length=length)).to(device)
-        x = F.one_hot(torch.randint(0, 4, (6, length), device=device), 4).permute(0, 2, 1).float()
-        target = torch.tensor([1, 0, 0, 0, 0, 0], dtype=torch.float32, device=device)
+        x = F.one_hot(torch.randint(0, 4, (11, length), device=device), 4).permute(0, 2, 1).float()
+        target = torch.tensor([1] + [0] * 10, dtype=torch.float32, device=device)
         logits = model(x)
-        assert logits.shape == (6,) and torch.isfinite(logits).all()
-        loss = F.binary_cross_entropy_with_logits(logits, target, pos_weight=torch.tensor(5.0, device=device))
+        assert logits.shape == (11,) and torch.isfinite(logits).all()
+        assert model.position_embedding.shape[-1] == length // 4
+        loss = F.binary_cross_entropy_with_logits(logits, target, pos_weight=torch.tensor(10.0, device=device))
         loss.backward()
         assert all(torch.isfinite(p.grad).all() for p in model.parameters() if p.grad is not None)
         with torch.inference_mode():
             model.eval()
             assert torch.isfinite(model(x)).all()
         print(f"PASS PyTorch {length}-bp forward/backward: {float(loss.detach()):.6f}")
-    cache = {"sequences": np.random.default_rng(1).integers(0, 4, size=(36, 301), dtype=np.uint8),
-             "labels": np.array([1] * 6 + [0] * 30, dtype=np.uint8)}
-    data = SequenceDataset(cache, np.arange(36), training=True)
-    sampler = EpochBatchSampler(cache["labels"], 5, 12, 1)
+    cache = {"sequences": np.random.default_rng(1).integers(0, 4, size=(66, 301), dtype=np.uint8),
+             "labels": np.array([1] * 6 + [0] * 60, dtype=np.uint8)}
+    data = SequenceDataset(cache, np.arange(66), training=True)
+    sampler = EpochBatchSampler(cache["labels"], 10, 22, 1)
     batches = list(sampler)
-    assert len(batches) == 3 and len(set(i for b in batches for i in b)) == 36
+    assert len(batches) == 3 and len(set(i for b in batches for i in b)) == 66
     for b in batches:
         assert cache["labels"][b].sum() == 2
     model = TFBindingModel301(ModelConfig()).to(device)
-    evaluation = SequenceDataset(cache, np.arange(36))
+    evaluation = SequenceDataset(cache, np.arange(66))
     y, p = predict(model, DataLoader(evaluation, batch_size=12), device)
-    assert len(y) == 36 and np.isfinite(p).all() and np.all((p >= 0) & (p <= 1))
+    assert len(y) == 66 and np.isfinite(p).all() and np.all((p >= 0) & (p <= 1))
     print("PASS balanced batches and 8-view inference")
 
 
@@ -491,8 +590,12 @@ def main():
     p.add_argument("--cache", required=True, type=Path)
     p.add_argument("--output-dir", required=True, type=Path)
     p.add_argument("--input-length", type=int, choices=(256, 301), default=256)
-    p.add_argument("--negatives-per-positive", type=int, default=5)
-    p.add_argument("--batch-size", type=int, default=48, help="Multiple of negatives-per-positive + 1; default = 8 positives + 40 negatives")
+    p.add_argument("--negatives-per-positive", type=int, default=10)
+    p.add_argument("--batch-size", type=int, default=88, help="Multiple of negatives-per-positive + 1; default = 8 positives + 80 negatives")
+    p.add_argument("--hard-negative-fraction", type=float, default=0.0,
+                   help="Optional hard share of epoch negatives (e.g. 0.25); zero keeps cyclic sampling only")
+    p.add_argument("--hard-negative-start-epoch", type=int, default=6, help="First mining epoch, after five warmup epochs")
+    p.add_argument("--hard-negative-refresh", type=int, default=5, help="Refresh scores every N epochs using training negatives only")
     p.add_argument("--eval-batch-size", type=int, default=128)
     p.add_argument("--eval-crops", choices=("center", "multi"), default="multi")
     p.add_argument("--eval-rc", action=argparse.BooleanOptionalAction, default=True)
@@ -506,6 +609,10 @@ def main():
     p.add_argument("--weight-decay", type=float, default=1e-4)
     p.add_argument("--dropout", type=float, default=0.2)
     p.add_argument("--embed-channels", type=int, default=32)
+    p.add_argument("--motif-kernels", type=int, nargs="+", default=(9, 12),
+                   help="Parallel first-layer kernels; use 15 with three poolings for the original baseline")
+    p.add_argument("--pooling-stages", type=int, choices=(2, 3), default=2,
+                   help="Two: 256 -> 128 -> 64; three: original 32-position baseline")
     p.add_argument("--encoder-channels", type=int, nargs=3, default=(48, 64, 96))
     p.add_argument("--transformer-blocks", type=int, default=1)
     p.add_argument("--heads", type=int, default=4)
