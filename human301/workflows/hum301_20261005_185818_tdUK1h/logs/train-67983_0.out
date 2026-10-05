@@ -1,0 +1,115 @@
+Conda: at_env; Python: /home/jbossenz/miniforge3/envs/at_env/bin/python
+GPU-Training: CREB3L3
+Datensatz: /data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/CREB3L3/hum301_20261005_185818_tdUK1h/dataset.npz
+Ergebnisse: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/hum301_20261005_185818_tdUK1h
+PASS PyTorch 256-bp forward/backward: 1.157828
+PASS PyTorch 301-bp forward/backward: 1.191588
+PASS balanced batches and 8-view inference
+Device: cuda; parameters: 231,233; training pos_weight: 5
+train {'positive': 363, 'negative': 36300, 'total': 36663}
+validation {'positive': 124, 'negative': 12400, 'total': 12524}
+test {'positive': 398, 'negative': 39800, 'total': 40198}
+Epoch 001: loss=1.1570; val AP=0.01403; negatives seen=10.0%
+Epoch 002: loss=1.1228; val AP=0.03567; negatives seen=20.0%
+Epoch 003: loss=0.9700; val AP=0.03850; negatives seen=30.0%
+Epoch 004: loss=0.8323; val AP=0.06874; negatives seen=40.0%
+Epoch 005: loss=0.8334; val AP=0.13131; negatives seen=50.0%
+Epoch 006: loss=0.7698; val AP=0.11299; negatives seen=60.0%
+Epoch 007: loss=0.7023; val AP=0.18775; negatives seen=70.0%
+Epoch 008: loss=0.6940; val AP=0.15453; negatives seen=80.0%
+Epoch 009: loss=0.6296; val AP=0.19559; negatives seen=90.0%
+Epoch 010: loss=0.6056; val AP=0.21438; negatives seen=100.0%
+Epoch 011: loss=0.5573; val AP=0.22477; negatives seen=100.0%
+Epoch 012: loss=0.5246; val AP=0.25388; negatives seen=100.0%
+Epoch 013: loss=0.5347; val AP=0.25910; negatives seen=100.0%
+Epoch 014: loss=0.4472; val AP=0.19661; negatives seen=100.0%
+Epoch 015: loss=0.4597; val AP=0.25584; negatives seen=100.0%
+Epoch 016: loss=0.4178; val AP=0.19433; negatives seen=100.0%
+Epoch 017: loss=0.4433; val AP=0.29845; negatives seen=100.0%
+Epoch 018: loss=0.4110; val AP=0.32479; negatives seen=100.0%
+Epoch 019: loss=0.3764; val AP=0.30242; negatives seen=100.0%
+Epoch 020: loss=0.3547; val AP=0.33305; negatives seen=100.0%
+Epoch 021: loss=0.3572; val AP=0.28858; negatives seen=100.0%
+Epoch 022: loss=0.3421; val AP=0.22344; negatives seen=100.0%
+Epoch 023: loss=0.2844; val AP=0.25065; negatives seen=100.0%
+Epoch 024: loss=0.3066; val AP=0.29285; negatives seen=100.0%
+Epoch 025: loss=0.2918; val AP=0.31699; negatives seen=100.0%
+Epoch 026: loss=0.2655; val AP=0.32082; negatives seen=100.0%
+Epoch 027: loss=0.2259; val AP=0.28574; negatives seen=100.0%
+Epoch 028: loss=0.2580; val AP=0.31126; negatives seen=100.0%
+Epoch 029: loss=0.2149; val AP=0.30881; negatives seen=100.0%
+Epoch 030: loss=0.2405; val AP=0.34496; negatives seen=100.0%
+Epoch 031: loss=0.2237; val AP=0.33806; negatives seen=100.0%
+Epoch 032: loss=0.2125; val AP=0.32554; negatives seen=100.0%
+Epoch 033: loss=0.2018; val AP=0.33171; negatives seen=100.0%
+Epoch 034: loss=0.1813; val AP=0.30621; negatives seen=100.0%
+Epoch 035: loss=0.1828; val AP=0.33469; negatives seen=100.0%
+Epoch 036: loss=0.1757; val AP=0.33896; negatives seen=100.0%
+Epoch 037: loss=0.1405; val AP=0.31058; negatives seen=100.0%
+Epoch 038: loss=0.1608; val AP=0.32138; negatives seen=100.0%
+Epoch 039: loss=0.1620; val AP=0.34199; negatives seen=100.0%
+Epoch 040: loss=0.1734; val AP=0.33294; negatives seen=100.0%
+Early stopping; selected epoch 30
+{
+  "checkpoint_epoch": 30,
+  "epochs_run": 40,
+  "training_minutes": 1.4909204177946473,
+  "threshold": 0.9641458988189697,
+  "validation_mcc": 0.4252907277133495,
+  "validation": {
+    "auprc": 0.3449554702257579,
+    "auprc_method": "sklearn.average_precision_score (non-trapezoidal)",
+    "auroc": 0.9423751300728407,
+    "threshold": 0.9641458988189697,
+    "mcc": 0.4252907277133495,
+    "precision": 0.7111111111111111,
+    "recall": 0.25806451612903225,
+    "specificity": 0.9989516129032258,
+    "fpr": 0.0010483870967742392,
+    "balanced_accuracy": 0.628508064516129,
+    "f1": 0.378698224852071,
+    "accuracy": 0.9916160970935803,
+    "tp": 32,
+    "fp": 13,
+    "fn": 92,
+    "tn": 12387,
+    "log_loss": 0.09431645360893087,
+    "positive_prevalence": 0.009900990099009901,
+    "pr_baseline": 0.009900990099009901,
+    "positive": 124,
+    "negative": 12400,
+    "total": 12524
+  },
+  "test": {
+    "auprc": 0.2862244243673406,
+    "auprc_method": "sklearn.average_precision_score (non-trapezoidal)",
+    "auroc": 0.9434256710689124,
+    "threshold": 0.9641458988189697,
+    "mcc": 0.2833217246516963,
+    "precision": 0.4697986577181208,
+    "recall": 0.17587939698492464,
+    "specificity": 0.9980150753768844,
+    "fpr": 0.0019849246231156137,
+    "balanced_accuracy": 0.5869472361809045,
+    "f1": 0.25594149908592323,
+    "accuracy": 0.9898751181650829,
+    "tp": 70,
+    "fp": 79,
+    "fn": 328,
+    "tn": 39721,
+    "log_loss": 0.09915648046780766,
+    "positive_prevalence": 0.009900990099009901,
+    "pr_baseline": 0.009900990099009901,
+    "positive": 398,
+    "negative": 39800,
+    "total": 40198
+  },
+  "test_evaluated": true,
+  "sampling_final": {
+    "positive": 363,
+    "negative": 1815,
+    "negatives_seen": 36300,
+    "negative_pool_size": 36300,
+    "negative_pool_coverage": 1.0
+  }
+}
