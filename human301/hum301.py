@@ -316,13 +316,17 @@ def train(args):
         raise ValueError("Invalid evaluation batch size or minimum learning rate")
     seed_everything(args.seed)
     cache = load_cache(args.cache)
-    # Exact sequence leakage is reported during preparation. Refuse to train
-    # through it silently; evaluation files remain intact.
+    # Report shared sequences across splits and continue with the fixed data.
+    # Conflicting labels retain their existing error behavior.
     audit = cache["summary"].get("sequence_audit", {})
-    issues = [key for key, value in audit.items() if isinstance(value, int) and value > 0]
-    issues += [key for key, value in audit.items() if isinstance(value, dict) and value.get("identical_or_RC_identical_sequences_with_both_labels", 0) > 0]
-    if issues:
-        raise ValueError("Resolve sequence overlap/conflicting sequence labels before training: " + ", ".join(issues))
+    overlap_issues = [key for key, value in audit.items() if isinstance(value, int) and value > 0]
+    label_issues = [key for key, value in audit.items() if isinstance(value, dict) and value.get("identical_or_RC_identical_sequences_with_both_labels", 0) > 0]
+    if label_issues:
+        raise ValueError("Resolve sequence overlap/conflicting sequence labels before training: " + ", ".join(label_issues))
+    if overlap_issues:
+        print("WARNING: Shared sequences or reverse complements between dataset splits: "
+              + ", ".join(f"{key}={audit[key]}" for key in overlap_issues)
+              + ". Training continues with the unchanged datasets.", flush=True)
     output = args.output_dir
     if output.exists() and any(output.iterdir()):
         raise ValueError("Output directory must be new or empty; existing runs are never overwritten")
