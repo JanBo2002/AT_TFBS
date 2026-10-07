@@ -1,0 +1,58 @@
+# Human301: Basis gegen lokale Auswertung
+
+Run-ID: `multitf_20261006_033507_932031`. 44 Einzelruns, 11 TFs, jeweils Seeds 1 und 2.
+CREB3L3 stammt aus Job 68001; die anderen zehn TFs aus diesem Workflow.
+
+Beide Modelle: 9/12-bp-Filter, originale fünf Bottleneck-Blöcke und drei Decoder; 1:10, Batch 88, maximal 100 Epochen, Patience 20, kein Mining.
+Validierung: chr5/chr7 aus Train; vollständige feste Testdaten. Schwellen: Validierungs-MCC.
+AP ist Average Precision. ± zeigt die Standardabweichung zwischen den zwei Seeds, kein Konfidenzintervall.
+
+| TF | Variante | Val-AP | Test-AP ± SD | Test-AUROC | Test-MCC | Positive / Negative im Test |
+|---|---|---:|---:|---:|---:|---:|
+| TERF1 | base | 0.1833 | 0.1679 ± 0.0003 | 0.8212 | 0.3003 | 664 / 66400 |
+| TERF1 | local | 0.1685 | 0.1759 ± 0.0035 | 0.8244 | 0.3205 | 664 / 66400 |
+| SRY | base | 0.3096 | 0.3133 ± 0.0011 | 0.9380 | 0.3538 | 3678 / 367800 |
+| SRY | local | 0.3131 | 0.3270 ± 0.0082 | 0.9368 | 0.3650 | 3678 / 367800 |
+| BATF2 | base | 0.4476 | 0.4582 ± 0.0025 | 0.9679 | 0.4721 | 12258 / 1225800 |
+| BATF2 | local | 0.4578 | 0.4659 ± 0.0071 | 0.9673 | 0.4772 | 12258 / 1225800 |
+| CTCF | base | 0.6841 | 0.6626 ± 0.0018 | 0.9671 | 0.6189 | 51547 / 5154700 |
+| CTCF | local | 0.6865 | 0.6661 ± 0.0006 | 0.9666 | 0.6254 | 51547 / 5154700 |
+| NFKB1 | base | 0.7543 | 0.7490 ± 0.0000 | 0.9885 | 0.6889 | 16856 / 1685600 |
+| NFKB1 | local | 0.7550 | 0.7476 ± 0.0006 | 0.9884 | 0.6884 | 16856 / 1685600 |
+| MAX | base | 0.4274 | 0.4076 ± 0.0015 | 0.9404 | 0.4716 | 9289 / 928900 |
+| MAX | local | 0.4385 | 0.4195 ± 0.0007 | 0.9278 | 0.4735 | 9289 / 928900 |
+| MGA | base | 0.3222 | 0.3148 ± 0.0051 | 0.9361 | 0.3769 | 8313 / 831300 |
+| MGA | local | 0.3302 | 0.3241 ± 0.0016 | 0.9361 | 0.3802 | 8313 / 831300 |
+| MYF6 | base | 0.4418 | 0.4332 ± 0.0009 | 0.9573 | 0.4514 | 33204 / 3320400 |
+| MYF6 | local | 0.4494 | 0.4396 ± 0.0014 | 0.9565 | 0.4523 | 33204 / 3320400 |
+| ELF3 | base | 0.4489 | 0.4428 ± 0.0005 | 0.9602 | 0.4554 | 37515 / 3751500 |
+| ELF3 | local | 0.4531 | 0.4469 ± 0.0008 | 0.9593 | 0.4570 | 37515 / 3751500 |
+| ZBED9 | base | 0.6635 | 0.6489 ± 0.0002 | 0.9789 | 0.6134 | 24442 / 2444200 |
+| ZBED9 | local | 0.6630 | 0.6497 ± 0.0007 | 0.9783 | 0.6118 | 24442 / 2444200 |
+| CREB3L3 | base | 0.5603 | 0.5315 ± 0.0014 | 0.9733 | 0.5251 | 398 / 39800 |
+| CREB3L3 | local | 0.6008 | 0.5506 ± 0.0099 | 0.9788 | 0.5430 | 398 / 39800 |
+
+| TF | Δ Test-AP: lokal − Basis | Δ Test-MCC | Präferenz anhand Val-AP |
+|---|---:|---:|---|
+| TERF1 | +0.0081 | +0.0202 | base |
+| SRY | +0.0137 | +0.0112 | local |
+| BATF2 | +0.0076 | +0.0051 | local |
+| CTCF | +0.0035 | +0.0065 | local |
+| NFKB1 | -0.0013 | -0.0005 | local |
+| MAX | +0.0119 | +0.0020 | local |
+| MGA | +0.0093 | +0.0033 | local |
+| MYF6 | +0.0064 | +0.0009 | local |
+| ELF3 | +0.0041 | +0.0015 | local |
+| ZBED9 | +0.0008 | -0.0016 | base |
+| CREB3L3 | +0.0191 | +0.0179 | local |
+
+Über alle elf TFs, jeder TF gleich gewichtet:
+
+- base: Val-AP 0.4766; Test-AP 0.4663; Test-MCC 0.4843.
+- local: Val-AP 0.4833; Test-AP 0.4739; Test-MCC 0.4904.
+
+Diese Mittelwerte sind keine gemeinsam neu berechnete AP über gemischte TF-Datensätze.
+Training_minutes umfasst die protokollierten Trainings- und Validierungsepochen, ohne abschließende Testauswertung.
+Die Auswertung sammelt vorhandene Metriken; sie trainiert, resampelt und optimiert keine Schwellen.
+
+Evaluation written to /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/multitf/multitf_20261006_033507_932031/evaluation
