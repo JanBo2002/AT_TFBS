@@ -1,0 +1,247 @@
+{
+  "tf": "BATF2",
+  "datasets": {
+    "CHIP": {
+      "cache": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/BATF2/hum301_multitf_chr5_chr7/dataset.npz",
+      "cache_sha256": "9335b13f6cf77fe90489c26db52894e0dca70919c6e4315f4bf96ce4634b382e",
+      "summary": {
+        "format_version": "at301-v1",
+        "genome_build": "hg38",
+        "coordinate_convention": "0-based half-open",
+        "stored_length": 301,
+        "sources": {
+          "train_positive_bed": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/Input_data/CHS/Train/BATF2/positives.bed",
+            "sha256": "1df8d0739453f25eeefec61727ffa3df2de8de2174b60b53896d2cebdf48cbd6"
+          },
+          "train_negative_bed": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/Input_data/CHS/Train/BATF2/random.bed",
+            "sha256": "a153d7a6ce150ff43b1c5071598b0258ecd96f8afa0c16988c1d0a47e4865313"
+          },
+          "test_positive_bed": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/Input_data/CHS/Test/BATF2/positives.bed",
+            "sha256": "416434cbe6a8e60f1a6379c1ddc8ed8dba2084df616325059cdf79be817c1f41"
+          },
+          "test_negative_bed": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/Input_data/CHS/Test/BATF2/random.bed",
+            "sha256": "c82bc439fbb9ad370b733812bff26019701365b8fa3dabb8c88d7f0d2acf0515"
+          },
+          "genome_fasta": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/hg38.fa",
+            "sha256": "5be01555d98347fdb3714dc84c6f77c9d8bc774adcf32c6f7a8fa06f5baf5e51"
+          },
+          "genome_fai": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/hg38.fa.fai",
+            "sha256": "3b425de206296a5c8053023fa5ca61da43cfe78c1737c12e58c83367c7e83c21"
+          }
+        },
+        "splits": {
+          "train": {
+            "positive": 11216,
+            "negative": 1121600,
+            "total": 1132816,
+            "chromosomes": [
+              "chr1",
+              "chr11",
+              "chr13",
+              "chr15",
+              "chr17",
+              "chr19",
+              "chr21",
+              "chr3",
+              "chr9"
+            ],
+            "sequences_with_N": 0,
+            "max_N_fraction": 0.0,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.5444586163098752,
+              "negative": 0.4972220895872531
+            }
+          },
+          "validation": {
+            "positive": 2891,
+            "negative": 289100,
+            "total": 291991,
+            "chromosomes": [
+              "chr5",
+              "chr7"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.37209302325581395,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.5122774876541578,
+              "negative": 0.4769405797118104
+            }
+          },
+          "test": {
+            "positive": 12258,
+            "negative": 1225800,
+            "total": 1238058,
+            "chromosomes": [
+              "chr10",
+              "chr12",
+              "chr14",
+              "chr16",
+              "chr18",
+              "chr2",
+              "chr20",
+              "chr22",
+              "chr4",
+              "chr6",
+              "chr8"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.0033222591362126247,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.5256280618239776,
+              "negative": 0.4855516717267563
+            }
+          }
+        },
+        "sequence_audit": {
+          "train": {
+            "duplicates_or_RC_duplicates_within_split": 28,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "validation": {
+            "duplicates_or_RC_duplicates_within_split": 2,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "test": {
+            "duplicates_or_RC_duplicates_within_split": 21,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "train_validation_shared_sequences_or_RC": 6,
+          "train_test_shared_sequences_or_RC": 18,
+          "validation_test_shared_sequences_or_RC": 3
+        },
+        "sequence_audit_action": "Reported only; no evaluation samples removed or relabeled"
+      }
+    },
+    "GHTS": {
+      "cache": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/BATF2/GHTS/dataset.npz",
+      "cache_sha256": "caa7804902c65114f81df17cee13ffd498c4b9e3ebd0f744194128b3702758bc",
+      "summary": {
+        "format_version": "at301-v1",
+        "genome_build": "hg38",
+        "coordinate_convention": "0-based half-open",
+        "stored_length": 301,
+        "sources": {
+          "train_positive_bed": {
+            "path": "/scratch/jbossenz_68197/hum301_fasta_metadata_ms5agmsr/train_positive_bed.bed",
+            "sha256": "cac52f8456c35f174825d3bb52ccbaadd73126fff47d1a3cd342d4859254c6b2"
+          },
+          "train_positive_fasta": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/GHTS/Train/BATF2/positives.fa",
+            "sha256": "76e528ef7712489c30e49e5221dc8eb4c2a4e1e7e93e33cec0aaaadd5ce530e2"
+          },
+          "train_negative_bed": {
+            "path": "/scratch/jbossenz_68197/hum301_fasta_metadata_ms5agmsr/train_negative_bed.bed",
+            "sha256": "a31e1de634d54a484acc9bb86bacc5696644397830f042d842c0d0bd7cc40e63"
+          },
+          "train_negative_fasta": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/GHTS/Train/BATF2/random.fa",
+            "sha256": "a8005317bde39e2f3697b0d91659404eaecf4f7556799ba37ca85411cf86c228"
+          },
+          "test_positive_bed": {
+            "path": "/scratch/jbossenz_68197/hum301_fasta_metadata_ms5agmsr/test_positive_bed.bed",
+            "sha256": "d0d5256a492a8672fb73cf70843dccb7d05b942c3496cb6f7340928a013d7499"
+          },
+          "test_positive_fasta": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/GHTS/Test/BATF2/positives.fa",
+            "sha256": "99554453eaf4e13c57bd76a9d85ff6ea90676a8c34c6cda153e775ae3a8e0c68"
+          },
+          "test_negative_bed": {
+            "path": "/scratch/jbossenz_68197/hum301_fasta_metadata_ms5agmsr/test_negative_bed.bed",
+            "sha256": "d16c27286acf40eccb2e91e3b661f8c3f377808b17451dae084a8b0775c6710e"
+          },
+          "test_negative_fasta": {
+            "path": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/clara/chip/student_handoff_30tf_increment/GHTS/Test/BATF2/random.fa",
+            "sha256": "1bc4c62ad42139c40c0993d9366df4d3a29fb23583355a522cd5a2dd6a112a58"
+          }
+        },
+        "splits": {
+          "train": {
+            "positive": 543,
+            "negative": 54300,
+            "total": 54843,
+            "chromosomes": [
+              "chr1",
+              "chr11",
+              "chr13",
+              "chr15",
+              "chr17",
+              "chr19",
+              "chr21",
+              "chr3",
+              "chr9"
+            ],
+            "sequences_with_N": 2,
+            "max_N_fraction": 0.026578073089700997,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.5114821890807169,
+              "negative": 0.5114766615884437
+            }
+          },
+          "validation": {
+            "positive": 171,
+            "negative": 17100,
+            "total": 17271,
+            "chromosomes": [
+              "chr5",
+              "chr7"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.24584717607973422,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.496771758991441,
+              "negative": 0.4968984476695614
+            }
+          },
+          "test": {
+            "positive": 775,
+            "negative": 77500,
+            "total": 78275,
+            "chromosomes": [
+              "chr10",
+              "chr12",
+              "chr14",
+              "chr16",
+              "chr18",
+              "chr2",
+              "chr20",
+              "chr22",
+              "chr4",
+              "chr6",
+              "chr8"
+            ],
+            "sequences_with_N": 0,
+            "max_N_fraction": 0.0,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.48829493087557607,
+              "negative": 0.4882858428892938
+            }
+          }
+        },
+        "sequence_audit": {
+          "train": {
+            "duplicates_or_RC_duplicates_within_split": 0,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "validation": {
+            "duplicates_or_RC_duplicates_within_split": 0,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "test": {
+            "duplicates_or_RC_duplicates_within_split": 0,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "train_validation_shared_sequences_or_RC": 0,
+          "train_test_shared_sequences_or_RC": 0,
+          "validation_test_shared_sequences_or_RC": 0
+        },
+        "sequence_audit_action": "Reported only; no evaluation samples removed or relabeled"
+      }
+    }
+  }
+}
