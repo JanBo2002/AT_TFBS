@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Run the existing local Human301 model on ChIP and GHTS, with both test sets.
 
-The model and hum301_data.py stay unchanged. Each TF has two independently
-trained models, one seed, and four evaluations with frozen source thresholds.
+The model and hum301_data.py stay unchanged. Each TF/seed has two independently
+trained models and four evaluations with frozen source thresholds. The 19 new
+TFs use seed 1; TERF1, CTCF, CREB3L3 and MAX use seeds 1--5.
 Only cache packing runs in the CPU array; training and inference use GPUs.
-GHTS positives.fa/random.fa are read directly; no GHTS genome extraction.
+With --other-tfs, both assays read ArchThalia-ML FASTAs directly.
+Without that flag, the original TFs and data paths remain in use.
 """
 from __future__ import annotations
 
@@ -16,6 +18,7 @@ import json
 import math
 import re
 import shlex
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -23,11 +26,16 @@ import time
 from pathlib import Path
 
 PROJECT_ROOT = Path("/data/projects/SFB_A03/jan/AT_TFBS")
-TFS = ("CREB3L3", "TERF1", "SRY", "BATF2", "CTCF", "NFKB1", "MAX", "MGA", "MYF6", "ELF3", "ZBED9")
+INPUT_ROOT = Path("/data/projects/SFB_A03/clara/ArchThalia-ML")
+PREVIOUS_TFS = ("CREB3L3", "TERF1", "SRY", "BATF2", "CTCF", "NFKB1", "MAX", "MGA", "MYF6", "ELF3", "ZBED9")
+NEW_TFS = ("FLI1", "FOSL2", "GABPA", "GLI4", "LEF1", "LEUTX", "NR1H4", "PAX7", "RFX5", "RORB",
+           "SOX2", "USF3", "VDR", "YY1", "ZBTB8A", "ZFP3", "ZNF696", "ZNF772", "ZNF773")
+MULTISEED_TFS = ("TERF1", "CTCF", "CREB3L3", "MAX")
+TFS = NEW_TFS + MULTISEED_TFS
 ASSAYS = ("CHIP", "GHTS")
 MODEL_SCRIPT = "hum301_motif64_local.py"
 DATA_SCRIPT = "hum301_data.py"
-FORMAT = "hum301-crossassay-v2"
+FORMAT = "hum301-crossassay-archthalia-v3"
 METRICS = ("auprc", "auroc", "mcc", "balanced_accuracy", "f1", "precision", "recall", "specificity")
 
 
@@ -69,17 +77,33 @@ def bed_paths(input_root, tf):
 
 
 def fasta_paths(input_root, tf):
-    return {key.replace("_bed", "_fasta"): path.with_suffix(".fa")
-            for key, path in bed_paths(input_root, tf).items()}
+    root = Path(input_root)
+    paths = {}
+    for split in ("Train", "Test"):
+        directory = root / split / tf
+        # The user supplied random.da. Its extension does not affect FASTA
+        # parsing. Accept random.fa too if .da was only a filename typo.
+        negative = directory / "random.da"
+        if not negative.is_file():
+            negative = directory / "random.fa"
+        if not negative.is_file():
+            raise ValueError(f"Missing FASTA negatives: {directory / 'random.da'} or {directory / 'random.fa'}")
+        paths[f"{split.lower()}_positive_fasta"] = directory / "positives.fa"
+        paths[f"{split.lower()}_negative_fasta"] = negative
+    return paths
 
 
-def resolve_inputs(input_root, tf, assay):
-    fastas = fasta_paths(input_root, tf)
-    # The supplied GHTS files are FASTA, including their genomic coordinates.
-    # ChIP can use FASTA as well, or its previous BED/reference pipeline.
-    if assay == "GHTS" or all(path.is_file() for path in fastas.values()):
-        require_files(fastas.values())
+def resolve_inputs(input_root, tf, assay, *, require_fasta=False):
+    try:
+        fastas = fasta_paths(input_root, tf)
+    except ValueError:
+        if require_fasta or assay == "GHTS":
+            raise
+        fastas = {}
+    if fastas and all(path.is_file() for path in fastas.values()):
         return {"kind": "fasta", "paths": {key: str(path) for key, path in fastas.items()}}
+    if require_fasta or assay == "GHTS":
+        require_files(fastas.values())
     beds = bed_paths(input_root, tf)
     require_files(beds.values())
     return {"kind": "bed", "paths": {key: str(path) for key, path in beds.items()}}
@@ -90,36 +114,51 @@ def plan(args):
         raise ValueError("run-id must contain only letters, digits, underscores or hyphens")
     root = args.project_root.resolve()
     code = root / "human301"
-    handoff = root / "raw_data/clara/chip/student_handoff_30tf_increment"
-    inputs = {"CHIP": str(handoff / "Input_data/CHS"), "GHTS": str(handoff / "GHTS")}
+    other_tfs = args.other_tfs
+    tfs = TFS if other_tfs else PREVIOUS_TFS
+    if other_tfs:
+        input_root = args.input_root.resolve()
+        inputs = {"CHIP": str(input_root / "CHS"), "GHTS": str(input_root / "GHTS")}
+    else:
+        handoff = root / "raw_data/clara/chip/student_handoff_30tf_increment"
+        inputs = {"CHIP": str(handoff / "Input_data/CHS"), "GHTS": str(handoff / "GHTS")}
     genome = root / "raw_data/general_data/genome/hg38.fa"
     required = [code / MODEL_SCRIPT, code / DATA_SCRIPT]
-    sources = {tf: {assay: resolve_inputs(inputs[assay], tf, assay) for assay in ASSAYS} for tf in TFS}
+    sources = {tf: {assay: resolve_inputs(inputs[assay], tf, assay, require_fasta=other_tfs)
+                    for assay in ASSAYS} for tf in tfs}
     if any(item["kind"] == "bed" for assays in sources.values() for item in assays.values()):
         required.extend((genome, Path(str(genome) + ".fai")))
     require_files(required)
     if args.manifest.exists():
         raise ValueError(f"Workflow already exists: {args.manifest}")
-    runs = [{"tf": tf, "train_assay": assay, "seed": args.seed,
-             "run_dir": str(code / "runs" / tf / args.run_id / f"{assay}_seed{args.seed}")}
-            for tf in TFS for assay in ASSAYS]
+    seeds_by_tf = {tf: list(range(1, 6)) if other_tfs and tf in MULTISEED_TFS else [args.seed] for tf in tfs}
+    runs = [{"tf": tf, "train_assay": assay, "seed": seed,
+             "run_dir": str(code / "runs" / tf / args.run_id / f"{assay}_seed{seed}")}
+            for tf in tfs for seed in seeds_by_tf[tf] for assay in ASSAYS]
     if any(Path(row["run_dir"]).exists() for row in runs):
         raise ValueError("A result directory already exists; choose a new run-id")
     payload = {"format": FORMAT, "run_id": args.run_id, "script_dir": str(code),
-               "data_root": str(root / "raw_data/human"), "input_roots": inputs, "input_sources": sources,
+               "data_root": str(root / "raw_data/human/ArchThalia-ML" if other_tfs else root / "raw_data/human"),
+               "input_roots": inputs, "input_sources": sources,
                "genome_fasta": str(genome), "validation_chromosomes": ["chr5", "chr7"],
                "model_script": MODEL_SCRIPT, "data_script": DATA_SCRIPT,
                "script_sha256": {name: sha256(code / name) for name in (MODEL_SCRIPT, DATA_SCRIPT)},
-               "tfs": list(TFS), "seed": args.seed, "runs": runs}
+               "tfs": list(tfs), "seed": args.seed, "seed_for_new_tfs": args.seed, "seeds_by_tf": seeds_by_tf,
+               "new_tfs": list(NEW_TFS) if other_tfs else [],
+               "multiseed_tfs": list(MULTISEED_TFS) if other_tfs else [], "runs": runs}
     write_json(args.manifest, payload)
     print(f"Workflow: {args.manifest}")
-    print(f"{len(TFS)} CPU cache tasks; {len(runs)} GPU training tasks; {2 * len(runs)} test evaluations.")
+    print(f"{len(tfs)} CPU cache tasks; {len(runs)} GPU training tasks; {2 * len(runs)} test evaluations.")
 
 
 def load_manifest(path):
     manifest = read_json(path)
-    if manifest.get("format") != FORMAT:
+    if manifest.get("format") not in (FORMAT, "hum301-crossassay-v2"):
         raise ValueError("Unsupported workflow manifest")
+    if "seeds_by_tf" not in manifest:
+        manifest["seeds_by_tf"] = {tf: sorted({run["seed"] for run in manifest["runs"] if run["tf"] == tf})
+                                   for tf in manifest["tfs"]}
+        manifest["seed_for_new_tfs"] = manifest["seed"]
     return manifest
 
 
@@ -325,7 +364,7 @@ def prepare(args):
     manifest = load_manifest(args.manifest)
     check_scripts(manifest)
     if not 0 <= args.task_id < len(manifest["tfs"]):
-        raise ValueError("CPU task-id must be 0..10")
+        raise ValueError(f"CPU task-id must be 0..{len(manifest['tfs']) - 1}")
     tf = manifest["tfs"][args.task_id]
     genome = Path(manifest["genome_fasta"])
     reference_hashes = {}
@@ -360,7 +399,7 @@ def training_command(manifest, row, cache, device="cuda"):
 
 def task_row(manifest, task_id):
     if not 0 <= task_id < len(manifest["runs"]):
-        raise ValueError("GPU task-id must be 0..21")
+        raise ValueError(f"GPU task-id must be 0..{len(manifest['runs']) - 1}")
     return manifest["runs"][task_id]
 
 
@@ -503,7 +542,7 @@ def summarize(args):
         val = read_json(directory / "validation_metrics.json")["classification"]
         timing = read_json(directory / "training_timing.json")
         arguments = config["arguments"]
-        expected = {"classification_readout": "local-logsumexp", "seed": manifest["seed"],
+        expected = {"classification_readout": "local-logsumexp", "seed": run["seed"],
                     "negatives_per_positive": 10, "batch_size": 88, "hard_negative_fraction": 0.0,
                     "epochs": 100, "patience": 20, "eval_crops": "multi", "eval_rc": True,
                     "skip_test": True, "task_mode": "classification"}
@@ -558,25 +597,41 @@ def summarize(args):
             for name in ("true_positive", "false_positive", "true_negative", "false_negative"):
                 row[name] = int(metrics[name])
             rows.append(row)
-    if len(rows) != 4 * len(manifest["tfs"]) or len(parameter_counts) != 1:
-        raise ValueError("Expected four evaluations per TF with the same local architecture")
+    if len(rows) != 2 * len(manifest["runs"]) or len(parameter_counts) != 1:
+        raise ValueError("Expected four evaluations per TF/seed with the same local architecture")
     directions = tuple(f"{source}_to_{target}" for source in ASSAYS for target in ASSAYS)
-    matrix = []
+    seed_matrix, matrix = [], []
     for tf in manifest["tfs"]:
-        by_direction = {row["direction"]: row for row in rows if row["tf"] == tf}
-        if set(by_direction) != set(directions):
-            raise ValueError(f"Missing or duplicate direction for {tf}")
-        matrix.append({"tf": tf, **{direction: by_direction[direction]["auprc"] for direction in directions}})
+        tf_seed_rows = []
+        for seed in manifest["seeds_by_tf"][tf]:
+            matching = [row for row in rows if row["tf"] == tf and row["seed"] == seed]
+            by_direction = {row["direction"]: row for row in matching}
+            if len(matching) != 4 or set(by_direction) != set(directions):
+                raise ValueError(f"Missing or duplicate direction for {tf}/seed{seed}")
+            row = {"tf": tf, "seed": seed,
+                   **{direction: by_direction[direction]["auprc"] for direction in directions}}
+            seed_matrix.append(row)
+            tf_seed_rows.append(row)
+        aggregate = {"tf": tf, "n_seeds": len(tf_seed_rows)}
+        for direction in directions:
+            values = [row[direction] for row in tf_seed_rows]
+            aggregate[direction] = statistics.mean(values)
+            aggregate[f"{direction}_std"] = statistics.stdev(values) if len(values) > 1 else None
+        matrix.append(aggregate)
     output = Path(args.manifest).parent / "evaluation"
     if output.exists() and any(output.iterdir()):
         raise ValueError(f"Summary already exists: {output}")
     output.mkdir(parents=True, exist_ok=True)
     write_tsv(output / "results.tsv", rows)
     write_tsv(output / "auprc_by_tf.tsv", matrix)
+    write_tsv(output / "auprc_by_tf_and_seed.tsv", seed_matrix)
     write_tsv(output / "training_runtime.tsv", training_rows)
-    write_json(output / "summary.json", {"run_id": manifest["run_id"], "seed": manifest["seed"],
+    write_json(output / "summary.json", {"run_id": manifest["run_id"], "seed_for_new_tfs": manifest["seed_for_new_tfs"],
+               "seeds_by_tf": manifest["seeds_by_tf"],
                "model": MODEL_SCRIPT, "n_models": len(training_rows), "n_test_evaluations": len(rows),
                "parameter_count": next(iter(parameter_counts)), "auprc_by_tf": matrix,
+               "auprc_by_tf_and_seed": seed_matrix,
+               "seed_summary_note": "TF scores are seed means; std is sample SD across seeds and is undefined for a single seed. Macro means weight each TF equally.",
                "macro_equal_tf_weight": {direction: sum(row[direction] for row in matrix) / len(matrix) for direction in directions},
                "total_training_wall_hours": sum(row["training_wall_minutes"] for row in training_rows) / 60,
                "total_epoch_training_validation_hours": sum(row["epoch_training_validation_minutes"] for row in training_rows) / 60,
@@ -594,6 +649,9 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     planning = sub.add_parser("plan")
     planning.add_argument("--project-root", type=Path, default=PROJECT_ROOT)
+    planning.add_argument("--input-root", type=Path, default=INPUT_ROOT)
+    planning.add_argument("--other-tfs", action="store_true",
+                          help="Run the remaining TFs plus four five-seed TFs on ArchThalia-ML; otherwise use the original workflow")
     planning.add_argument("--run-id", required=True)
     planning.add_argument("--seed", type=int, default=1)
     planning.add_argument("--manifest", type=Path, required=True)
