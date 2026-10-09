@@ -1,0 +1,148 @@
+Training has 13,080 negatives for 21,257 positives. Positive examples will rotate across epochs, without duplicates inside an epoch.
+WARNING: validation: only 1,308 negatives for 2,126 positives; 818 positives were dropped at random to keep the global 1:1 ratio.
+WARNING: test: only 1,968 negatives for 4,928 positives; 2,960 positives were dropped at random to keep the global 1:1 ratio.
+Training: 19,131 positives, 11,772 negatives; 11,772 distinct pairs per epoch. Positive examples rotate across epochs.
+Input profile cache loaded: /data/projects/SFB_A03/jan/AT_TFBS/maa_preferences/maa_data/MYC2_ja_2h_chipseq_Yin2023/maa_cache.input-dna-dap.asinh.npz
+Window geometry: crop 1024 bp from 1416 bp context; train shift +/-128 (uniform); eval shift fixed +/-128
+Validation split: 91/812 non-overlapping block components; per-class counts: {'positive': 2126, 'negative': 1308}
+train: n=30,903, positive=19,131, negative=11,772
+  val: n=2,616, positive=1,308, negative=1,308
+ test: n=3,936, positive=1,968, negative=1,968
+Device: cuda
+Hidden activation: RELU
+Input channels: A, C, G, T, dap; signal transform: asinh
+Hidden channels: 96, (112, 128, 144, 160)
+Parameters: 2,196,070 total; 2,196,070 trainable
+Checkpoint selection and early stopping start at epoch 2 so all training positives can be traversed.
+Epoch 001 train: loss=0.6213 AUROC=0.7842 AUPRC=0.7651 BalAcc=0.7198 F1=0.7196 MCC=0.4396
+Epoch 001 val  : loss=0.4304 AUROC=0.8930 AUPRC=0.8857 BalAcc=0.8001 F1=0.7864 MCC=0.6051
+  learning_rate_used=3.000e-04; learning_rate_next=2.999e-04; elapsed=77.1s
+  checkpoint selection starts at epoch 2; current checkpoint skipped
+Epoch 002 train: loss=0.4606 AUROC=0.8729 AUPRC=0.8602 BalAcc=0.7967 F1=0.8002 MCC=0.5938
+Epoch 002 val  : loss=0.4739 AUROC=0.9148 AUPRC=0.9040 BalAcc=0.7821 F1=0.7395 MCC=0.5971
+  learning_rate_used=2.999e-04; learning_rate_next=2.997e-04; elapsed=75.4s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.904006)
+Epoch 003 train: loss=0.4300 AUROC=0.8908 AUPRC=0.8790 BalAcc=0.8115 F1=0.8141 MCC=0.6233
+Epoch 003 val  : loss=0.4094 AUROC=0.9257 AUPRC=0.9209 BalAcc=0.8154 F1=0.8381 MCC=0.6571
+  learning_rate_used=2.997e-04; learning_rate_next=2.993e-04; elapsed=75.2s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.920906)
+Epoch 004 train: loss=0.4061 AUROC=0.9031 AUPRC=0.8921 BalAcc=0.8274 F1=0.8309 MCC=0.6554
+Epoch 004 val  : loss=0.7376 AUROC=0.8106 AUPRC=0.8009 BalAcc=0.6988 F1=0.6338 MCC=0.4252
+  learning_rate_used=2.993e-04; learning_rate_next=2.988e-04; elapsed=75.2s
+Epoch 005 train: loss=0.3915 AUROC=0.9105 AUPRC=0.9030 BalAcc=0.8320 F1=0.8348 MCC=0.6643
+Epoch 005 val  : loss=0.4244 AUROC=0.8969 AUPRC=0.8893 BalAcc=0.8131 F1=0.8079 MCC=0.6271
+  learning_rate_used=2.988e-04; learning_rate_next=2.982e-04; elapsed=75.8s
+Epoch 006 train: loss=0.3768 AUROC=0.9185 AUPRC=0.9114 BalAcc=0.8424 F1=0.8449 MCC=0.6852
+Epoch 006 val  : loss=0.3686 AUROC=0.9369 AUPRC=0.9302 BalAcc=0.8387 F1=0.8258 MCC=0.6849
+  learning_rate_used=2.982e-04; learning_rate_next=2.974e-04; elapsed=75.8s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.930181)
+Epoch 007 train: loss=0.3663 AUROC=0.9227 AUPRC=0.9148 BalAcc=0.8476 F1=0.8505 MCC=0.6957
+Epoch 007 val  : loss=0.3560 AUROC=0.9372 AUPRC=0.9316 BalAcc=0.8444 F1=0.8370 MCC=0.6917
+  learning_rate_used=2.974e-04; learning_rate_next=2.964e-04; elapsed=74.9s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.931617)
+Epoch 008 train: loss=0.3573 AUROC=0.9274 AUPRC=0.9195 BalAcc=0.8534 F1=0.8558 MCC=0.7072
+Epoch 008 val  : loss=0.3715 AUROC=0.9368 AUPRC=0.9258 BalAcc=0.8593 F1=0.8604 MCC=0.7187
+  learning_rate_used=2.964e-04; learning_rate_next=2.953e-04; elapsed=75.1s
+Epoch 009 train: loss=0.3525 AUROC=0.9303 AUPRC=0.9247 BalAcc=0.8544 F1=0.8566 MCC=0.7091
+Epoch 009 val  : loss=0.3326 AUROC=0.9423 AUPRC=0.9364 BalAcc=0.8574 F1=0.8526 MCC=0.7163
+  learning_rate_used=2.953e-04; learning_rate_next=2.941e-04; elapsed=75.0s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.936406)
+Epoch 010 train: loss=0.3433 AUROC=0.9343 AUPRC=0.9303 BalAcc=0.8606 F1=0.8624 MCC=0.7214
+Epoch 010 val  : loss=0.4237 AUROC=0.9467 AUPRC=0.9401 BalAcc=0.8567 F1=0.8705 MCC=0.7301
+  learning_rate_used=2.941e-04; learning_rate_next=2.927e-04; elapsed=75.0s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.940066)
+Epoch 011 train: loss=0.3373 AUROC=0.9363 AUPRC=0.9314 BalAcc=0.8628 F1=0.8652 MCC=0.7260
+Epoch 011 val  : loss=0.3728 AUROC=0.9468 AUPRC=0.9388 BalAcc=0.8631 F1=0.8741 MCC=0.7376
+  learning_rate_used=2.927e-04; learning_rate_next=2.912e-04; elapsed=75.5s
+Epoch 012 train: loss=0.3284 AUROC=0.9400 AUPRC=0.9347 BalAcc=0.8685 F1=0.8704 MCC=0.7374
+Epoch 012 val  : loss=0.4328 AUROC=0.9322 AUPRC=0.9230 BalAcc=0.8123 F1=0.7875 MCC=0.6423
+  learning_rate_used=2.912e-04; learning_rate_next=2.895e-04; elapsed=75.7s
+Epoch 013 train: loss=0.3233 AUROC=0.9422 AUPRC=0.9370 BalAcc=0.8717 F1=0.8733 MCC=0.7437
+Epoch 013 val  : loss=0.3256 AUROC=0.9408 AUPRC=0.9327 BalAcc=0.8628 F1=0.8625 MCC=0.7255
+  learning_rate_used=2.895e-04; learning_rate_next=2.877e-04; elapsed=75.7s
+Epoch 014 train: loss=0.3144 AUROC=0.9456 AUPRC=0.9409 BalAcc=0.8759 F1=0.8772 MCC=0.7520
+Epoch 014 val  : loss=0.3384 AUROC=0.9502 AUPRC=0.9449 BalAcc=0.8654 F1=0.8768 MCC=0.7435
+  learning_rate_used=2.877e-04; learning_rate_next=2.858e-04; elapsed=75.8s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.944947)
+Epoch 015 train: loss=0.3108 AUROC=0.9470 AUPRC=0.9426 BalAcc=0.8763 F1=0.8783 MCC=0.7529
+Epoch 015 val  : loss=0.3351 AUROC=0.9378 AUPRC=0.9322 BalAcc=0.8578 F1=0.8636 MCC=0.7182
+  learning_rate_used=2.858e-04; learning_rate_next=2.837e-04; elapsed=75.6s
+Epoch 016 train: loss=0.3032 AUROC=0.9510 AUPRC=0.9484 BalAcc=0.8810 F1=0.8824 MCC=0.7622
+Epoch 016 val  : loss=0.3004 AUROC=0.9544 AUPRC=0.9471 BalAcc=0.8761 F1=0.8712 MCC=0.7545
+  learning_rate_used=2.837e-04; learning_rate_next=2.815e-04; elapsed=75.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.947083)
+Epoch 017 train: loss=0.3000 AUROC=0.9511 AUPRC=0.9471 BalAcc=0.8825 F1=0.8840 MCC=0.7653
+Epoch 017 val  : loss=0.3389 AUROC=0.9448 AUPRC=0.9342 BalAcc=0.8731 F1=0.8787 MCC=0.7494
+  learning_rate_used=2.815e-04; learning_rate_next=2.792e-04; elapsed=75.7s
+Epoch 018 train: loss=0.3001 AUROC=0.9520 AUPRC=0.9481 BalAcc=0.8829 F1=0.8841 MCC=0.7660
+Epoch 018 val  : loss=0.3458 AUROC=0.9467 AUPRC=0.9390 BalAcc=0.8651 F1=0.8736 MCC=0.7369
+  learning_rate_used=2.792e-04; learning_rate_next=2.767e-04; elapsed=75.8s
+Epoch 019 train: loss=0.2953 AUROC=0.9530 AUPRC=0.9486 BalAcc=0.8864 F1=0.8878 MCC=0.7731
+Epoch 019 val  : loss=0.5427 AUROC=0.9540 AUPRC=0.9475 BalAcc=0.8318 F1=0.8542 MCC=0.6974
+  learning_rate_used=2.767e-04; learning_rate_next=2.741e-04; elapsed=75.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.947535)
+Epoch 020 train: loss=0.2869 AUROC=0.9567 AUPRC=0.9524 BalAcc=0.8923 F1=0.8937 MCC=0.7849
+Epoch 020 val  : loss=0.4000 AUROC=0.9362 AUPRC=0.9242 BalAcc=0.8475 F1=0.8392 MCC=0.6987
+  learning_rate_used=2.741e-04; learning_rate_next=2.714e-04; elapsed=76.2s
+Epoch 021 train: loss=0.2833 AUROC=0.9576 AUPRC=0.9546 BalAcc=0.8924 F1=0.8938 MCC=0.7850
+Epoch 021 val  : loss=0.2961 AUROC=0.9540 AUPRC=0.9472 BalAcc=0.8804 F1=0.8867 MCC=0.7656
+  learning_rate_used=2.714e-04; learning_rate_next=2.686e-04; elapsed=76.2s
+Epoch 022 train: loss=0.2745 AUROC=0.9604 AUPRC=0.9564 BalAcc=0.8964 F1=0.8973 MCC=0.7929
+Epoch 022 val  : loss=0.4373 AUROC=0.9512 AUPRC=0.9433 BalAcc=0.8670 F1=0.8792 MCC=0.7494
+  learning_rate_used=2.686e-04; learning_rate_next=2.657e-04; elapsed=76.2s
+Epoch 023 train: loss=0.2786 AUROC=0.9593 AUPRC=0.9563 BalAcc=0.8951 F1=0.8961 MCC=0.7904
+Epoch 023 val  : loss=0.3105 AUROC=0.9531 AUPRC=0.9428 BalAcc=0.8807 F1=0.8800 MCC=0.7615
+  learning_rate_used=2.657e-04; learning_rate_next=2.626e-04; elapsed=76.2s
+Epoch 024 train: loss=0.2732 AUROC=0.9617 AUPRC=0.9589 BalAcc=0.8971 F1=0.8981 MCC=0.7943
+Epoch 024 val  : loss=0.3989 AUROC=0.9496 AUPRC=0.9414 BalAcc=0.8555 F1=0.8443 MCC=0.7185
+  learning_rate_used=2.626e-04; learning_rate_next=2.595e-04; elapsed=76.3s
+Epoch 025 train: loss=0.2667 AUROC=0.9635 AUPRC=0.9605 BalAcc=0.9001 F1=0.9016 MCC=0.8006
+Epoch 025 val  : loss=0.3727 AUROC=0.9469 AUPRC=0.9392 BalAcc=0.8735 F1=0.8747 MCC=0.7471
+  learning_rate_used=2.595e-04; learning_rate_next=2.562e-04; elapsed=76.5s
+Epoch 026 train: loss=0.2636 AUROC=0.9644 AUPRC=0.9623 BalAcc=0.9041 F1=0.9053 MCC=0.8085
+Epoch 026 val  : loss=0.3663 AUROC=0.9419 AUPRC=0.9337 BalAcc=0.8674 F1=0.8743 MCC=0.7393
+  learning_rate_used=2.562e-04; learning_rate_next=2.528e-04; elapsed=76.2s
+Epoch 027 train: loss=0.2609 AUROC=0.9658 AUPRC=0.9636 BalAcc=0.9056 F1=0.9064 MCC=0.8114
+Epoch 027 val  : loss=0.4511 AUROC=0.9557 AUPRC=0.9481 BalAcc=0.8628 F1=0.8767 MCC=0.7447
+  learning_rate_used=2.528e-04; learning_rate_next=2.494e-04; elapsed=75.4s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.948061)
+Epoch 028 train: loss=0.2496 AUROC=0.9688 AUPRC=0.9670 BalAcc=0.9106 F1=0.9113 MCC=0.8214
+Epoch 028 val  : loss=0.3049 AUROC=0.9590 AUPRC=0.9527 BalAcc=0.8911 F1=0.8931 MCC=0.7827
+  learning_rate_used=2.494e-04; learning_rate_next=2.458e-04; elapsed=75.2s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3/best_model.pt (objective=classification-auprc, score=0.952727)
+Epoch 029 train: loss=0.2514 AUROC=0.9690 AUPRC=0.9669 BalAcc=0.9121 F1=0.9126 MCC=0.8243
+Epoch 029 val  : loss=0.4444 AUROC=0.9581 AUPRC=0.9523 BalAcc=0.8739 F1=0.8841 MCC=0.7598
+  learning_rate_used=2.458e-04; learning_rate_next=2.421e-04; elapsed=88.2s
+Epoch 030 train: loss=0.2480 AUROC=0.9704 AUPRC=0.9687 BalAcc=0.9129 F1=0.9133 MCC=0.8258
+Epoch 030 val  : loss=0.5860 AUROC=0.9545 AUPRC=0.9472 BalAcc=0.8356 F1=0.8124 MCC=0.6928
+  learning_rate_used=2.421e-04; learning_rate_next=2.384e-04; elapsed=85.0s
+Epoch 031 train: loss=0.2496 AUROC=0.9707 AUPRC=0.9690 BalAcc=0.9131 F1=0.9135 MCC=0.8262
+Epoch 031 val  : loss=0.3809 AUROC=0.9549 AUPRC=0.9471 BalAcc=0.8723 F1=0.8821 MCC=0.7550
+  learning_rate_used=2.384e-04; learning_rate_next=2.345e-04; elapsed=74.5s
+Epoch 032 train: loss=0.2410 AUROC=0.9723 AUPRC=0.9712 BalAcc=0.9170 F1=0.9177 MCC=0.8340
+Epoch 032 val  : loss=0.4049 AUROC=0.9524 AUPRC=0.9441 BalAcc=0.8708 F1=0.8646 MCC=0.7447
+  learning_rate_used=2.345e-04; learning_rate_next=2.306e-04; elapsed=74.6s
+Epoch 033 train: loss=0.2396 AUROC=0.9727 AUPRC=0.9716 BalAcc=0.9174 F1=0.9179 MCC=0.8348
+Epoch 033 val  : loss=0.3242 AUROC=0.9565 AUPRC=0.9519 BalAcc=0.8888 F1=0.8915 MCC=0.7785
+  learning_rate_used=2.306e-04; learning_rate_next=2.266e-04; elapsed=77.4s
+Epoch 034 train: loss=0.2275 AUROC=0.9761 AUPRC=0.9752 BalAcc=0.9239 F1=0.9243 MCC=0.8479
+Epoch 034 val  : loss=0.4029 AUROC=0.9559 AUPRC=0.9491 BalAcc=0.8880 F1=0.8929 MCC=0.7792
+  learning_rate_used=2.266e-04; learning_rate_next=2.225e-04; elapsed=76.9s
+Epoch 035 train: loss=0.2323 AUROC=0.9754 AUPRC=0.9740 BalAcc=0.9223 F1=0.9229 MCC=0.8447
+Epoch 035 val  : loss=0.4581 AUROC=0.9539 AUPRC=0.9466 BalAcc=0.8651 F1=0.8561 MCC=0.7359
+  learning_rate_used=2.225e-04; learning_rate_next=2.184e-04; elapsed=74.5s
+Epoch 036 train: loss=0.2241 AUROC=0.9769 AUPRC=0.9760 BalAcc=0.9272 F1=0.9276 MCC=0.8544
+Epoch 036 val  : loss=0.3683 AUROC=0.9520 AUPRC=0.9421 BalAcc=0.8846 F1=0.8846 MCC=0.7691
+  learning_rate_used=2.184e-04; learning_rate_next=2.142e-04; elapsed=74.5s
+Early stopping after 36 epochs.
+Binary threshold: 0.315608 (strategy=val-mcc, validation_score=0.788058)
+TEST 3: loss=0.3589 AUROC=0.9463 AUPRC=0.9460 BalAcc=0.8646 F1=0.8729 MCC=0.7355
+Outputs written to /data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/cv_maa_ablation_seed_1_68253/dna_c32_dap/MYC2_ja_2h_chipseq_Yin2023/test_chr_3
+Binary predictions: binary_classification_results.tsv
+Binary metrics: binary_classification_metrics.json
+ROC plot: roc_curve.png
+Precision-recall plot: precision_recall_curve.png
+Regression predictions: regression_results.tsv
+Regression metrics: regression_metrics.json
+Joint summary: multitask_summary.txt
+Confusion matrix: binary_confusion_matrix.tsv

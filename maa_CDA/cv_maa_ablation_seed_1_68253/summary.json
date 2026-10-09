@@ -1,0 +1,68 @@
+{
+  "seed": 1,
+  "expected_runs": 70,
+  "completed_runs": 70,
+  "variants": [
+    {
+      "variant": "dna",
+      "channel_increase": 0,
+      "dap": 0,
+      "atac": 0,
+      "input_mode": "dna"
+    },
+    {
+      "variant": "dna_c32",
+      "channel_increase": 32,
+      "dap": 0,
+      "atac": 0,
+      "input_mode": "dna"
+    },
+    {
+      "variant": "dna_dap",
+      "channel_increase": 0,
+      "dap": 1,
+      "atac": 0,
+      "input_mode": "dna-dap"
+    },
+    {
+      "variant": "dna_atac",
+      "channel_increase": 0,
+      "dap": 0,
+      "atac": 1,
+      "input_mode": "dna-atac"
+    },
+    {
+      "variant": "dna_dap_atac",
+      "channel_increase": 0,
+      "dap": 1,
+      "atac": 1,
+      "input_mode": "dna-dap-atac"
+    },
+    {
+      "variant": "dna_c32_dap",
+      "channel_increase": 32,
+      "dap": 1,
+      "atac": 0,
+      "input_mode": "dna-dap"
+    },
+    {
+      "variant": "dna_c32_atac",
+      "channel_increase": 32,
+      "dap": 0,
+      "atac": 1,
+      "input_mode": "dna-atac"
+    }
+  ],
+  "tfs": [
+    "MYC2_ja_2h_chipseq_Yin2023",
+    "MYC3_air_jablock_2h_chipseq_Yin2023"
+  ],
+  "comparison_passed": true,
+  "errors": [],
+  "train_script": "/data/projects/SFB_A03/jan/AT_TFBS/maa_CDA/slurm/maa-ablation-launch.LJgwoOto/maa.py",
+  "train_script_sha256": "e6bf9cbe64ee678ca3fc708ebbc762e31f8f8028c007ea7677a4aed599073a90",
+  "input_policy": "selected_DAP_ATAC_tracks_used_in_train_validation_and_test",
+  "std_definition": "sample_standard_deviation_across_five_test_chromosomes",
+  "full_factorial": false,
+  "effect_definition": "finite_differences_averaged_over_available_complete_contexts_then_over_chromosomes"
+}
