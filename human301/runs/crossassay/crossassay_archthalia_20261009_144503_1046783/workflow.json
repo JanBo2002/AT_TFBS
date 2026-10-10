@@ -1,0 +1,1094 @@
+{
+  "format": "hum301-crossassay-archthalia-v3",
+  "run_id": "crossassay_archthalia_20261009_144503_1046783",
+  "script_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301",
+  "data_root": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/ArchThalia-ML",
+  "input_roots": {
+    "CHIP": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS",
+    "GHTS": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS"
+  },
+  "input_sources": {
+    "FLI1": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/FLI1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/FLI1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/FLI1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/FLI1/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/FLI1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/FLI1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/FLI1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/FLI1/random.fa"
+        }
+      }
+    },
+    "FOSL2": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/FOSL2/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/FOSL2/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/FOSL2/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/FOSL2/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/FOSL2/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/FOSL2/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/FOSL2/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/FOSL2/random.fa"
+        }
+      }
+    },
+    "GABPA": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/GABPA/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/GABPA/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/GABPA/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/GABPA/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/GABPA/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/GABPA/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/GABPA/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/GABPA/random.fa"
+        }
+      }
+    },
+    "GLI4": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/GLI4/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/GLI4/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/GLI4/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/GLI4/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/GLI4/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/GLI4/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/GLI4/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/GLI4/random.fa"
+        }
+      }
+    },
+    "LEF1": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEF1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEF1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEF1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEF1/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEF1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEF1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEF1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEF1/random.fa"
+        }
+      }
+    },
+    "LEUTX": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEUTX/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEUTX/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEUTX/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEUTX/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEUTX/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEUTX/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEUTX/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEUTX/random.fa"
+        }
+      }
+    },
+    "NR1H4": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/NR1H4/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/NR1H4/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/NR1H4/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/NR1H4/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/NR1H4/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/NR1H4/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/NR1H4/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/NR1H4/random.fa"
+        }
+      }
+    },
+    "PAX7": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/PAX7/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/PAX7/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/PAX7/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/PAX7/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/PAX7/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/PAX7/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/PAX7/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/PAX7/random.fa"
+        }
+      }
+    },
+    "RFX5": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/RFX5/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/RFX5/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/RFX5/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/RFX5/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/RFX5/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/RFX5/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/RFX5/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/RFX5/random.fa"
+        }
+      }
+    },
+    "RORB": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/RORB/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/RORB/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/RORB/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/RORB/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/RORB/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/RORB/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/RORB/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/RORB/random.fa"
+        }
+      }
+    },
+    "SOX2": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/SOX2/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/SOX2/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/SOX2/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/SOX2/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/SOX2/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/SOX2/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/SOX2/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/SOX2/random.fa"
+        }
+      }
+    },
+    "USF3": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/USF3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/USF3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/USF3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/USF3/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/USF3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/USF3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/USF3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/USF3/random.fa"
+        }
+      }
+    },
+    "VDR": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/VDR/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/VDR/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/VDR/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/VDR/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/VDR/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/VDR/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/VDR/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/VDR/random.fa"
+        }
+      }
+    },
+    "YY1": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/YY1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/YY1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/YY1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/YY1/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/YY1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/YY1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/YY1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/YY1/random.fa"
+        }
+      }
+    },
+    "ZBTB8A": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZBTB8A/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZBTB8A/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZBTB8A/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZBTB8A/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZBTB8A/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZBTB8A/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZBTB8A/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZBTB8A/random.fa"
+        }
+      }
+    },
+    "ZFP3": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZFP3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZFP3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZFP3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZFP3/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZFP3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZFP3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZFP3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZFP3/random.fa"
+        }
+      }
+    },
+    "ZNF696": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF696/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF696/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF696/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF696/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF696/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF696/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF696/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF696/random.fa"
+        }
+      }
+    },
+    "ZNF772": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF772/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF772/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF772/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF772/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF772/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF772/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF772/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF772/random.fa"
+        }
+      }
+    },
+    "ZNF773": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF773/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/ZNF773/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF773/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/ZNF773/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF773/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/ZNF773/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF773/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/ZNF773/random.fa"
+        }
+      }
+    },
+    "TERF1": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/TERF1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/TERF1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/TERF1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/TERF1/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/TERF1/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/TERF1/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/TERF1/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/TERF1/random.fa"
+        }
+      }
+    },
+    "CTCF": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/CTCF/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/CTCF/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/CTCF/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/CTCF/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/CTCF/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/CTCF/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/CTCF/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/CTCF/random.fa"
+        }
+      }
+    },
+    "CREB3L3": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/CREB3L3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/CREB3L3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/CREB3L3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/CREB3L3/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/CREB3L3/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/CREB3L3/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/CREB3L3/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/CREB3L3/random.fa"
+        }
+      }
+    },
+    "MAX": {
+      "CHIP": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/MAX/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/MAX/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/MAX/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/MAX/random.fa"
+        }
+      },
+      "GHTS": {
+        "kind": "fasta",
+        "paths": {
+          "train_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/MAX/positives.fa",
+          "train_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/MAX/random.fa",
+          "test_positive_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/MAX/positives.fa",
+          "test_negative_fasta": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/MAX/random.fa"
+        }
+      }
+    }
+  },
+  "genome_fasta": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/general_data/genome/hg38.fa",
+  "validation_chromosomes": [
+    "chr5",
+    "chr7"
+  ],
+  "model_script": "hum301_motif64_local.py",
+  "data_script": "hum301_data.py",
+  "script_sha256": {
+    "hum301_motif64_local.py": "d0aa188f3a2cdca39c5e60baeeb20be3d5caedff9f762bb6784e64211bc5f6d9",
+    "hum301_data.py": "c37f6d9d5342b4779e6fd39de8f8a5ee4f0fd2ee1cf4c743485ae9eb97e33dd3"
+  },
+  "tfs": [
+    "FLI1",
+    "FOSL2",
+    "GABPA",
+    "GLI4",
+    "LEF1",
+    "LEUTX",
+    "NR1H4",
+    "PAX7",
+    "RFX5",
+    "RORB",
+    "SOX2",
+    "USF3",
+    "VDR",
+    "YY1",
+    "ZBTB8A",
+    "ZFP3",
+    "ZNF696",
+    "ZNF772",
+    "ZNF773",
+    "TERF1",
+    "CTCF",
+    "CREB3L3",
+    "MAX"
+  ],
+  "seed": 1,
+  "seed_for_new_tfs": 1,
+  "seeds_by_tf": {
+    "FLI1": [
+      1
+    ],
+    "FOSL2": [
+      1
+    ],
+    "GABPA": [
+      1
+    ],
+    "GLI4": [
+      1
+    ],
+    "LEF1": [
+      1
+    ],
+    "LEUTX": [
+      1
+    ],
+    "NR1H4": [
+      1
+    ],
+    "PAX7": [
+      1
+    ],
+    "RFX5": [
+      1
+    ],
+    "RORB": [
+      1
+    ],
+    "SOX2": [
+      1
+    ],
+    "USF3": [
+      1
+    ],
+    "VDR": [
+      1
+    ],
+    "YY1": [
+      1
+    ],
+    "ZBTB8A": [
+      1
+    ],
+    "ZFP3": [
+      1
+    ],
+    "ZNF696": [
+      1
+    ],
+    "ZNF772": [
+      1
+    ],
+    "ZNF773": [
+      1
+    ],
+    "TERF1": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "CTCF": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "CREB3L3": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "MAX": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "new_tfs": [
+    "FLI1",
+    "FOSL2",
+    "GABPA",
+    "GLI4",
+    "LEF1",
+    "LEUTX",
+    "NR1H4",
+    "PAX7",
+    "RFX5",
+    "RORB",
+    "SOX2",
+    "USF3",
+    "VDR",
+    "YY1",
+    "ZBTB8A",
+    "ZFP3",
+    "ZNF696",
+    "ZNF772",
+    "ZNF773"
+  ],
+  "multiseed_tfs": [
+    "TERF1",
+    "CTCF",
+    "CREB3L3",
+    "MAX"
+  ],
+  "runs": [
+    {
+      "tf": "FLI1",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/FLI1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "FLI1",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/FLI1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "FOSL2",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/FOSL2/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "FOSL2",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/FOSL2/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "GABPA",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/GABPA/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "GABPA",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/GABPA/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "GLI4",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/GLI4/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "GLI4",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/GLI4/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "LEF1",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/LEF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "LEF1",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/LEF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "LEUTX",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/LEUTX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "LEUTX",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/LEUTX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "NR1H4",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/NR1H4/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "NR1H4",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/NR1H4/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "PAX7",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/PAX7/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "PAX7",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/PAX7/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "RFX5",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/RFX5/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "RFX5",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/RFX5/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "RORB",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/RORB/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "RORB",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/RORB/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "SOX2",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/SOX2/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "SOX2",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/SOX2/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "USF3",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/USF3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "USF3",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/USF3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "VDR",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/VDR/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "VDR",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/VDR/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "YY1",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/YY1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "YY1",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/YY1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "ZBTB8A",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZBTB8A/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "ZBTB8A",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZBTB8A/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "ZFP3",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZFP3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "ZFP3",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZFP3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "ZNF696",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF696/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "ZNF696",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF696/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "ZNF772",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF772/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "ZNF772",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF772/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "ZNF773",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF773/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "ZNF773",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/ZNF773/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "CHIP",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "GHTS",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed2"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "CHIP",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed3"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "GHTS",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed3"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "CHIP",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed4"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "GHTS",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed4"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "CHIP",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/CHIP_seed5"
+    },
+    {
+      "tf": "TERF1",
+      "train_assay": "GHTS",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/TERF1/crossassay_archthalia_20261009_144503_1046783/GHTS_seed5"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "CHIP",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "GHTS",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/GHTS_seed2"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "CHIP",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/CHIP_seed3"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "GHTS",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/GHTS_seed3"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "CHIP",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/CHIP_seed4"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "GHTS",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/GHTS_seed4"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "CHIP",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/CHIP_seed5"
+    },
+    {
+      "tf": "CTCF",
+      "train_assay": "GHTS",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CTCF/crossassay_archthalia_20261009_144503_1046783/GHTS_seed5"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "CHIP",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "GHTS",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed2"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "CHIP",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed3"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "GHTS",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed3"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "CHIP",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed4"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "GHTS",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed4"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "CHIP",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed5"
+    },
+    {
+      "tf": "CREB3L3",
+      "train_assay": "GHTS",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/GHTS_seed5"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "CHIP",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed1"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "GHTS",
+      "seed": 1,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed1"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "CHIP",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "GHTS",
+      "seed": 2,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed2"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "CHIP",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed3"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "GHTS",
+      "seed": 3,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed3"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "CHIP",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed4"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "GHTS",
+      "seed": 4,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed4"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "CHIP",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/CHIP_seed5"
+    },
+    {
+      "tf": "MAX",
+      "train_assay": "GHTS",
+      "seed": 5,
+      "run_dir": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/MAX/crossassay_archthalia_20261009_144503_1046783/GHTS_seed5"
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+TF=CREB3L3 train=CHIP seed=2 model=hum301_motif64_local.py
+/home/jbossenz/miniforge3/envs/at_env/bin/python -u /data/projects/SFB_A03/jan/AT_TFBS/human301/hum301_motif64_local.py train --cache /data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/ArchThalia-ML/CREB3L3/CHIP/dataset.npz --output-dir /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2 --input-length 256 --embed-channels 64 --encoder-channels 80 96 128 --heads 4 --ffn-channels 256 --classification-readout local-logsumexp --task-mode classification --checkpoint-objective classification-auprc --threshold-strategy val-mcc --negatives-per-positive 10 --batch-size 88 --hard-negative-fraction 0 --epochs 100 --patience 20 --learning-rate 0.0003 --min-learning-rate 0.000001 --weight-decay 0.0001 --dropout 0.1 --activation relu --reverse-complement-probability 0.5 --eval-crops multi --eval-rc --no-balanced-evaluation --eval-batch-size 128 --num-workers 2 --seed 2 --device cuda --skip-test
+Window geometry: 256 bp from 301 bp; crop starts 0..45; shifts -22..+23; fresh uniform draw per access
+Evaluation: crops (0, 22, 23, 45), reverse complement=True; all samples
+train: n=36,663, positive=363, negative=36,300
+  val: n=12,524, positive=124, negative=12,400
+ test: n=40,198, positive=398, negative=39,800
+Device: cuda
+Hidden activation: RELU
+Parameters: 1,032,981 total; 1,032,981 trainable
+Architecture: motif kernels 9/12; encoder 128/64/64; original five-block bottleneck at 64; decoder 64/128/256
+  negatives seen=10.0%; hard negatives=0
+Epoch 001 train: loss=1.2359 AUROC=0.6478 AUPRC=0.1608 BalAcc=0.6128 F1=0.2243 MCC=0.1325
+Epoch 001 val  : loss=0.5359 AUROC=0.8366 AUPRC=0.1071 BalAcc=0.7555 F1=0.0658 MCC=0.1256
+  learning_rate_used=3.000e-04; learning_rate_next=2.999e-04; elapsed=7.1s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.107079)
+  negatives seen=20.0%; hard negatives=0
+Epoch 002 train: loss=0.9611 AUROC=0.8153 AUPRC=0.3582 BalAcc=0.7453 F1=0.3540 MCC=0.3128
+Epoch 002 val  : loss=0.2816 AUROC=0.8966 AUPRC=0.1868 BalAcc=0.7979 F1=0.1485 MCC=0.2183
+  learning_rate_used=2.999e-04; learning_rate_next=2.997e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.186786)
+  negatives seen=30.0%; hard negatives=0
+Epoch 003 train: loss=0.7623 AUROC=0.8912 AUPRC=0.5703 BalAcc=0.8044 F1=0.4448 MCC=0.4166
+Epoch 003 val  : loss=0.3403 AUROC=0.9278 AUPRC=0.2836 BalAcc=0.8510 F1=0.1247 MCC=0.2143
+  learning_rate_used=2.997e-04; learning_rate_next=2.993e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.283629)
+  negatives seen=40.0%; hard negatives=0
+Epoch 004 train: loss=0.6733 AUROC=0.9152 AUPRC=0.6250 BalAcc=0.8466 F1=0.5136 MCC=0.4939
+Epoch 004 val  : loss=0.1820 AUROC=0.9293 AUPRC=0.2724 BalAcc=0.7865 F1=0.3008 MCC=0.3360
+  learning_rate_used=2.993e-04; learning_rate_next=2.988e-04; elapsed=5.7s
+  negatives seen=50.0%; hard negatives=0
+Epoch 005 train: loss=0.6100 AUROC=0.9331 AUPRC=0.6386 BalAcc=0.8671 F1=0.5486 MCC=0.5329
+Epoch 005 val  : loss=0.1959 AUROC=0.9185 AUPRC=0.2504 BalAcc=0.7877 F1=0.2664 MCC=0.3098
+  learning_rate_used=2.988e-04; learning_rate_next=2.982e-04; elapsed=5.7s
+  negatives seen=60.0%; hard negatives=0
+Epoch 006 train: loss=0.5556 AUROC=0.9441 AUPRC=0.7099 BalAcc=0.8680 F1=0.5594 MCC=0.5421
+Epoch 006 val  : loss=0.1648 AUROC=0.9442 AUPRC=0.3734 BalAcc=0.8364 F1=0.3063 MCC=0.3602
+  learning_rate_used=2.982e-04; learning_rate_next=2.974e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.373448)
+  negatives seen=70.0%; hard negatives=0
+Epoch 007 train: loss=0.4837 AUROC=0.9595 AUPRC=0.7475 BalAcc=0.8872 F1=0.6148 MCC=0.5975
+Epoch 007 val  : loss=1.0743 AUROC=0.9462 AUPRC=0.4212 BalAcc=0.7503 F1=0.0398 MCC=0.0993
+  learning_rate_used=2.974e-04; learning_rate_next=2.964e-04; elapsed=5.6s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.421202)
+  negatives seen=80.0%; hard negatives=0
+Epoch 008 train: loss=0.4941 AUROC=0.9575 AUPRC=0.7456 BalAcc=0.8957 F1=0.6240 MCC=0.6092
+Epoch 008 val  : loss=0.5303 AUROC=0.9509 AUPRC=0.4472 BalAcc=0.8547 F1=0.0711 MCC=0.1607
+  learning_rate_used=2.964e-04; learning_rate_next=2.953e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.447153)
+  negatives seen=90.0%; hard negatives=0
+Epoch 009 train: loss=0.4309 AUROC=0.9683 AUPRC=0.8005 BalAcc=0.9120 F1=0.6864 MCC=0.6703
+Epoch 009 val  : loss=0.1991 AUROC=0.9464 AUPRC=0.4514 BalAcc=0.6565 F1=0.4286 MCC=0.4564
+  learning_rate_used=2.953e-04; learning_rate_next=2.941e-04; elapsed=5.8s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.451409)
+  negatives seen=100.0%; hard negatives=0
+Epoch 010 train: loss=0.3925 AUROC=0.9740 AUPRC=0.8274 BalAcc=0.9249 F1=0.7269 MCC=0.7117
+Epoch 010 val  : loss=0.2684 AUROC=0.9404 AUPRC=0.4234 BalAcc=0.8659 F1=0.1616 MCC=0.2533
+  learning_rate_used=2.941e-04; learning_rate_next=2.927e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 011 train: loss=0.3554 AUROC=0.9772 AUPRC=0.8515 BalAcc=0.9364 F1=0.7542 MCC=0.7407
+Epoch 011 val  : loss=0.1632 AUROC=0.9578 AUPRC=0.5079 BalAcc=0.7938 F1=0.4744 MCC=0.4784
+  learning_rate_used=2.927e-04; learning_rate_next=2.912e-04; elapsed=5.8s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.507852)
+  negatives seen=100.0%; hard negatives=0
+Epoch 012 train: loss=0.3095 AUROC=0.9839 AUPRC=0.8520 BalAcc=0.9322 F1=0.7644 MCC=0.7490
+Epoch 012 val  : loss=0.5806 AUROC=0.9584 AUPRC=0.5229 BalAcc=0.8588 F1=0.0734 MCC=0.1643
+  learning_rate_used=2.912e-04; learning_rate_next=2.895e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.522918)
+  negatives seen=100.0%; hard negatives=0
+Epoch 013 train: loss=0.3159 AUROC=0.9835 AUPRC=0.8749 BalAcc=0.9388 F1=0.7698 MCC=0.7559
+Epoch 013 val  : loss=0.1340 AUROC=0.9626 AUPRC=0.5572 BalAcc=0.8581 F1=0.3446 MCC=0.3985
+  learning_rate_used=2.895e-04; learning_rate_next=2.877e-04; elapsed=5.8s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.557232)
+  negatives seen=100.0%; hard negatives=0
+Epoch 014 train: loss=0.2462 AUROC=0.9892 AUPRC=0.9115 BalAcc=0.9522 F1=0.8207 MCC=0.8083
+Epoch 014 val  : loss=0.2160 AUROC=0.9472 AUPRC=0.4805 BalAcc=0.7317 F1=0.4936 MCC=0.4896
+  learning_rate_used=2.877e-04; learning_rate_next=2.858e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 015 train: loss=0.2798 AUROC=0.9869 AUPRC=0.8879 BalAcc=0.9402 F1=0.7712 MCC=0.7577
+Epoch 015 val  : loss=0.2813 AUROC=0.9423 AUPRC=0.4621 BalAcc=0.6287 F1=0.3902 MCC=0.4517
+  learning_rate_used=2.858e-04; learning_rate_next=2.837e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 016 train: loss=0.1891 AUROC=0.9930 AUPRC=0.9358 BalAcc=0.9591 F1=0.8452 MCC=0.8339
+Epoch 016 val  : loss=0.1607 AUROC=0.9613 AUPRC=0.5254 BalAcc=0.7701 F1=0.4626 MCC=0.4622
+  learning_rate_used=2.837e-04; learning_rate_next=2.815e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 017 train: loss=0.1965 AUROC=0.9929 AUPRC=0.9327 BalAcc=0.9624 F1=0.8433 MCC=0.8327
+Epoch 017 val  : loss=2.0735 AUROC=0.9625 AUPRC=0.4890 BalAcc=0.6901 F1=0.0316 MCC=0.0771
+  learning_rate_used=2.815e-04; learning_rate_next=2.792e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 018 train: loss=0.2552 AUROC=0.9894 AUPRC=0.9084 BalAcc=0.9565 F1=0.8175 MCC=0.8063
+Epoch 018 val  : loss=0.1615 AUROC=0.9542 AUPRC=0.5621 BalAcc=0.7946 F1=0.5086 MCC=0.5087
+  learning_rate_used=2.792e-04; learning_rate_next=2.767e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.562085)
+  negatives seen=100.0%; hard negatives=0
+Epoch 019 train: loss=0.1868 AUROC=0.9933 AUPRC=0.9341 BalAcc=0.9612 F1=0.8429 MCC=0.8321
+Epoch 019 val  : loss=0.2624 AUROC=0.9567 AUPRC=0.5573 BalAcc=0.6652 F1=0.4852 MCC=0.5466
+  learning_rate_used=2.767e-04; learning_rate_next=2.741e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 020 train: loss=0.1989 AUROC=0.9930 AUPRC=0.9271 BalAcc=0.9661 F1=0.8533 MCC=0.8434
+Epoch 020 val  : loss=0.2193 AUROC=0.9427 AUPRC=0.4825 BalAcc=0.7203 F1=0.5116 MCC=0.5137
+  learning_rate_used=2.741e-04; learning_rate_next=2.714e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 021 train: loss=0.1757 AUROC=0.9945 AUPRC=0.9487 BalAcc=0.9652 F1=0.8643 MCC=0.8541
+Epoch 021 val  : loss=0.1190 AUROC=0.9694 AUPRC=0.5745 BalAcc=0.8486 F1=0.4809 MCC=0.5015
+  learning_rate_used=2.714e-04; learning_rate_next=2.686e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.574453)
+  negatives seen=100.0%; hard negatives=0
+Epoch 022 train: loss=0.1937 AUROC=0.9942 AUPRC=0.9335 BalAcc=0.9627 F1=0.8829 MCC=0.8726
+Epoch 022 val  : loss=0.1299 AUROC=0.9633 AUPRC=0.5530 BalAcc=0.8250 F1=0.4740 MCC=0.4877
+  learning_rate_used=2.686e-04; learning_rate_next=2.657e-04; elapsed=5.6s
+  negatives seen=100.0%; hard negatives=0
+Epoch 023 train: loss=0.1440 AUROC=0.9959 AUPRC=0.9574 BalAcc=0.9742 F1=0.8889 MCC=0.8805
+Epoch 023 val  : loss=0.2689 AUROC=0.9575 AUPRC=0.5066 BalAcc=0.6888 F1=0.4974 MCC=0.5203
+  learning_rate_used=2.657e-04; learning_rate_next=2.626e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 024 train: loss=0.1514 AUROC=0.9964 AUPRC=0.9657 BalAcc=0.9767 F1=0.8994 MCC=0.8916
+Epoch 024 val  : loss=0.1910 AUROC=0.9605 AUPRC=0.5362 BalAcc=0.7320 F1=0.5088 MCC=0.5063
+  learning_rate_used=2.626e-04; learning_rate_next=2.595e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 025 train: loss=0.1332 AUROC=0.9964 AUPRC=0.9579 BalAcc=0.9707 F1=0.8794 MCC=0.8703
+Epoch 025 val  : loss=0.3256 AUROC=0.9565 AUPRC=0.5353 BalAcc=0.6650 F1=0.4767 MCC=0.5289
+  learning_rate_used=2.595e-04; learning_rate_next=2.562e-04; elapsed=5.6s
+  negatives seen=100.0%; hard negatives=0
+Epoch 026 train: loss=0.1451 AUROC=0.9962 AUPRC=0.9620 BalAcc=0.9722 F1=0.8724 MCC=0.8636
+Epoch 026 val  : loss=0.3140 AUROC=0.9528 AUPRC=0.4618 BalAcc=0.6445 F1=0.4091 MCC=0.4450
+  learning_rate_used=2.562e-04; learning_rate_next=2.528e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 027 train: loss=0.1820 AUROC=0.9956 AUPRC=0.9494 BalAcc=0.9690 F1=0.8955 MCC=0.8865
+Epoch 027 val  : loss=0.2533 AUROC=0.9591 AUPRC=0.4869 BalAcc=0.6920 F1=0.4571 MCC=0.4604
+  learning_rate_used=2.528e-04; learning_rate_next=2.494e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 028 train: loss=0.1319 AUROC=0.9965 AUPRC=0.9621 BalAcc=0.9752 F1=0.8968 MCC=0.8887
+Epoch 028 val  : loss=0.1845 AUROC=0.9644 AUPRC=0.5431 BalAcc=0.7402 F1=0.5263 MCC=0.5241
+  learning_rate_used=2.494e-04; learning_rate_next=2.458e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 029 train: loss=0.1688 AUROC=0.9962 AUPRC=0.9558 BalAcc=0.9725 F1=0.9041 MCC=0.8959
+Epoch 029 val  : loss=0.6869 AUROC=0.9627 AUPRC=0.5363 BalAcc=0.8588 F1=0.0734 MCC=0.1643
+  learning_rate_used=2.458e-04; learning_rate_next=2.421e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 030 train: loss=0.1253 AUROC=0.9975 AUPRC=0.9717 BalAcc=0.9760 F1=0.9037 MCC=0.8959
+Epoch 030 val  : loss=0.2501 AUROC=0.9580 AUPRC=0.5010 BalAcc=0.7357 F1=0.4979 MCC=0.4936
+  learning_rate_used=2.421e-04; learning_rate_next=2.384e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 031 train: loss=0.1598 AUROC=0.9966 AUPRC=0.9681 BalAcc=0.9733 F1=0.9009 MCC=0.8926
+Epoch 031 val  : loss=0.3702 AUROC=0.9482 AUPRC=0.4592 BalAcc=0.6646 F1=0.4505 MCC=0.4802
+  learning_rate_used=2.384e-04; learning_rate_next=2.345e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 032 train: loss=0.1601 AUROC=0.9968 AUPRC=0.9711 BalAcc=0.9764 F1=0.9176 MCC=0.9104
+Epoch 032 val  : loss=0.1485 AUROC=0.9593 AUPRC=0.5301 BalAcc=0.8552 F1=0.3590 MCC=0.4085
+  learning_rate_used=2.345e-04; learning_rate_next=2.306e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 033 train: loss=0.0934 AUROC=0.9983 AUPRC=0.9806 BalAcc=0.9782 F1=0.9227 MCC=0.9158
+Epoch 033 val  : loss=0.1354 AUROC=0.9661 AUPRC=0.5510 BalAcc=0.8715 F1=0.3755 MCC=0.4278
+  learning_rate_used=2.306e-04; learning_rate_next=2.266e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 034 train: loss=0.1175 AUROC=0.9981 AUPRC=0.9809 BalAcc=0.9800 F1=0.9277 MCC=0.9213
+Epoch 034 val  : loss=0.1677 AUROC=0.9667 AUPRC=0.5114 BalAcc=0.9035 F1=0.2909 MCC=0.3747
+  learning_rate_used=2.266e-04; learning_rate_next=2.225e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 035 train: loss=0.1133 AUROC=0.9971 AUPRC=0.9659 BalAcc=0.9795 F1=0.9124 MCC=0.9053
+Epoch 035 val  : loss=0.3496 AUROC=0.9687 AUPRC=0.5933 BalAcc=0.6490 F1=0.4485 MCC=0.5166
+  learning_rate_used=2.225e-04; learning_rate_next=2.184e-04; elapsed=5.7s
+  saved new best checkpoint: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/best_model.pt (objective=classification-auprc, score=0.593338)
+  negatives seen=100.0%; hard negatives=0
+Epoch 036 train: loss=0.1090 AUROC=0.9980 AUPRC=0.9723 BalAcc=0.9826 F1=0.9402 MCC=0.9348
+Epoch 036 val  : loss=0.1370 AUROC=0.9679 AUPRC=0.5613 BalAcc=0.8397 F1=0.4468 MCC=0.4709
+  learning_rate_used=2.184e-04; learning_rate_next=2.142e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 037 train: loss=0.0722 AUROC=0.9977 AUPRC=0.9674 BalAcc=0.9888 F1=0.9410 MCC=0.9362
+Epoch 037 val  : loss=0.2104 AUROC=0.9508 AUPRC=0.5003 BalAcc=0.8045 F1=0.4413 MCC=0.4540
+  learning_rate_used=2.142e-04; learning_rate_next=2.099e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 038 train: loss=0.1331 AUROC=0.9978 AUPRC=0.9772 BalAcc=0.9789 F1=0.9288 MCC=0.9223
+Epoch 038 val  : loss=0.1465 AUROC=0.9661 AUPRC=0.5416 BalAcc=0.8765 F1=0.3328 MCC=0.3968
+  learning_rate_used=2.099e-04; learning_rate_next=2.055e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 039 train: loss=0.0705 AUROC=0.9988 AUPRC=0.9874 BalAcc=0.9877 F1=0.9421 MCC=0.9372
+Epoch 039 val  : loss=0.1456 AUROC=0.9672 AUPRC=0.5816 BalAcc=0.8260 F1=0.5093 MCC=0.5175
+  learning_rate_used=2.055e-04; learning_rate_next=2.011e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 040 train: loss=0.1109 AUROC=0.9983 AUPRC=0.9849 BalAcc=0.9817 F1=0.9316 MCC=0.9255
+Epoch 040 val  : loss=0.3206 AUROC=0.9617 AUPRC=0.5712 BalAcc=0.6810 F1=0.5028 MCC=0.5422
+  learning_rate_used=2.011e-04; learning_rate_next=1.967e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 041 train: loss=0.0756 AUROC=0.9986 AUPRC=0.9823 BalAcc=0.9877 F1=0.9421 MCC=0.9372
+Epoch 041 val  : loss=0.1685 AUROC=0.9670 AUPRC=0.5680 BalAcc=0.8111 F1=0.5455 MCC=0.5452
+  learning_rate_used=1.967e-04; learning_rate_next=1.922e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 042 train: loss=0.0899 AUROC=0.9989 AUPRC=0.9857 BalAcc=0.9795 F1=0.9448 MCC=0.9395
+Epoch 042 val  : loss=0.1762 AUROC=0.9712 AUPRC=0.5557 BalAcc=0.9135 F1=0.2776 MCC=0.3680
+  learning_rate_used=1.922e-04; learning_rate_next=1.877e-04; elapsed=5.9s
+  negatives seen=100.0%; hard negatives=0
+Epoch 043 train: loss=0.0852 AUROC=0.9987 AUPRC=0.9854 BalAcc=0.9851 F1=0.9406 MCC=0.9353
+Epoch 043 val  : loss=0.4003 AUROC=0.9584 AUPRC=0.4999 BalAcc=0.6768 F1=0.4809 MCC=0.5113
+  learning_rate_used=1.877e-04; learning_rate_next=1.831e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 044 train: loss=0.1248 AUROC=0.9987 AUPRC=0.9870 BalAcc=0.9799 F1=0.9374 MCC=0.9316
+Epoch 044 val  : loss=0.1355 AUROC=0.9718 AUPRC=0.5639 BalAcc=0.8165 F1=0.4494 MCC=0.4647
+  learning_rate_used=1.831e-04; learning_rate_next=1.785e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 045 train: loss=0.0931 AUROC=0.9987 AUPRC=0.9872 BalAcc=0.9821 F1=0.9353 MCC=0.9295
+Epoch 045 val  : loss=0.2258 AUROC=0.9558 AUPRC=0.5120 BalAcc=0.7554 F1=0.5039 MCC=0.4990
+  learning_rate_used=1.785e-04; learning_rate_next=1.739e-04; elapsed=5.6s
+  negatives seen=100.0%; hard negatives=0
+Epoch 046 train: loss=0.0673 AUROC=0.9988 AUPRC=0.9790 BalAcc=0.9898 F1=0.9611 MCC=0.9575
+Epoch 046 val  : loss=0.1509 AUROC=0.9714 AUPRC=0.5805 BalAcc=0.7987 F1=0.5155 MCC=0.5157
+  learning_rate_used=1.739e-04; learning_rate_next=1.692e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 047 train: loss=0.0627 AUROC=0.9988 AUPRC=0.9806 BalAcc=0.9904 F1=0.9548 MCC=0.9508
+Epoch 047 val  : loss=0.1461 AUROC=0.9696 AUPRC=0.5749 BalAcc=0.8051 F1=0.4611 MCC=0.4706
+  learning_rate_used=1.692e-04; learning_rate_next=1.646e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 048 train: loss=0.0625 AUROC=0.9993 AUPRC=0.9924 BalAcc=0.9855 F1=0.9556 MCC=0.9513
+Epoch 048 val  : loss=0.2093 AUROC=0.9650 AUPRC=0.5627 BalAcc=0.7678 F1=0.5382 MCC=0.5335
+  learning_rate_used=1.646e-04; learning_rate_next=1.599e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 049 train: loss=0.0586 AUROC=0.9984 AUPRC=0.9778 BalAcc=0.9939 F1=0.9652 MCC=0.9622
+Epoch 049 val  : loss=0.2854 AUROC=0.9623 AUPRC=0.5438 BalAcc=0.7125 F1=0.5096 MCC=0.5154
+  learning_rate_used=1.599e-04; learning_rate_next=1.552e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 050 train: loss=0.0821 AUROC=0.9988 AUPRC=0.9835 BalAcc=0.9877 F1=0.9533 MCC=0.9490
+Epoch 050 val  : loss=0.3334 AUROC=0.9616 AUPRC=0.5680 BalAcc=0.7131 F1=0.5521 MCC=0.5743
+  learning_rate_used=1.552e-04; learning_rate_next=1.505e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 051 train: loss=0.0404 AUROC=0.9993 AUPRC=0.9915 BalAcc=0.9926 F1=0.9639 MCC=0.9606
+Epoch 051 val  : loss=0.2145 AUROC=0.9640 AUPRC=0.5479 BalAcc=0.7794 F1=0.5303 MCC=0.5263
+  learning_rate_used=1.505e-04; learning_rate_next=1.458e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 052 train: loss=0.0611 AUROC=0.9993 AUPRC=0.9939 BalAcc=0.9924 F1=0.9742 MCC=0.9717
+Epoch 052 val  : loss=0.1584 AUROC=0.9695 AUPRC=0.5621 BalAcc=0.8948 F1=0.3218 MCC=0.3956
+  learning_rate_used=1.458e-04; learning_rate_next=1.411e-04; elapsed=5.7s
+  negatives seen=100.0%; hard negatives=0
+Epoch 053 train: loss=0.0331 AUROC=0.9996 AUPRC=0.9951 BalAcc=0.9931 F1=0.9690 MCC=0.9662
+Epoch 053 val  : loss=0.4133 AUROC=0.9658 AUPRC=0.5688 BalAcc=0.6731 F1=0.4943 MCC=0.5436
+  learning_rate_used=1.411e-04; learning_rate_next=1.364e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 054 train: loss=0.0465 AUROC=0.9993 AUPRC=0.9868 BalAcc=0.9928 F1=0.9664 MCC=0.9634
+Epoch 054 val  : loss=0.2369 AUROC=0.9672 AUPRC=0.5695 BalAcc=0.7605 F1=0.5702 MCC=0.5685
+  learning_rate_used=1.364e-04; learning_rate_next=1.318e-04; elapsed=5.8s
+  negatives seen=100.0%; hard negatives=0
+Epoch 055 train: loss=0.0469 AUROC=0.9993 AUPRC=0.9908 BalAcc=0.9942 F1=0.9678 MCC=0.9649
+Epoch 055 val  : loss=0.3534 AUROC=0.9657 AUPRC=0.5429 BalAcc=0.6930 F1=0.5189 MCC=0.5490
+  learning_rate_used=1.318e-04; learning_rate_next=1.271e-04; elapsed=5.7s
+Early stopping after 55 epochs.
+Binary threshold: 0.202076 (strategy=val-mcc, validation_score=0.604363)
+Validation-only run completed; frozen model: /data/projects/SFB_A03/jan/AT_TFBS/human301/runs/CREB3L3/crossassay_archthalia_20261009_144503_1046783/CHIP_seed2/model_for_prediction.pt
+CREB3L3: CHIP -> CHIP
+TEST CREB3L3 CHIP -> CHIP: loss=0.3155 AUROC=0.9782 AUPRC=0.5435 BalAcc=0.7335 F1=0.5335 MCC=0.5345
+CREB3L3: CHIP -> GHTS
+TEST CREB3L3 CHIP -> GHTS: loss=0.5141 AUROC=0.8788 AUPRC=0.4526 BalAcc=0.7098 F1=0.4891 MCC=0.4910
+Completed CREB3L3/CHIP: one model, both fixed test sets.
