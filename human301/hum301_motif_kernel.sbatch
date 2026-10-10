@@ -5,21 +5,24 @@
 #SBATCH --mem=32G
 #SBATCH --time=24:00:00
 #SBATCH --chdir=/data/projects/SFB_A03/jan/AT_TFBS/human301
-#SBATCH --output=/data/projects/SFB_A03/jan/AT_TFBS/human301/hum301-kernel-data-%j.out
-#SBATCH --error=/data/projects/SFB_A03/jan/AT_TFBS/human301/hum301-kernel-data-%j.err
-
-# Beide neuen Dateien neben hum301_data.py und hum301_crossassay.py ablegen.
-# Start: sbatch hum301_motif_kernel.sbatch
-# Dieser CPU-Job prueft die vorhandenen Caches und startet danach automatisch
-# das GPU-Array (60 Modelle) und die CPU-Zusammenfassung (120 Auswertungen).
-# Vorhandene Python-Dateien und Datensaetze werden nicht veraendert.
+# Alle drei Dateien neben hum301_data.py und hum301_crossassay.py ablegen.
+# Start: bash hum301_motif_kernel_submit.sh
+# Der Launcher legt den Laufordner an und reicht diese Datei fuer die
+# CPU-Datenpruefung, das GPU-Array und die CPU-Zusammenfassung getrennt ein.
+# Logs und Ergebnisse liegen gemeinsam unter runs/motif_kernel/<RUN_ID>/.
 
 set -euo pipefail
-source "$HOME/miniforge3/etc/profile.d/conda.sh"
-conda activate at_env
+: "${HUM301_KERNEL_STAGE:?Bitte mit bash hum301_motif_kernel_submit.sh starten}"
+if [[ "$HUM301_KERNEL_STAGE" == "plan" ]]; then
+    PYTHON_BIN=python3
+else
+    source "$HOME/miniforge3/etc/profile.d/conda.sh"
+    conda activate at_env
+    PYTHON_BIN=python
+fi
 export PYTHONUNBUFFERED=1
 
-python -u - <<'PY'
+"$PYTHON_BIN" -u - <<'PY'
 import argparse
 import gc
 import os
@@ -32,6 +35,7 @@ from pathlib import Path
 PROJECT = Path("/data/projects/SFB_A03/jan/AT_TFBS")
 CODE = PROJECT / "human301"
 SELF = CODE / "hum301_motif_kernel.sbatch"
+LAUNCHER = CODE / "hum301_motif_kernel_submit.sh"
 MODEL_SCRIPT = "hum301_motif_kernel.py"
 SEED = 1
 ASSAYS = ("CHIP", "GHTS")
@@ -59,7 +63,7 @@ import hum301_crossassay as workflow
 # Nur die Modellwahl in diesem Prozess anpassen; die vorhandene Datei bleibt
 # unveraendert. Trainingsargumente und Test-Evaluation werden wiederverwendet.
 workflow.MODEL_SCRIPT = MODEL_SCRIPT
-STAGE = os.environ.get("HUM301_KERNEL_STAGE", "data")
+STAGE = os.environ["HUM301_KERNEL_STAGE"]
 
 
 def cache_paths(tf):
@@ -74,66 +78,63 @@ def cache_paths(tf):
             "GHTS": root / "GHTS/dataset.npz"}
 
 
-def submit(arguments):
-    reply = subprocess.check_output(["sbatch", "--parsable", *arguments], text=True).strip()
-    job = reply.split(";", 1)[0]
-    if not job.isdigit():
-        raise ValueError(f"Unerwartete sbatch-Antwort: {reply}")
-    return job
-
-
-def prepare_existing():
-    import hum301_data as data
+def plan():
+    # Nur kleine Metadaten auf dem Login-Node; die Caches werden erst im
+    # CPU-Job geladen und geprueft. Kein Kopieren von Daten oder Python-Code.
     workflow.require_files([CODE / MODEL_SCRIPT, CODE / "hum301_data.py",
-                            CODE / "hum301_crossassay.py", SELF])
-    job = os.environ["SLURM_JOB_ID"]
-    run_id = "motif_kernel_" + time.strftime("%Y%m%d_%H%M%S") + "_" + job
-    manifest_path = CODE / "runs/crossassay" / run_id / "workflow.json"
+                            CODE / "hum301_crossassay.py", SELF, LAUNCHER])
+    run_directory = Path(os.environ["HUM301_KERNEL_RUN_DIR"])
+    run_id = run_directory.name
+    manifest_path = run_directory / "workflow.json"
     runs = [{"tf": tf, "train_assay": assay, "seed": SEED,
              "motif_kernel": kernel,
-             "run_dir": str(CODE / "runs" / tf / run_id / f"{assay}_seed{SEED}_k{kernel}")}
+             "run_dir": str(run_directory / "models" / tf / f"{assay}_seed{SEED}_k{kernel}")}
             for tf, kernel in KERNELS.items() for assay in ASSAYS]
-    if manifest_path.exists() or any(Path(row["run_dir"]).exists() for row in runs):
+    if run_directory.exists():
         raise ValueError("Ergebnisordner existiert bereits")
-    # Alle benoetigten Dateien pruefen, bevor Datensatz-Metadaten geschrieben werden.
     workflow.require_files([path for tf in KERNELS for path in cache_paths(tf).values()])
+    run_directory.mkdir(parents=True, exist_ok=False)
+    for relative in ("datasets", "evaluation", "logs/data", "logs/train", "logs/summary"):
+        (run_directory / relative).mkdir(parents=True)
+    for row in runs:
+        Path(row["run_dir"]).mkdir(parents=True)
     manifest = {"format": workflow.FORMAT, "run_id": run_id, "script_dir": str(CODE),
                 "data_root": str(PROJECT / "raw_data/human"), "model_script": MODEL_SCRIPT,
                 "data_script": "hum301_data.py", "seed": SEED, "tfs": list(KERNELS),
                 "runs": runs, "motif_kernel_by_tf": KERNELS,
+                "input_caches": {tf: {assay: str(path) for assay, path in cache_paths(tf).items()}
+                                 for tf in KERNELS},
                 "kernel_basis": "published PWM widths, including flanks; see motif table",
                 "script_sha256": {name: workflow.sha256(CODE / name) for name in
-                                  (MODEL_SCRIPT, "hum301_data.py", "hum301_crossassay.py", SELF.name)}}
-    for tf in KERNELS:
+                                  (MODEL_SCRIPT, "hum301_data.py", "hum301_crossassay.py",
+                                   SELF.name, LAUNCHER.name)}}
+    workflow.write_json(manifest_path, manifest)
+    print(f"Laufordner: {run_directory}")
+    print(f"{len(KERNELS)} TFs; {len(runs)} Modelle; {2 * len(runs)} Testauswertungen; Seed {SEED}")
+
+
+def prepare_existing(manifest_path):
+    import hum301_data as data
+    manifest = workflow.load_manifest(manifest_path)
+    workflow.check_scripts(manifest)
+    workflow.require_files([path for assays in manifest["input_caches"].values()
+                            for path in assays.values()])
+    for tf in manifest["tfs"]:
         datasets = {}
-        for assay, path in cache_paths(tf).items():
+        for assay, path in manifest["input_caches"][tf].items():
             cache = data.load_cache(path)
             summary = cache["summary"]
             if cache["sequences"].shape[1] != 301 or summary.get("genome_build") != "hg38":
                 raise ValueError(f"Kein passender Human301-Cache: {path}")
             datasets[assay] = {"cache": str(path), "cache_sha256": workflow.sha256(path),
                                "summary": summary}
-            print(f"{tf}/{assay}: vorhandener Cache {path}; Kernel={KERNELS[tf]} bp", flush=True)
+            kernel = manifest["motif_kernel_by_tf"][tf]
+            print(f"{tf}/{assay}: vorhandener Cache {path}; Kernel={kernel} bp", flush=True)
             del cache
             gc.collect()
         workflow.check_cross_splits(datasets)
         workflow.write_json(workflow.data_state_path(manifest_path, tf), {"tf": tf, "datasets": datasets})
-    workflow.write_json(manifest_path, manifest)
-    train_job = submit([
-        f"--dependency=afterok:{job}", f"--array=0-{len(runs)-1}",
-        "--job-name=hum301-kernel-train", "--ntasks=1", "--cpus-per-task=4",
-        "--mem=32G", "--gres=gpu:1", "--time=48:00:00",
-        f"--output={CODE}/hum301-kernel-train-%A_%a.out",
-        f"--error={CODE}/hum301-kernel-train-%A_%a.err",
-        f"--export=ALL,HUM301_KERNEL_STAGE=train,HUM301_KERNEL_MANIFEST={manifest_path}", str(SELF)])
-    summary_job = submit([
-        f"--dependency=afterok:{train_job}", "--job-name=hum301-kernel-summary",
-        "--ntasks=1", "--cpus-per-task=2", "--mem=8G", "--time=01:00:00",
-        f"--output={CODE}/hum301-kernel-summary-%j.out",
-        f"--error={CODE}/hum301-kernel-summary-%j.err",
-        f"--export=ALL,HUM301_KERNEL_STAGE=summary,HUM301_KERNEL_MANIFEST={manifest_path}", str(SELF)])
-    print(f"GPU-Array: {train_job}: {len(runs)} Modelle, {2*len(runs)} Tests; Seed {SEED}")
-    print(f"CPU-Zusammenfassung: {summary_job}\nAuswertung: {manifest_path.parent / 'evaluation'}")
+    print(f"CPU-Pruefung abgeschlossen: {2 * len(manifest['tfs'])} vorhandene Caches.")
 
 
 def train_and_test(manifest_path):
@@ -262,11 +263,11 @@ def summarize(manifest_path):
               "\t".join(f"{row[d]:.4f}" for d in directions))
 
 
-if STAGE == "data":
-    prepare_existing()
-elif STAGE in ("train", "summary"):
+if STAGE == "plan":
+    plan()
+elif STAGE in ("data", "train", "summary"):
     manifest_path = Path(os.environ["HUM301_KERNEL_MANIFEST"])
-    (train_and_test if STAGE == "train" else summarize)(manifest_path)
+    {"data": prepare_existing, "train": train_and_test, "summary": summarize}[STAGE](manifest_path)
 else:
     raise ValueError(f"Unbekannte Stage: {STAGE}")
 PY
