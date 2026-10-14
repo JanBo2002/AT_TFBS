@@ -13,7 +13,7 @@ Die unveraenderten MAA-Funktionen unterhalb bleiben fuer Kompatibilitaet erhalte
 
 from __future__ import annotations
 
-SCRIPT_VERSION = "4.4.0-human301-local-motifhead"
+SCRIPT_VERSION = "4.4.1-human301-local-motifhead"
 
 import argparse
 import csv
@@ -3696,7 +3696,7 @@ def workflow_plan(args: argparse.Namespace) -> int:
                 "script_sha256": {name: workflow.sha256(code / name) for name in names},
                 "alpha_selection": "arithmetic mean of per-TF optimal alpha from the other 17 TFs in the same direction",
                 "optimal_alpha_tie_rule": "smallest alpha when AUPRC maxima tie within 1e-12",
-                "task_order": "both source assays and both tests of one TF finish before the next TF starts"}
+                "task_order": "array task IDs follow TF list, CHIP then GHTS; no dependencies between TFs"}
     directory.mkdir(parents=True)
     for relative in ("datasets", "evaluation", "logs/data", "logs/train", "logs/summary"):
         (directory / relative).mkdir(parents=True, exist_ok=True)
@@ -3741,24 +3741,25 @@ def workflow_submit(args: argparse.Namespace) -> int:
         workflow.require_files([workflow.data_state_path(args.manifest, tf)])
     root = args.manifest.resolve().parent
     script = Path(manifest["script_dir"]) / manifest["sbatch_script"]
-    jobs = []
-    previous = job_id
-    for tf_index, tf in enumerate(manifest["tfs"]):
-        command = ["sbatch", "--parsable", f"--job-name=hum301-head-{tf}", "--array=0-1%2",
-                   "--gres=gpu:1", "--cpus-per-task=4", "--mem=32G", "--time=24:00:00",
-                   f"--dependency=afterok:{previous}",
-                   f"--output={root / 'logs/train'}/hum301-head-{tf}-%A_%a.out",
-                   f"--error={root / 'logs/train'}/hum301-head-{tf}-%A_%a.err",
-                   f"--export=ALL,HUM301_HEAD_STAGE=train,HUM301_HEAD_MANIFEST={args.manifest.resolve()},HUM301_HEAD_TF_INDEX={tf_index}",
-                   str(script)]
-        response = subprocess.run(command, check=True, capture_output=True, text=True)
-        previous = response.stdout.strip().split(";", 1)[0]
-        if not previous.isdecimal():
-            raise ValueError(f"sbatch hat keine Job-ID geliefert: {response.stdout!r}")
-        jobs.append({"tf": tf, "job_id": previous, "depends_on": command[8].split(":", 1)[-1]})
-        print(f"{tf}: Trainings-/Testarray {previous}; Reihenfolge durch afterok gesichert", flush=True)
+    parallel_models = int(os.environ.get("HUM301_HEAD_MAX_PARALLEL", "6"))
+    if not 1 <= parallel_models <= len(manifest["runs"]):
+        raise ValueError("HUM301_HEAD_MAX_PARALLEL muss zwischen 1 und 36 liegen")
+    # Alle 36 Modelle sind nach der CPU-Pruefung freigegeben. Die Tasknummern
+    # folgen der TF-Liste; ein langsamer TF blockiert keinen anderen TF.
+    command = ["sbatch", "--parsable", "--job-name=hum301-head-train",
+               f"--array=0-{len(manifest['runs']) - 1}%{parallel_models}",
+               "--gres=gpu:1", "--cpus-per-task=4", "--mem=32G", "--time=24:00:00",
+               f"--dependency=afterok:{job_id}",
+               f"--output={root / 'logs/train'}/hum301-head-train-%A_%a.out",
+               f"--error={root / 'logs/train'}/hum301-head-train-%A_%a.err",
+               f"--export=ALL,HUM301_HEAD_STAGE=train,HUM301_HEAD_MANIFEST={args.manifest.resolve()}", str(script)]
+    response = subprocess.run(command, check=True, capture_output=True, text=True)
+    train_id = response.stdout.strip().split(";", 1)[0]
+    if not train_id.isdecimal():
+        raise ValueError(f"sbatch hat keine Job-ID geliefert: {response.stdout!r}")
+    print(f"GPU-Array {train_id}: 36 Modelle, bis zu {parallel_models} parallel; keine TF-Wartekette", flush=True)
     command = ["sbatch", "--parsable", "--job-name=hum301-head-summary", "--cpus-per-task=4",
-               "--mem=64G", "--time=24:00:00", f"--dependency=afterok:{previous}",
+               "--mem=64G", "--time=24:00:00", f"--dependency=afterok:{train_id}",
                f"--output={root / 'logs/summary'}/hum301-head-summary-%j.out",
                f"--error={root / 'logs/summary'}/hum301-head-summary-%j.err",
                f"--export=ALL,HUM301_HEAD_STAGE=summary,HUM301_HEAD_MANIFEST={args.manifest.resolve()}", str(script)]
@@ -3766,7 +3767,10 @@ def workflow_submit(args: argparse.Namespace) -> int:
     summary_id = response.stdout.strip().split(";", 1)[0]
     if not summary_id.isdecimal():
         raise ValueError("sbatch hat keine Summary-Job-ID geliefert")
-    workflow.write_json(root / "slurm_jobs.json", {"cpu_job": job_id, "ordered_tf_arrays": jobs, "summary_job": summary_id})
+    workflow.write_json(root / "slurm_jobs.json", {"cpu_job": job_id, "train_array_job": train_id,
+                         "max_parallel_models": parallel_models, "summary_job": summary_id,
+                         "task_order": [{"task_id": row["task_id"], "tf": row["tf"],
+                                          "train_assay": row["train_assay"]} for row in manifest["runs"]]})
     print(f"Summary-/Alpha-Job: {summary_id}")
     return 0
 

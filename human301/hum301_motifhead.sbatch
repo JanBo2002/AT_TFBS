@@ -9,11 +9,12 @@
 #SBATCH --error=hum301-motifhead-data-%j.err
 
 # Diese Datei und hum301_motif64_motifhead.py neben den vorhandenen Skripten ablegen.
-# Start: sbatch hum301_motifhead.sbatch
-# CPU-Pruefung -> 18 geordnete GPU-Arrays -> CPU-Auswertung mit α-Suche.
-# Pro TF laufen CHIP und GHTS parallel; der naechste TF wartet auf beide Tests.
+# Start: bash hum301_motifhead_submit.sh
+# CPU-Pruefung -> ein GPU-Array mit 36 Tasks -> CPU-Auswertung mit α-Suche.
+# Die Tasknummern folgen der TF-Liste; keine Dependencies zwischen den TFs.
 # Alle Ergebnisse liegen unter runs/motifhead/<RUN_ID>/.
-# Optionale Einstellungen: HUM301_HEAD_LOSS_WEIGHT, HUM301_HEAD_ALPHA_STEP, HUM301_HEAD_SEED.
+# Optionale Einstellungen: HUM301_HEAD_LOSS_WEIGHT, HUM301_HEAD_ALPHA_STEP,
+# HUM301_HEAD_SEED und HUM301_HEAD_MAX_PARALLEL (Standard 6).
 
 set -euo pipefail
 trap 'head_exit_status=$?; printf "Error: Motivkopf-Job fehlgeschlagen (Exit %s).\n" "$head_exit_status" >&2; exit "$head_exit_status"' ERR
@@ -52,16 +53,14 @@ case "${HUM301_HEAD_STAGE:-setup}" in
         ;;
     train)
         : "${HUM301_HEAD_MANIFEST:?Error: Manifest fehlt}"
-        : "${HUM301_HEAD_TF_INDEX:?Error: TF-Index fehlt}"
         : "${SLURM_ARRAY_TASK_ID:?Error: Array-Task-ID fehlt}"
-        if [[ ! "$HUM301_HEAD_TF_INDEX" =~ ^([0-9]|1[0-7])$ ]] || \
-           [[ ! "$SLURM_ARRAY_TASK_ID" =~ ^[01]$ ]]; then
-            printf 'Error: Ungueltige TF- oder Array-Task-ID.\n' >&2
+        if [[ ! "$SLURM_ARRAY_TASK_ID" =~ ^[0-9]+$ ]] || \
+           (( SLURM_ARRAY_TASK_ID < 0 || SLURM_ARRAY_TASK_ID > 35 )); then
+            printf 'Error: Ungueltige Array-Task-ID (erwartet 0 bis 35).\n' >&2
             exit 1
         fi
-        head_task_id=$((2 * HUM301_HEAD_TF_INDEX + SLURM_ARRAY_TASK_ID))
         python -u "$head_model" workflow-train --manifest "$HUM301_HEAD_MANIFEST" \
-            --task-id "$head_task_id" --device cuda
+            --task-id "$SLURM_ARRAY_TASK_ID" --device cuda
         ;;
     summary)
         : "${HUM301_HEAD_MANIFEST:?Error: Manifest fehlt}"
