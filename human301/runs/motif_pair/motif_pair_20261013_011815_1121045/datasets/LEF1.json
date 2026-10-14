@@ -1,0 +1,255 @@
+{
+  "tf": "LEF1",
+  "datasets": {
+    "CHIP": {
+      "cache": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/ArchThalia-ML/LEF1/CHIP/dataset.npz",
+      "cache_sha256": "38572175432087cc4c2c772af840c69ee75b03d17d34f4f1d2e9e40d34f96190",
+      "summary": {
+        "format_version": "at301-v1",
+        "genome_build": "hg38",
+        "coordinate_convention": "0-based half-open",
+        "stored_length": 301,
+        "sources": {
+          "train_positive_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_bl_5nx6v/train_positive_bed.bed",
+            "sha256": "889d5aa18c5f03da35ae8193fcc08f9f83d1f43824018a91f75a0b3779f86b69"
+          },
+          "train_positive_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEF1/positives.fa",
+            "sha256": "74dfa198ea2a7340ba28cbd754688e2b4264709164a3ec6541323a86b503b6e4"
+          },
+          "train_negative_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_bl_5nx6v/train_negative_bed.bed",
+            "sha256": "6f011c82fa0bc72340510427586b4a3ceab843055aa27a11f60484dba0aa5525"
+          },
+          "train_negative_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Train/LEF1/random.fa",
+            "sha256": "94bce5cf123dc72a6f52c237d24ec5b6fcdab94e679084a08a32dc0d812663a0"
+          },
+          "test_positive_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_bl_5nx6v/test_positive_bed.bed",
+            "sha256": "aa94668a1bd0abce9b646a63c258fefa5ab0712b7dfa55a9a780e2588548ee11"
+          },
+          "test_positive_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEF1/positives.fa",
+            "sha256": "c9b27bf912b3f9bbe28d14e9c210dd41d6fb38da25677b2e9bb0fc143dd2c244"
+          },
+          "test_negative_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_bl_5nx6v/test_negative_bed.bed",
+            "sha256": "271a6167fb4328df6b65c6a440bef48813e94fcbe0a5c71ea5831027d45e1124"
+          },
+          "test_negative_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/CHS/Test/LEF1/random.fa",
+            "sha256": "78a40007b1200332deae6743f3c6cd520239202b5b64a070a87339c40af3740d"
+          }
+        },
+        "splits": {
+          "train": {
+            "positive": 10692,
+            "negative": 1069200,
+            "total": 1079892,
+            "chromosomes": [
+              "chr1",
+              "chr11",
+              "chr13",
+              "chr15",
+              "chr17",
+              "chr19",
+              "chr21",
+              "chr3",
+              "chr9"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.016611295681063124,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.46740096102176204,
+              "negative": 0.45899772923028737
+            }
+          },
+          "validation": {
+            "positive": 3270,
+            "negative": 327000,
+            "total": 330270,
+            "chromosomes": [
+              "chr5",
+              "chr7"
+            ],
+            "sequences_with_N": 0,
+            "max_N_fraction": 0.0,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.440522417629309,
+              "negative": 0.4340673189267173
+            }
+          },
+          "test": {
+            "positive": 12304,
+            "negative": 1230400,
+            "total": 1242704,
+            "chromosomes": [
+              "chr10",
+              "chr12",
+              "chr14",
+              "chr16",
+              "chr18",
+              "chr2",
+              "chr20",
+              "chr22",
+              "chr4",
+              "chr6",
+              "chr8"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.0033222591362126247,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.4484503090406634,
+              "negative": 0.4429361086149765
+            }
+          }
+        },
+        "sequence_audit": {
+          "train": {
+            "duplicates_or_RC_duplicates_within_split": 23,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "validation": {
+            "duplicates_or_RC_duplicates_within_split": 5,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "test": {
+            "duplicates_or_RC_duplicates_within_split": 24,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "train_validation_shared_sequences_or_RC": 7,
+          "train_test_shared_sequences_or_RC": 20,
+          "validation_test_shared_sequences_or_RC": 3
+        },
+        "sequence_audit_action": "Reported only; no evaluation samples removed or relabeled"
+      }
+    },
+    "GHTS": {
+      "cache": "/data/projects/SFB_A03/jan/AT_TFBS/raw_data/human/ArchThalia-ML/LEF1/GHTS/dataset.npz",
+      "cache_sha256": "21c2ec760c3063607c06c42061ed1e4f5a2f8cbb60bb9e95da5b49c8fa3843a3",
+      "summary": {
+        "format_version": "at301-v1",
+        "genome_build": "hg38",
+        "coordinate_convention": "0-based half-open",
+        "stored_length": 301,
+        "sources": {
+          "train_positive_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_2ef36g97/train_positive_bed.bed",
+            "sha256": "0db199d64a195c7b8ce638865aa0ac677c5a9a30dcd34be61ad74c4dc827fe90"
+          },
+          "train_positive_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEF1/positives.fa",
+            "sha256": "b082af7d39e0cfe9b65b549dbabe93a1cf1614d4388c7bbda171a21ca6a55ab3"
+          },
+          "train_negative_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_2ef36g97/train_negative_bed.bed",
+            "sha256": "2e46c59089053c82a72e871bbcd345cb2acccb58bcb4177f54d3907380113ed5"
+          },
+          "train_negative_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Train/LEF1/random.fa",
+            "sha256": "231443e74eebc89350c9e45319c862c79a27d42ff78b6a2245389a81b6b56beb"
+          },
+          "test_positive_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_2ef36g97/test_positive_bed.bed",
+            "sha256": "c6c2eaa026d0e1b11ef35d3f83e609688a95e593265c14a6a508d193829dda21"
+          },
+          "test_positive_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEF1/positives.fa",
+            "sha256": "a242d9e8164fe790f7a0ab0ba44558a1d24b56f8326142dfa0ea965bcfd01e4d"
+          },
+          "test_negative_bed": {
+            "path": "/scratch/jbossenz_68381/hum301_fasta_metadata_2ef36g97/test_negative_bed.bed",
+            "sha256": "6c4125d592180d9f8739d827e6bea078b28befb64c87e40a535c8717aa260c4d"
+          },
+          "test_negative_fasta": {
+            "path": "/data/projects/SFB_A03/clara/ArchThalia-ML/GHTS/Test/LEF1/random.fa",
+            "sha256": "96f46197c15362e13a62510dc404a93a5e036c9f23079d2dbd70189949aa6b8a"
+          }
+        },
+        "splits": {
+          "train": {
+            "positive": 4567,
+            "negative": 456700,
+            "total": 461267,
+            "chromosomes": [
+              "chr1",
+              "chr11",
+              "chr13",
+              "chr15",
+              "chr17",
+              "chr19",
+              "chr21",
+              "chr3",
+              "chr9"
+            ],
+            "sequences_with_N": 1,
+            "max_N_fraction": 0.03322259136212625,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.437926181470198,
+              "negative": 0.4379252720840756
+            }
+          },
+          "validation": {
+            "positive": 1477,
+            "negative": 147700,
+            "total": 149177,
+            "chromosomes": [
+              "chr5",
+              "chr7"
+            ],
+            "sequences_with_N": 0,
+            "max_N_fraction": 0.0,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.4240435290174705,
+              "negative": 0.4240429216986034
+            }
+          },
+          "test": {
+            "positive": 5752,
+            "negative": 575200,
+            "total": 580952,
+            "chromosomes": [
+              "chr10",
+              "chr12",
+              "chr14",
+              "chr16",
+              "chr18",
+              "chr2",
+              "chr20",
+              "chr22",
+              "chr4",
+              "chr6",
+              "chr8"
+            ],
+            "sequences_with_N": 0,
+            "max_N_fraction": 0.0,
+            "mean_GC_fraction_ACGT_only": {
+              "positive": 0.43200054061796783,
+              "negative": 0.4320009449262773
+            }
+          }
+        },
+        "sequence_audit": {
+          "train": {
+            "duplicates_or_RC_duplicates_within_split": 7,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "validation": {
+            "duplicates_or_RC_duplicates_within_split": 0,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "test": {
+            "duplicates_or_RC_duplicates_within_split": 6,
+            "identical_or_RC_identical_sequences_with_both_labels": 0
+          },
+          "train_validation_shared_sequences_or_RC": 2,
+          "train_test_shared_sequences_or_RC": 4,
+          "validation_test_shared_sequences_or_RC": 2
+        },
+        "sequence_audit_action": "Reported only; no evaluation samples removed or relabeled"
+      }
+    }
+  }
+}
