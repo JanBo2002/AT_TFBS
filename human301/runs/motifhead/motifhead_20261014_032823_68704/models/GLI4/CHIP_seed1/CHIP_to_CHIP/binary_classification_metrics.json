@@ -1,0 +1,82 @@
+{
+  "tf": "GLI4",
+  "seed": 1,
+  "train_assay": "CHIP",
+  "test_assay": "CHIP",
+  "direction": "CHIP_to_CHIP",
+  "checkpoint": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/motifhead/motifhead_20261014_032823_68704/models/GLI4/CHIP_seed1/model_for_prediction.pt",
+  "checkpoint_epoch": 45,
+  "checkpoint_sha256": "0f920f3dd79f1f15dc5d664cd8b653621f88c13fb29ac90cac2491a2bcb407d7",
+  "threshold": 0.9938278198242188,
+  "motif_threshold": 0.9909180402755737,
+  "threshold_strategy": "val-mcc",
+  "threshold_source": "CHIP validation only",
+  "training_cache_sha256": "4faf117e0fabd2871a0ad6e81f4c04c16680fb12904a16b9968f4db7c4b451a7",
+  "test_cache_sha256": "4faf117e0fabd2871a0ad6e81f4c04c16680fb12904a16b9968f4db7c4b451a7",
+  "evaluation_crop_mode": "multi",
+  "evaluation_reverse_complement": true,
+  "test_positive": 435,
+  "test_negative": 43500,
+  "test_metrics": {
+    "threshold": 0.9938278198242188,
+    "accuracy": 0.9929896437919654,
+    "balanced_accuracy": 0.7131149425287356,
+    "precision": 0.7591836734693878,
+    "recall": 0.42758620689655175,
+    "specificity": 0.9986436781609196,
+    "negative_predictive_value": 0.9943007553215839,
+    "f1": 0.5470588235294118,
+    "mcc": 0.56670766844659,
+    "true_negative": 43441.0,
+    "false_positive": 59.0,
+    "false_negative": 249.0,
+    "true_positive": 186.0,
+    "auroc": 0.9348760206103846,
+    "auprc": 0.555401519144335
+  },
+  "motif_metrics": {
+    "threshold": 0.9909180402755737,
+    "accuracy": 0.9919654034368954,
+    "balanced_accuracy": 0.643183908045977,
+    "precision": 0.7440476190476191,
+    "recall": 0.28735632183908044,
+    "specificity": 0.9990114942528736,
+    "negative_predictive_value": 0.9929170379509676,
+    "f1": 0.41459369817578773,
+    "mcc": 0.4593941220364506,
+    "true_negative": 43457.0,
+    "false_positive": 43.0,
+    "false_negative": 310.0,
+    "true_positive": 125.0,
+    "auroc": 0.8958750165147311,
+    "auprc": 0.42552133285167476
+  },
+  "head_logit_statistics": {
+    "source": "complete source validation at selected deep-head checkpoint",
+    "cache_sha256": "4faf117e0fabd2871a0ad6e81f4c04c16680fb12904a16b9968f4db7c4b451a7",
+    "checkpoint_epoch": 45,
+    "sample_count": 12726,
+    "std_ddof": 0,
+    "logit_definition": "logit(mean(sigmoid(view_logit))); float64 endpoint clipping",
+    "crop_starts": [
+      0,
+      22,
+      23,
+      45
+    ],
+    "reverse_complement": true,
+    "n_views": 8,
+    "deep": {
+      "mean": -6.102147487290972,
+      "std": 3.5966457822663935
+    },
+    "motif": {
+      "mean": -5.394656339572165,
+      "std": 2.7193145746942915
+    }
+  },
+  "scores_file": "test_predictions.tsv.gz",
+  "scores_sha256": "49c9eb824b62191611807aa112bcfd86ad40d6df61e4400ba8125221fbee7131",
+  "inference_seconds": 17.59204201819375,
+  "evaluation_wall_seconds": 19.184208701830357
+}

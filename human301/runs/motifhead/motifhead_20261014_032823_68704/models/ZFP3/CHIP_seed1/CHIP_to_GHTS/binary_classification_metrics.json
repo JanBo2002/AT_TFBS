@@ -1,0 +1,82 @@
+{
+  "tf": "ZFP3",
+  "seed": 1,
+  "train_assay": "CHIP",
+  "test_assay": "GHTS",
+  "direction": "CHIP_to_GHTS",
+  "checkpoint": "/data/projects/SFB_A03/jan/AT_TFBS/human301/runs/motifhead/motifhead_20261014_032823_68704/models/ZFP3/CHIP_seed1/model_for_prediction.pt",
+  "checkpoint_epoch": 22,
+  "checkpoint_sha256": "699461344288716380a5509433f85ee1140ec1f2df79367d0888d6f80f3aa4ad",
+  "threshold": 0.9191612601280212,
+  "motif_threshold": 0.8397870063781738,
+  "threshold_strategy": "val-mcc",
+  "threshold_source": "CHIP validation only",
+  "training_cache_sha256": "493e8c2fbd633ee96e15887ba7828dacd3834787298c350d62f4e82d9ce1faf4",
+  "test_cache_sha256": "a8aae5d8132618ca83aae50299b253b1bd2392eac9afb93f9e4bf7531b931bda",
+  "evaluation_crop_mode": "multi",
+  "evaluation_reverse_complement": true,
+  "test_positive": 115,
+  "test_negative": 11500,
+  "test_metrics": {
+    "threshold": 0.9191612601280212,
+    "accuracy": 0.9929401635815756,
+    "balanced_accuracy": 0.665,
+    "precision": 0.8837209302325582,
+    "recall": 0.33043478260869563,
+    "specificity": 0.9995652173913043,
+    "negative_predictive_value": 0.9933460076045627,
+    "f1": 0.4810126582278481,
+    "mcc": 0.5379889306354266,
+    "true_negative": 11495.0,
+    "false_positive": 5.0,
+    "false_negative": 77.0,
+    "true_positive": 38.0,
+    "auroc": 0.746980718336484,
+    "auprc": 0.415127183306264
+  },
+  "motif_metrics": {
+    "threshold": 0.8397870063781738,
+    "accuracy": 0.9919070167886354,
+    "balanced_accuracy": 0.6429565217391304,
+    "precision": 0.7333333333333333,
+    "recall": 0.28695652173913044,
+    "specificity": 0.9989565217391304,
+    "negative_predictive_value": 0.9929127052722558,
+    "f1": 0.4125,
+    "mcc": 0.4556788509594828,
+    "true_negative": 11488.0,
+    "false_positive": 12.0,
+    "false_negative": 82.0,
+    "true_positive": 33.0,
+    "auroc": 0.7978049149338374,
+    "auprc": 0.3739379058099219
+  },
+  "head_logit_statistics": {
+    "source": "complete source validation at selected deep-head checkpoint",
+    "cache_sha256": "493e8c2fbd633ee96e15887ba7828dacd3834787298c350d62f4e82d9ce1faf4",
+    "checkpoint_epoch": 22,
+    "sample_count": 12423,
+    "std_ddof": 0,
+    "logit_definition": "logit(mean(sigmoid(view_logit))); float64 endpoint clipping",
+    "crop_starts": [
+      0,
+      22,
+      23,
+      45
+    ],
+    "reverse_complement": true,
+    "n_views": 8,
+    "deep": {
+      "mean": -5.808321448444553,
+      "std": 2.6652556885246343
+    },
+    "motif": {
+      "mean": -5.622693993442866,
+      "std": 1.973603138977663
+    }
+  },
+  "scores_file": "test_predictions.tsv.gz",
+  "scores_sha256": "d83a004bfed3067b50b67733f0c5b1795c382d419b4fcd12bb4890728a6bd068",
+  "inference_seconds": 5.424034636002034,
+  "evaluation_wall_seconds": 6.212948055006564
+}
