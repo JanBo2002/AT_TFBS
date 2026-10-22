@@ -70,8 +70,10 @@ class PackageTests(unittest.TestCase):
             fake.write_text('#!/bin/sh\nprintf "%s\\n" "$@" > "$ABLATION_CAPTURE"\n')
             fake.chmod(0o755)
             capture=temp/"args.txt"
-            env=dict(os.environ,ABLATION_PYTHON=str(fake),ABLATION_CAPTURE=str(capture))
-            for name,args in [("train_task.sbatch",[str(temp/"tasks.csv"),"3",str(ROOT)]),("collect_all.sbatch",[str(ROOT)])]:
+            env=dict(os.environ,ABLATION_PYTHON=str(fake),ABLATION_CAPTURE=str(capture),SLURM_ARRAY_TASK_ID="3")
+            for name,args in [("train_task.sbatch",[str(temp/"tasks.csv"),"3",str(ROOT)]),
+                              ("train_array.sbatch",[str(temp/"tasks.csv"),str(ROOT)]),
+                              ("collect_all.sbatch",[str(ROOT)])]:
                 spool=temp/"slurm_script"
                 shutil.copyfile(ROOT/name,spool)
                 subprocess.run(["bash",str(spool),*args],env=env,check=True)

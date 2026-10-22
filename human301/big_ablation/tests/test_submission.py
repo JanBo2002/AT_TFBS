@@ -18,6 +18,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from ablation.dispatch import Dispatcher, MAX_JOBS, file_hash, outstanding
+from ablation.array_dispatch import active_tasks
 from ablation.priority import read_priority
 from ablation.slurm import Slurm, SlurmError, resource_options
 from run_experiment import make_plan
@@ -235,17 +236,24 @@ with database.with_suffix(".lock").open("a") as lock:
     jobs=json.loads(database.read_text()) if database.exists() else []
     if command=="sbatch":
         name=next(a.split("=",1)[1] for a in sys.argv[1:] if a.startswith("--job-name="))
-        jobs.append(dict(id=str(100+len(jobs)),name=name,state="RUNNING",args=sys.argv[1:],
-                         leaked_array="SBATCH_ARRAY_INX" in os.environ))
+        base=str(100+len(jobs))
+        size=int(next(a.split("=",1)[1] for a in sys.argv[1:] if a.startswith("--array=")).split("%",1)[0].split("-",1)[1])+1
+        for index in range(size):
+            jobs.append(dict(id=base+"_"+str(index),name=name,state="PENDING",reason="JobHeldUser",args=sys.argv[1:],
+                             leaked_array="SBATCH_ARRAY_INX" in os.environ))
         database.write_text(json.dumps(jobs))
-        print(jobs[-1]["id"])
+        print(base)
     elif command=="squeue":
-        for job in jobs: print(job["id"]+"|"+job["state"]+"|"+job["name"])
+        for job in jobs: print(job["id"]+"|"+job["state"]+"|"+job["reason"]+"|"+job["name"])
     elif command=="sacct":
         for job in jobs: print(job["id"]+"|"+job["state"])
+    elif command=="scontrol" and sys.argv[1]=="release":
+        job=next(j for j in jobs if j["id"]==sys.argv[2])
+        job.update(state="RUNNING",reason="None")
+        database.write_text(json.dumps(jobs))
 ''')
             driver.chmod(0o755)
-            for name in ("sbatch", "squeue", "sacct"):
+            for name in ("sbatch", "squeue", "sacct", "scontrol"):
                 (tools / name).symlink_to(driver.name)
             manifest = package / "configs" / "caches.csv"
             cache = temp / "cache.npz"
@@ -269,14 +277,15 @@ with database.with_suffix(".lock").open("a") as lock:
                 deadline = time.monotonic() + 15
                 while time.monotonic() < deadline:
                     state = json.loads(state_path.read_text())
-                    if sum(bool(t["job_id"]) for t in state["tasks"]) == 8:
+                    if len(active_tasks(state["tasks"])) == 8:
                         break
                     time.sleep(.05)
-                self.assertEqual(sum(bool(t["job_id"]) for t in state["tasks"]), 8,
+                self.assertEqual(sum(bool(t["job_id"]) for t in state["tasks"]), 60,
                                  (batch / "launcher.log").read_text())
+                self.assertEqual(len(active_tasks(state["tasks"])),8)
                 self.assertEqual(state["config_order"], CONFIGS)
                 self.assertEqual(len(state["tasks"]), 180)
-                self.assertTrue(all(t["config"] == CONFIGS[0] for t in outstanding(state["tasks"])))
+                self.assertTrue(all(t["config"] == CONFIGS[0] for t in active_tasks(state["tasks"])))
                 self.assertEqual([(t["tf"], t["train_assay"]) for t in state["tasks"][:8]], PAIRS[:8])
                 self.assertTrue((batch / "training_priority.csv").is_file())
                 duplicate = subprocess.run(["bash", str(package / "submit_00_basic.sh"), str(manifest)],
@@ -284,7 +293,8 @@ with database.with_suffix(".lock").open("a") as lock:
                 self.assertEqual(duplicate.returncode, 2)
                 self.assertIn("already running", duplicate.stderr)
                 jobs = json.loads((temp / "jobs.json").read_text())
-                self.assertEqual(len(jobs), 8)
+                self.assertEqual(len(jobs), 60)
+                self.assertEqual(sum(job["state"]=="RUNNING" for job in jobs),8)
                 self.assertTrue(all(not job["leaked_array"] for job in jobs))
             finally:
                 if pid:

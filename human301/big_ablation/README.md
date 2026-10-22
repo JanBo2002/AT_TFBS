@@ -62,30 +62,26 @@ verwenden und **eine Zeile je TF und Assay** eintragen. Relative Cache-Pfade wer
 relativ zur Manifestdatei interpretiert. `caches.example.csv` enthält Platzhalter
 und ist kein startfertiges Manifest.
 
-Alle drei Konfigurationen auf allen TFs im Manifest starten:
+Alle drei Konfigurationen mit der vorhandenen Cache-Zuordnung starten:
 
 ```bash
 bash submit.sh configs/caches.csv
 ```
 
-Der gemeinsame Launcher arbeitet die Konfigurationen in dieser Reihenfolge ab:
-`00_basic` → `A01_kernel_LegNetMax_3_6_9_12` → `A02_kernel_7_11_15_21`.
-Er verwaltet **acht Plätze insgesamt**. Zuerst füllt Basic die Plätze; solange
-noch Basic-Aufgaben einzureichen sind, haben diese Vorrang. Sobald alle Basic-
-Aufgaben eingereicht sind und weniger als acht davon offen sind, füllt A01 die
-freien Plätze. Das Gleiche gilt anschließend für A02. Beispiel: fünf verbleibende
-Basic-Jobs und drei A01-Jobs. Die nächste Konfiguration wartet also nicht auf den
-letzten langen Job der vorherigen.
+Die aktuelle Fassung verwendet **ein sichtbares SLURM-Array pro Konfiguration**.
+Basic wird zuerst vollständig eingereicht. Solange Basic noch acht Plätze füllen
+kann, wird ausschließlich Basic freigegeben. Sobald weniger als acht Basic-
+Aufgaben übrig sind, wird das A01-Array eingereicht und füllt freie Plätze auf.
+Für A02 gilt derselbe Übergang. Insgesamt sind maximal acht Trainingsaufgaben
+freigegeben und noch nicht beendet. Alle übrigen Aufgaben des bereits
+angelegten Arrays bleiben als `JobHeldUser` in `squeue` sichtbar.
 
-Ein Job trainiert genau ein Modell für eine Konfiguration/TF/Quell-Assay/Seed-
-Kombination und testet diesen Checkpoint auf beiden Assays. Bei 30 TFs und einem
-Seed sind es 60 Trainingsjobs je Konfiguration, insgesamt 180. Für die globale
-Grenze zählen auch wartende und noch aufräumende Jobs als belegt. Freie Plätze
-werden alle 60 Sekunden geprüft. Tatsächlich gleichzeitig laufende Jobs hängen
-von den verfügbaren Cluster-Ressourcen ab.
+Die 60er-Reihenfolge ohne Laufzeitangaben steht in
+`configs/training_priority.csv`. Gezielte Freigabe und Start-Abhängigkeiten
+zwischen Array-Elementen setzen diese Reihenfolge um. Modell, Trainingsdaten,
+Sampling und Hyperparameter bleiben unverändert.
 
-Jede Konfiguration hat außerdem ein eigenes Submit-Skript für einen separaten
-Durchlauf:
+Jede Konfiguration hat außerdem einen eigenen Starter:
 
 ```bash
 bash submit_00_basic.sh configs/caches.csv
@@ -93,63 +89,29 @@ bash submit_A01_kernel_LegNetMax_3_6_9_12.sh configs/caches.csv
 bash submit_A02_kernel_7_11_15_21.sh configs/caches.csv
 ```
 
-Für die automatische Folge **nur `submit.sh`** starten. Die drei Einzelbefehle
-sind Alternativen und jeweils auf acht Plätze begrenzt. Eine gemeinsame Sperre
-verhindert einen zweiten gleichzeitigen Launcher im selben Projekt.
-
-Die vollständige vorgegebene Reihenfolge steht in
-`configs/training_priority.csv`: **60 Einträge, ohne Zeitangaben**. Sie wird in
-jeder Konfiguration erneut verwendet, von `CTCF/CHS` bis `ZFP3/GHTS`. `CHS` wird
-intern wie bisher `CHIP` zugeordnet. Bei mehreren Seeds stehen deren Wiederholungen
-direkt hinter dem jeweiligen TF/Assay-Paar. Neue, noch nicht gelistete Paare folgen
-am Ende in Manifest-Reihenfolge. Gruppierte Multi-TF-Planner behalten ihre eigene
-Reihenfolge.
-
-Die Einreichung erfolgt als Einzeljobs mit einer Start-Abhängigkeit zu früheren
-offenen Jobs (`after`). Dadurch können die Trainings parallel
-laufen, während ein späterer Job keinen früheren wartenden Job überholt. Die
-Priorität bezieht sich auf den SLURM-Jobstart. Die Initialisierung innerhalb des
-Python-Prozesses gehört zum jeweiligen Job. Fehlgeschlagene oder abgebrochene
-Trainings werden protokolliert und nicht automatisch wiederholt.
-
-Der Launcher läuft nach dem Start im Hintergrund auf dem Login-Knoten weiter.
-Er gibt seinen PID und den erzeugten Batch-Ordner aus. Darin werden für jede
-Konfiguration `tasks.csv`, eine Kopie der Prioritätsliste, `state.json`,
-`launcher.log` und die SLURM-Ausgaben gespeichert. `state.json` enthält die
-Job-IDs und ermöglicht das Fortsetzen ohne erneutes Einreichen bekannter Jobs:
+Für die automatische Folge nur `submit.sh` verwenden. Die gemeinsame Sperre
+verhindert parallele Launcher. Der Steuerprozess läuft im Hintergrund auf dem
+Login-Knoten; Status, Pläne und Logs stehen im ausgegebenen Batch-Ordner.
+Freie Plätze werden etwa alle 60 Sekunden geprüft. Andere Jobs außerhalb dieses
+Batchs zählen nicht gegen dessen Acht-Job-Grenze.
 
 ```bash
-python submit_jobs.py status plans/batch_XXXXXXXX
-tail -f plans/batch_XXXXXXXX/launcher.log
-# Nach einem gestoppten Launcher oder einem Neustart des Login-Knotens:
-python submit_jobs.py resume plans/batch_XXXXXXXX
+squeue -u "$USER"
+python submit_jobs.py status plans/batch_array_XXXXXXXX
+python submit_jobs.py resume plans/batch_array_XXXXXXXX
 ```
 
-`batch_XXXXXXXX` durch den ausgegebenen Ordner ersetzen. Ein Terminal-Disconnect
-beendet den abgekoppelten Prozess nicht. Nach einem Neustart des Login-Knotens
-muss `resume` aufgerufen werden. Bereits eingereichte SLURM-Jobs bleiben dabei
-erhalten. Ein unklarer Jobstatus gibt keinen Platz frei; der Launcher wartet auf
-SLURM/Accounting. Bei einer verlorenen Submit-Bestätigung wird der Job anhand
-seines eindeutigen Namens gesucht. Ist das nicht eindeutig möglich, pausiert der
-Launcher und schreibt den Grund ins Protokoll.
+`resume` ist nach einem Neustart des Login-Knotens erforderlich und übernimmt die
+vorhandenen Arrays. Partition ist nicht festgelegt. Ressourcen-/Account-Optionen
+können angehängt werden, z. B. `--account=...` oder `--mem=40G`. Trainingsressourcen
+stehen in `train_array.sbatch`, CPU-Sammelressourcen in `collect_all.sbatch`.
+`ABLATION_PYTHON` legt den Python-Pfad fest. Der Launcher benötigt `sbatch`,
+`scontrol`, `squeue` und funktionierendes `sacct`.
 
-Nach dem Ende aller Trainings wird einmal `collect_all.sbatch` als CPU-Job
-eingereicht. Dieser erzeugt die gemeinsamen CSVs und Auswertungsdateien auch dann,
-wenn einzelne Trainings fehlgeschlagen sind. Der Batch-Status enthält zusätzlich
-die SLURM-Fehler, auch wenn ein Job vor dem Start des Python-Trainings scheiterte.
-
-Partition, Account und QoS sind absichtlich nicht festgelegt. Falls dein Cluster
-sie benötigt, lassen sich Ressourcen-/Account-Optionen in Langform anhängen,
-beispielsweise `bash submit.sh configs/caches.csv --account=... --qos=...`.
-Der Account wird auch an den CPU-Sammeljob weitergegeben; dessen Partition/QoS
-und weitere standortspezifische CPU-Einstellungen gehören in `collect_all.sbatch`.
-Ressourcen der Trainingsjobs stehen in `train_task.sbatch` und lassen sich ebenfalls
-überschreiben, z. B. mit `--mem=40G`. Array-/Dependency-Optionen sind dem Launcher
-vorbehalten. Umgebungsvariablen mit Präfix `SBATCH_` werden beim Einreichen entfernt,
-damit sie die feste Grenze und Reihenfolge nicht übersteuern. Der Python-Pfad
-lässt sich über `ABLATION_PYTHON` setzen; ansonsten wird `python3` aus der aktivierten
-Umgebung verwendet. Für Launcher und Fortsetzen werden `sbatch`, `squeue` und
-`sacct` einschließlich funktionierendem Job-Accounting benötigt.
+Nach dem Ende aller Trainings sammelt ein CPU-Job die CSVs und Auswertungsdateien.
+Fehlgeschlagene Aufgaben werden nicht automatisch wiederholt. Eine detaillierte
+Beschreibung, einschließlich der gezielten Bereinigung des alten abgebrochenen
+Durchlaufs, steht in **README_ARRAYS.md**.
 
 Manuell beziehungsweise ohne SLURM:
 

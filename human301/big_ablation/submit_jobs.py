@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Background submission with persistent plans and a shared eight-job limit."""
+"""Three visible Slurm arrays with persistent plans and eight shared slots."""
 from __future__ import annotations
 
 import argparse
@@ -15,7 +15,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from ablation.dispatch import Dispatcher, MAX_JOBS, file_hash, outstanding
+from ablation.dispatch import MAX_JOBS, file_hash
+from ablation.array_dispatch import ArrayDispatcher as Dispatcher, active_tasks
 from ablation.recorder import atomic_json
 from ablation.slurm import TERMINAL, resource_options
 from run_experiment import PLAN_FIELDS, make_plan
@@ -26,7 +27,7 @@ ROOT = Path(__file__).resolve().parent
 def check_tools():
     if os.environ.get("SLURM_JOB_ID"):
         raise ValueError("Start/resume the dispatcher on the login node, outside a Slurm job")
-    missing = [name for name in ("sbatch", "squeue", "sacct") if not shutil.which(name)]
+    missing = [name for name in ("sbatch", "squeue", "sacct", "scontrol") if not shutil.which(name)]
     if missing:
         raise ValueError("Required Slurm commands not found: " + ", ".join(missing))
 
@@ -60,11 +61,11 @@ def prepare(args):
     rows = make_plan(selection)
     if not rows:
         raise ValueError("Task plan is empty")
-    batch = Path(tempfile.mkdtemp(prefix="batch_", dir=ROOT / "plans")).resolve()
+    batch = Path(tempfile.mkdtemp(prefix="batch_array_", dir=ROOT / "plans")).resolve()
     (batch / "slurm").mkdir()
     shutil.copyfile(priority, batch / "training_priority.csv")
     batch_id = "h301_" + uuid.uuid4().hex[:12]
-    tasks, hashes, configs = [], {}, []
+    tasks, hashes, configs, arrays = [], {}, [], []
     # make_plan returns complete configuration blocks in the explicit order
     # from submit.sh; within each block it applies training_priority.csv.
     for row in rows:
@@ -84,12 +85,14 @@ def prepare(args):
             writer.writeheader()
             writer.writerows(config_rows)
         hashes[str(plan)] = file_hash(plan)
+        arrays.append(dict(config=name, plan=str(plan), count=len(config_rows),
+                           job_name=f"{name[:45]}_{batch_id}", job_id=None, state="UNSUBMITTED"))
         for index, task in enumerate(task for task in tasks if task["config"] == name):
             task.update(plan=str(plan), index=index)
-    atomic_json(batch / "state.json", dict(version=1, root=str(ROOT), batch_id=batch_id,
+    atomic_json(batch / "state.json", dict(version=2, root=str(ROOT), batch_id=batch_id,
                 created_utc=datetime.now(timezone.utc).isoformat(), created_date=datetime.now().strftime("%Y-%m-%d"),
                 phase="prepared", max_jobs=MAX_JOBS, config_order=configs, sbatch_options=options,
-                plan_hashes=hashes, tasks=tasks, collection=None, last_error=""))
+                plan_hashes=hashes, tasks=tasks, arrays=arrays, collection=None, last_error=""))
     return batch
 
 
@@ -113,8 +116,11 @@ def status(batch):
         ended = [task for task in tasks if task["state"] in TERMINAL]
         failed = [task for task in ended if task["state"] != "COMPLETED"]
         waiting = sum(task["state"] == "UNSUBMITTED" for task in tasks)
-        print(f"{config}: {len(ended)}/{len(tasks)} ended ({len(failed)} failed/cancelled), "
-              f"{len(outstanding(tasks))} submitted/unfinished, {waiting} not yet submitted")
+        held = sum(task["state"] == "HELD" for task in tasks)
+        array = next((a for a in state.get("arrays", []) if a["config"] == config), {})
+        print(f"{config}: array {array.get('job_id') or 'not submitted'}; "
+              f"{len(ended)}/{len(tasks)} ended ({len(failed)} failed/cancelled), "
+              f"{len(active_tasks(tasks))} released/unfinished, {held} held, {waiting} not submitted")
     if state.get("collection"):
         print(f"Collection: {state['collection']['job_id']} {state['collection']['state']}")
     if state.get("last_error"):
