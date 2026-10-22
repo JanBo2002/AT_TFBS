@@ -1,0 +1,118 @@
+{
+  "status": "passed",
+  "basic_regression": {
+    "status": "passed",
+    "device": "cpu",
+    "torch_version": "2.14.1+cpu",
+    "reference_sha256": "ab8b7924c276f4d4c8f00254302075c4a6004047fbd04d37200ed1f8bdd753a8",
+    "data_dependency_sha256": "c37f6d9d5342b4779e6fd39de8f8a5ee4f0fd2ee1cf4c743485ae9eb97e33dd3",
+    "checks": [
+      "all original argparse training defaults preserved",
+      "state-dict names, initial weights and buffers bitwise equal for seeds 1/13/42",
+      "all forward outputs bitwise equal, including center indices 128 and 127",
+      "center/multi crop and RC probability averaging bitwise equal",
+      "dropout, gradients, clipping, AdamW updates and normalization buffers bitwise equal",
+      "fresh random crops, RC augmentation and per-worker RNG match",
+      "cyclic negative selection and batch order match over five epochs",
+      "two full training epochs: weights, LR schedule, metrics, selected checkpoint and validation-MCC threshold bitwise equal",
+      "all three configurations forward successfully; channel allocation 32/32 or 16/16/16/16"
+    ],
+    "variants": [
+      {
+        "name": "00_basic",
+        "kernels": [
+          9,
+          12
+        ],
+        "channels": [
+          32,
+          32
+        ],
+        "parameters": 1032981
+      },
+      {
+        "name": "A01_kernel_LegNetMax_3_6_9_12",
+        "kernels": [
+          3,
+          6,
+          9,
+          12
+        ],
+        "channels": [
+          16,
+          16,
+          16,
+          16
+        ],
+        "parameters": 1032213
+      },
+      {
+        "name": "A02_kernel_7_11_15_21",
+        "kernels": [
+          7,
+          11,
+          15,
+          21
+        ],
+        "channels": [
+          16,
+          16,
+          16,
+          16
+        ],
+        "parameters": 1033749
+      }
+    ],
+    "limits": "Synthetic regression tests; no scientific TF training data were available here. GPU/ROCm full-run reproducibility depends on the original environment."
+  },
+  "integration_tests": {
+    "passed": 15,
+    "failed": 0,
+    "details": "validation/integration.log"
+  },
+  "syntax": {
+    "python_ast_parse": "passed",
+    "bash_syntax": "passed"
+  },
+  "python_source_hash": "57cc83a62da4107adb88a6c795070732367bbbb31e215d2e576ce94551f91071",
+  "scientific_training_executed": false,
+  "submission_tests": {
+    "mode": "simulated_slurm",
+    "passed": 8,
+    "max_outstanding_training_jobs": 8,
+    "priority_entries": 60,
+    "priority_durations_stored": false,
+    "actual_cluster_jobs_submitted": false
+  },
+  "unchanged_training_sources_and_configs": [
+    "ablation/__init__.py",
+    "ablation/blocks.py",
+    "ablation/builders.py",
+    "ablation/collect.py",
+    "ablation/common.py",
+    "ablation/data.py",
+    "ablation/defaults.py",
+    "ablation/epoch.py",
+    "ablation/fitting.py",
+    "ablation/hum301_data.py",
+    "ablation/inference.py",
+    "ablation/loaders.py",
+    "ablation/losses.py",
+    "ablation/metrics.py",
+    "ablation/model.py",
+    "ablation/planning.py",
+    "ablation/providers.py",
+    "ablation/recorder.py",
+    "ablation/reporting.py",
+    "ablation/schema.py",
+    "ablation/specs.py",
+    "ablation/training.py",
+    "ablation/utils.py",
+    "ablation/verification.py",
+    "ablation/workflows.py",
+    "configs/00_basic.json",
+    "configs/A01_kernel_LegNetMax_3_6_9_12.json",
+    "configs/A02_kernel_7_11_15_21.json",
+    "reference/hum301_motif64.py"
+  ]
+}
