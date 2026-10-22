@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent
 
 
 def inside(path, parent):
+    
     return path.resolve().is_relative_to(parent.resolve()) and path.resolve() != parent.resolve()
 
 
