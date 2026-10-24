@@ -9,6 +9,6 @@ if [[ $# -lt 1 ]]; then
 fi
 ABLATION_MANIFEST="$1"
 shift
-exec "$ABLATION_PYTHON" "$ABLATION_ROOT/submit_jobs.py" start \
+exec "$ABLATION_PYTHON" "$ABLATION_ROOT/run_experiment.py" submit start \
     --manifest "$ABLATION_MANIFEST" \
     --config 00_basic A01_kernel_LegNetMax_3_6_9_12 A02_kernel_7_11_15_21 -- "$@"

@@ -1,6 +1,6 @@
 # Gemeinsames CSV-Schema 1.0
 
-Jede Experiment-CSV besitzt denselben festen Header aus `ablation/schema.py`.
+Jede Experiment-CSV besitzt denselben festen Header aus dem Abschnitt zum CSV-Schema in `training.py`.
 Nicht verfügbare Werte sind leer, nicht künstlich null. Alle Zeiten sind Sekunden,
 alle Speicherangaben Bytes. JSON-Spalten sind reguläre CSV-Felder und müssen mit
 einem CSV-Parser eingelesen werden.
