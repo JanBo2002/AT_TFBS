@@ -23,13 +23,13 @@ from pathlib import Path
 
 import torch
 
-from data import discover, read_manifest, order_tasks
+from data import discover, read_manifest, read_priority, order_tasks
 from training import (
     RunRecorder, atomic_json, metadata, package_hash, RunContext, digest,
     recipe_digest, invoke, load_config, collect, verify,
 )
 
-SCRIPT_VERSION = '5.0.0-shared-configurations'
+SCRIPT_VERSION = '5.2.1-task-profiles-default-long'
 
 
 # Slurm access and shared eight-job dispatcher
@@ -480,16 +480,31 @@ def make_plan(args):
     lookup={(r["tf"],r["assay"]):r["cache"] for r in manifest}
     rows=[]
     for path,config in configs:
+        selected_tfs = config.get("tfs", tfs)
+        priority = getattr(args, "priority_file", ROOT/"configs"/"training_priority.csv")
+        profile_pairs = None
+        # Resolve the default here without adding a field to the stored JSON.
+        if "tfs" not in config:
+            profile = config.get("task_profile", "long")
+            filename = "training_priority.csv" if profile == "long" else "training_priority_short.csv"
+            priority = ROOT / "configs" / filename
+            profile_pairs = read_priority(priority)
+            selected_tfs = list(dict.fromkeys(tf for tf, assay in profile_pairs))
+        absent = set(selected_tfs) - {row["tf"] for row in manifest}
+        if absent:
+            raise ValueError(f"Configured TFs not in manifest: {sorted(absent)}")
+        selected_tfs = [tf for tf in tfs if tf in selected_tfs]
         if "planner" in config["workflow"]:
             custom = invoke(config["workflow"]["planner"],config,manifest,
-                tf_filter=args.tf,train_assays=args.train_assay,seeds=args.seed)
+                tf_filter=selected_tfs if "tfs" in config or "task_profile" in config else args.tf,
+                train_assays=args.train_assay,seeds=args.seed)
             for row in custom:
                 if set(row) != set(PLAN_FIELDS)-{"config_path","config_hash"}:
                     raise ValueError("Custom planner returned an invalid task schema")
                 rows.append(dict(row,config_path=str(path),config_hash=digest(config)))
             continue
         config_rows=[]
-        for tf in tfs:
+        for tf in selected_tfs:
             assays=args.train_assay or config["train_assays"]
             if set(assays)-set(config["train_assays"]):
                 raise ValueError("Requested source assay is not enabled in the configuration")
@@ -498,11 +513,13 @@ def make_plan(args):
             if missing: raise ValueError(f"Missing caches for {tf}: {missing}")
             cache_paths={a:str(lookup[(tf,a)]) for a in needed}
             for assay in assays:
+                if profile_pairs is not None and (tf, assay) not in profile_pairs:
+                    continue
                 for seed in args.seed or config["seeds"]:
                     config_rows.append({"config_path":str(path),"config_hash":digest(config),"tf":tf,
                         "tf_ids_json":json.dumps([tf]),"training_scope":"single_tf",
                         "train_assay":assay,"seed":seed,"cache_paths_json":json.dumps(cache_paths,sort_keys=True)})
-        rows.extend(order_tasks(config_rows,getattr(args,"priority_file",ROOT/"configs"/"training_priority.csv")))
+        rows.extend(order_tasks(config_rows, priority))
     return rows
 
 

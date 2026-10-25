@@ -41,7 +41,7 @@ from scipy.stats import pearsonr, spearmanr
 from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 
-SCRIPT_VERSION = '5.1.0-input-channel-dropout'
+SCRIPT_VERSION = '5.3.0-task-profiles'
 
 
 # Configuration loading and extension points
@@ -85,7 +85,7 @@ def load_config(path: Path) -> dict[str, Any]:
     config = json.loads(path.read_text())
     required = {"schema_version", "name", "reference", "workflow", "data", "predictor",
                 "fitting", "inference", "analyses", "seeds", "train_assays", "test_assays"}
-    allowed = required | {"description"}
+    allowed = required | {"description", "tfs", "task_profile"}
     if required - config.keys() or config.keys() - allowed:
         raise ValueError(f"Invalid configuration keys: missing={required-config.keys()}, unknown={config.keys()-allowed}")
     if config["schema_version"] != "1.0":
@@ -102,6 +102,20 @@ def load_config(path: Path) -> dict[str, Any]:
         raise ValueError("Seeds must be nonnegative integers")
     if len(set(config["seeds"])) != len(config["seeds"]):
         raise ValueError("Duplicate seeds")
+    if "task_profile" in config:
+        if config["task_profile"] not in ("long", "short"):
+            raise ValueError("task_profile must be 'long' or 'short'")
+        if "tfs" in config:
+            raise ValueError("Select task_profile or tfs, not both")
+    if "tfs" in config:
+        tfs = config["tfs"]
+        if not isinstance(tfs, list) or not tfs or any(
+            not isinstance(tf, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", tf)
+            for tf in tfs
+        ):
+            raise ValueError("tfs must be a nonempty list of TF names")
+        if len(tfs) != len(set(tfs)):
+            raise ValueError("Duplicate TFs")
     for key in ("train_assays", "test_assays"):
         if not config[key] or len(config[key]) != len(set(config[key])):
             raise ValueError(f"{key} must be nonempty and unique")
