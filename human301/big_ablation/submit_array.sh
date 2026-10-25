@@ -82,13 +82,28 @@ def main():
         except BlockingIOError:
             raise RuntimeError('Der alte Hintergrund-Launcher oder ein anderer Start läuft noch.') from None
         queue = run(['squeue', '--me', '--noheader', '--format=%i|%j|%Z'], env)
+        wait_for = []
         for line in queue.splitlines():
             fields = line.split('|', 2)
             if len(fields) == 3:
                 job, name, directory = (field.strip() for field in fields)
                 if directory and Path(directory).resolve() == root and (name.startswith('h301_array_') or re.match(r'A\d+_', name)):
-                    raise RuntimeError(f'Für dieses Projekt ist noch ein Trainingsjob/Array aktiv: {job}. '
-                                       'Mehrere Konfigurationen gemeinsam in einem Aufruf angeben.')
+                    parent = job.split('_', 1)[0]
+                    require(re.fullmatch(r'[0-9]+', parent) is not None,
+                            f'Trainingsjob-ID kann nicht als Abhängigkeit verwendet werden: {job}')
+                    wait_for.append(parent)
+                    require(name != 'h301_array_' + '_'.join(configs),
+                            'Diese Konfigurationen sind bereits als Trainingsarray eingereiht.')
+        wait_for = sorted(set(wait_for), key=int)
+        # Pending arrays have no results directory yet; retain duplicate protection.
+        for previous_path in plans.glob('batch_array_*/submission.json'):
+            try:
+                previous = json.loads(previous_path.read_text())
+            except (OSError, ValueError):
+                continue
+            if str(previous.get('array_id')) in wait_for:
+                overlap = set(configs) & set(previous.get('configs', []))
+                require(not overlap, 'Konfiguration bereits eingereiht: ' + ', '.join(sorted(overlap)))
         batch = Path(tempfile.mkdtemp(prefix='batch_array_', dir=plans)).resolve()
         (batch / 'slurm').mkdir()
         plan = batch / 'tasks.csv'
@@ -134,10 +149,12 @@ def main():
             shutil.copyfile(root / 'configs/training_priority_short.csv', batch / 'training_priority_short.csv')
         state = dict(root=str(root), configs=configs, mode='native_array', array_id=None,
                      created_at=datetime.now(timezone.utc).isoformat(), plan=str(plan),
-                     task_count=len(rows), max_parallel=8, collectors={})
+                     task_count=len(rows), max_parallel=8, collectors={}, wait_for=wait_for)
         state_path = batch / 'submission.json'
         atomic_json(state_path, state)
-        array_id = receipt(run(['sbatch', '--parsable', *account_options,
+        dependency_options = (['--dependency=afterany:' + ':'.join(wait_for), '--kill-on-invalid-dep=yes']
+                              if wait_for else [])
+        array_id = receipt(run(['sbatch', '--parsable', *account_options, *dependency_options,
             f'--array=0-{len(rows)-1}%8', '--no-requeue', '--export=ALL',
             '--job-name=h301_array_' + '_'.join(configs), f'--chdir={root}',
             f'--output={batch / "slurm" / "train_%A_%a.out"}',
@@ -146,8 +163,11 @@ def main():
         state['array_id'] = array_id
         atomic_json(state_path, state)
         print(f'Jobarray {array_id}: {len(rows)} Trainingsaufgaben, maximal 8 gleichzeitig.', flush=True)
+        if wait_for:
+            print('Automatischer Start nach Ende der Trainingsjobs/Arrays: ' + ', '.join(wait_for), flush=True)
         print(f'Aufgabenplan und Logs: {batch}', flush=True)
-        # Only CPU result collection has a dependency; training tasks have none.
+        # Normal collection runs in the last finishing task. Retain a CPU fallback
+        # for tasks that were cancelled or could not write their completion state.
         for name, selected in indices.items():
             dependency = 'afterany:' + ':'.join(f'{array_id}_{index}' for index in selected)
             try:
@@ -155,7 +175,8 @@ def main():
                     '--dependency=' + dependency, '--kill-on-invalid-dep=yes',
                     '--job-name=h301_collect_' + name, f'--chdir={root}',
                     f'--output={batch / "slurm" / ("collect_" + name + "_%j.out")}',
-                    str(root / 'collect_config.sbatch'), str(root), name], env))
+                    str(root / 'collect_config.sbatch'), str(root), name,
+                    str(batch / f'completion_{array_id}_{name}.json')], env))
                 state['collectors'][name] = job
             except RuntimeError as exc:
                 state['collection_error'] = str(exc)
@@ -164,7 +185,7 @@ def main():
                 print(f'Nach dem Training: python run_experiment.py collect --config {name}', file=sys.stderr)
                 return 1
             atomic_json(state_path, state)
-            print(f'{name}: {len(selected)} Aufgaben; automatische CPU-Zusammenfassung als Job {job}.', flush=True)
+            print(f'{name}: {len(selected)} Aufgaben; Zusammenfassung im letzten Lauf, CPU-Absicherung als Job {job}.', flush=True)
         return 0
 
 
