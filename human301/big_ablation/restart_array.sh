@@ -10,12 +10,14 @@ ABLATION_SCRIPT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename 
 exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_SCRIPT" "$@" <<'PYTHON_RESTART'
 """One launcher: inspect old array tasks and restart only selected missing work.
 
-bash wiederanlauf_array.sh 72554 A04 --check
-bash wiederanlauf_array.sh 72554 A04
+bash restart_array.sh 72554 A04 --check
+bash restart_array.sh 72554 A04 --allow-code-version-mismatch
 
 Missing and incomplete terminal tasks are restarted automatically, from epoch 1.
 The old folder of each incomplete run is deleted immediately before restarting.
 Running jobs and fully completed runs are skipped. --check never deletes files.
+Code-version exceptions require --allow-code-version-mismatch or
+ABLATION_ALLOW_CODE_VERSION_MISMATCH=1; configuration checks always remain active.
 """
 import argparse
 import csv
@@ -121,14 +123,14 @@ def delete_incomplete(root, config, row, path):
     print(f'Unvollstaendiger Lauf geloescht: {path}', flush=True)
 
 
-def completed(path, config, row, code_hash):
+def completed(path, config, row):
     """Completion markers + checkpoint hash + BOTH evaluations; no torch import."""
     try:
         meta = read_json(path / 'run.json')
         require(meta.get('status') == 'completed', 'run.json meldet ' + str(meta.get('status')))
         recipe = {k: v for k, v in config.items() if k not in {'description', 'seeds', 'train_assays', 'test_assays'}}
-        require(meta['config_hash'] == digest(recipe) and meta['code_hash'] == code_hash,
-                'Code-/Config-Hash in run.json stimmt nicht.')
+        require(meta['config_hash'] == digest(recipe),
+                'Config-Hash in run.json stimmt nicht.')
         require((meta['tf'], meta['train_assay'], int(meta['seed'])) ==
                 (row['tf'], row['train_assay'], int(row['seed'])), 'Falsche Laufzuordnung.')
         require(read_json(path / 'config.json') == config, 'Gespeicherte Config weicht ab.')
@@ -165,6 +167,7 @@ def completed(path, config, row, code_hash):
 
 def worker(root, batch):
     state = read_json(batch / 'submission.json')
+    allow_code_version_mismatch = state.get('allow_code_version_mismatch', False)
     index = int(os.environ['SLURM_ARRAY_TASK_ID'])
     require(index in state['selected_indices'], 'Aufgabe nicht fuer diesen Wiederanlauf ausgewaehlt.')
     with Path(state['plan']).open(newline='') as handle:
@@ -177,14 +180,17 @@ def worker(root, batch):
     path = location(root, config, row)
     with (batch / f'task_{index}.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        if completed(path, config, row, state['code_hash'])[0]:
+        if completed(path, config, row)[0]:
+            require(allow_code_version_mismatch or read_json(path / 'run.json').get('code_hash') == state['code_hash'],
+                    'Fertiger Lauf stammt aus einer anderen Code-Version; ohne ausdrueckliche Freigabe kein Wiederanlauf.')
             print(f'{index}: bereits vollstaendig, uebersprungen.')
             return 0
         if path.exists() or path.is_symlink():
             require(state.get('cleanup') == 'delete', 'Kein Loeschauftrag im Einreichungsbeleg.')
             delete_incomplete(root, config, row, path)
         return subprocess.call([sys.executable, str(root / 'run_experiment.py'), 'task',
-                                '--plan', state['plan'], '--index', str(index)])
+                                '--plan', state['plan'], '--index', str(index)] +
+                               (['--allow-code-version-mismatch'] if allow_code_version_mismatch else []))
 
 
 def main():
@@ -195,10 +201,15 @@ def main():
     parser.add_argument('array_id', type=int)
     parser.add_argument('config', nargs='?', default='A04')
     parser.add_argument('--check', action='store_true', help='Nur Bericht, keine Einreichung')
+    parser.add_argument('--allow-code-version-mismatch', action='store_true',
+                        default=os.environ.get('ABLATION_ALLOW_CODE_VERSION_MISMATCH') == '1',
+                        help='Andere bisherige Code-Version ausdruecklich erlauben; auch per ABLATION_ALLOW_CODE_VERSION_MISMATCH=1')
     # Accept the earlier invocation as an alias; restarting is now the default.
     parser.add_argument('--restart-incomplete', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--account')
     args = parser.parse_args(sys.argv[2:])
+    if args.allow_code_version_mismatch:
+        os.environ['ABLATION_ALLOW_CODE_VERSION_MISMATCH'] = '1'
     require(not os.environ.get('SLURM_JOB_ID'), 'Den Launcher auf dem Login-Knoten starten.')
     require(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*', args.config), 'Ungueltiger Config-Name.')
     root, original = script.parent, str(args.array_id)
@@ -223,8 +234,9 @@ def main():
         code_hash = package_hash(root)
         versions = root / 'results' / args.config / 'versions.txt'
         if versions.exists():
-            saved_hash = re.search(r'^code_sha256:\s*(\w+)', versions.read_text(), re.MULTILINE)
-            require(saved_hash and saved_hash.group(1) == code_hash, 'Python-Code weicht von versions.txt ab; kein Mischen von Versionen.')
+            saved_hashes = re.findall(r'^code_sha256:\s*(\w+)', versions.read_text(), re.MULTILINE)
+            require(args.allow_code_version_mismatch or (saved_hashes and saved_hashes[-1] == code_hash),
+                    'Python-Code weicht von versions.txt ab; ausdruecklich --allow-code-version-mismatch verwenden.')
         related = [original] + sorted({str(s['array_id']) for _, s in states
                    if s.get('retry_of') == original and s.get('configs') == [args.config]
                    and str(s.get('array_id', '')).isdigit()}, key=int)
@@ -247,8 +259,11 @@ def main():
             slurm = slurm or 'UNKNOWN'
             status, reason = 'AKTIV', active['state'] if active else ''
             if not active:
-                ok, reason = completed(path, config, row, code_hash)
+                ok, reason = completed(path, config, row)
                 if ok:
+                    require(args.allow_code_version_mismatch or read_json(path / 'run.json').get('code_hash') == code_hash,
+                            f'Aufgabe {index} ist fertig, stammt aber aus einer anderen Code-Version; '
+                            'ausdruecklich --allow-code-version-mismatch verwenden. Der Lauf bleibt erhalten.')
                     status = 'FERTIG'
                 elif slurm.split()[0].rstrip('+*') not in TERMINAL:
                     status, reason = 'UNKLAR', 'Kein sicher bestaetigtes Jobende; ' + reason
@@ -287,6 +302,7 @@ def main():
         (batch / 'slurm').mkdir()
         state = dict(root=str(root), configs=[args.config], retry_of=original, plan=str(plan), array_id=None,
                      selected_indices=retry, cleanup='delete', code_hash=code_hash,
+                     allow_code_version_mismatch=args.allow_code_version_mismatch,
                      max_parallel=parallel, collectors={}, status='prepared')
         save_json(batch / 'submission.json', state)
         account = ['--account=' + args.account] if args.account else []
@@ -312,6 +328,11 @@ def main():
             if existing:
                 run(['scontrol', 'update', 'JobId=' + old_collector, 'Dependency=' + dependency])
                 collector = old_collector
+                if args.allow_code_version_mismatch:
+                    print('Der bereits wartende Zusammenfassungsjob uebernimmt die Freigabe nicht nachtraeglich.',
+                          file=sys.stderr)
+                    print(f'Nach allen Laeufen bei Bedarf: python run_experiment.py collect --config {args.config} '
+                          '--allow-code-version-mismatch', file=sys.stderr)
             else:
                 collector = job_id(run(['sbatch', '--parsable', *account, '--export=ALL', '--no-requeue',
                      '--dependency=' + dependency, '--kill-on-invalid-dep=yes', '--chdir=' + str(root),
