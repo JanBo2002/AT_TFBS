@@ -29,7 +29,7 @@ from training import (
     recipe_digest, invoke, load_config, collect, verify,
 )
 
-SCRIPT_VERSION = '5.2.1-task-profiles-default-long'
+SCRIPT_VERSION = '5.2.2-task-profiles-code-version-override'
 
 
 # Slurm access and shared eight-job dispatcher
@@ -547,7 +547,8 @@ def execute(row,args):
         if stored.exists() and recipe_digest(json.loads(stored.read_text()))!=recipe_digest(config):
             raise ValueError(f"Experiment {config['name']} already has another configuration. Assign a new experiment name.")
         atomic_json(stored,config)
-        write_versions(experiment,code_hash)
+        write_versions(experiment,code_hash,
+            allow_code_version_mismatch=getattr(args,"allow_code_version_mismatch",False))
     run_id=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")+"_"+uuid.uuid4().hex[:8]
     seed=int(row["seed"])
     tf=row["tf"]
@@ -597,12 +598,19 @@ def plan_options(parser):
 def runtime_options(parser):
     parser.add_argument("--device",default="auto")
     parser.add_argument("--workers",type=int,default=None,help="Explicit override of the original worker setting")
+    code_version_options(parser)
+
+
+def code_version_options(parser):
+    parser.add_argument("--allow-code-version-mismatch",action="store_true",
+        help="Allow differing code versions for this invocation only; configuration checks stay enabled. "
+             "Also enabled by ABLATION_ALLOW_CODE_VERSION_MISMATCH=1.")
 
 
 # Version recording
 # -----------------
 
-def write_versions(experiment, code_hash):
+def write_versions(experiment, code_hash, *, allow_code_version_mismatch=False):
     """Record script versions without copying Python files into results."""
     lines = [f"code_sha256: {code_hash}"]
     for filename in ("run_experiment.py", "model.py", "data.py", "training.py"):
@@ -611,8 +619,17 @@ def write_versions(experiment, code_hash):
         lines.append(f"{filename}: {match.group(1) if match else 'unversioned'}")
     destination = experiment / "versions.txt"
     content = "\n".join(lines) + "\n"
-    if destination.exists() and destination.read_text() != content:
-        raise ValueError("Experiment already uses another code version; choose a new experiment name")
+    if destination.exists():
+        previous = destination.read_text()
+        current = previous.rsplit("\n\n# Additional implementation used\n",1)[-1]
+        if current == content:
+            return
+        if not (allow_code_version_mismatch or os.environ.get("ABLATION_ALLOW_CODE_VERSION_MISMATCH") == "1"):
+            raise ValueError("Experiment already uses another code version; choose a new experiment name "
+                             "or explicitly pass --allow-code-version-mismatch")
+        print("Warning: code-version mismatch explicitly allowed; previous versions.txt entries are retained.",
+              file=sys.stderr)
+        content = previous + ("" if previous.endswith("\n") else "\n") + "\n# Additional implementation used\n" + content
     destination.write_text(content)
 
 
@@ -641,6 +658,7 @@ def main():
     runtime_options(task)
     collect_parser=sub.add_parser("collect",help="Export standard CSVs and evaluation.md")
     select_group(collect_parser)
+    code_version_options(collect_parser)
     verify_parser=sub.add_parser("verify-basic",help="Check model, optimizer, dataset and inference parity against the frozen original")
     verify_parser.add_argument("--reference", type=Path, required=True, help="Original motif64 script used for parity checks")
     verify_parser.add_argument("--output",type=Path,default=ROOT/"verification.json")
@@ -679,12 +697,12 @@ def main():
                 print(f"Task failed: {row['tf']} {row['train_assay']} seed {row['seed']}",file=sys.stderr)
             remaining[row["config_path"]]-=1
             if remaining[row["config_path"]]==0 and (ROOT/"results"/name/"config.json").is_file():
-                collect(ROOT,name)
+                collect(ROOT,name,allow_code_version_mismatch=args.allow_code_version_mismatch)
         if failed: return 1
     elif args.command=="collect":
         for path,config in resolve_configs(args):
             if (ROOT/"results"/config["name"]/"config.json").exists():
-                collect(ROOT,config["name"])
+                collect(ROOT,config["name"],allow_code_version_mismatch=args.allow_code_version_mismatch)
     elif args.command=="verify-basic":
         verify(ROOT,args.output,args.reference)
     return 0

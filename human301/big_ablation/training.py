@@ -41,7 +41,7 @@ from scipy.stats import pearsonr, spearmanr
 from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 
-SCRIPT_VERSION = '5.3.0-task-profiles'
+SCRIPT_VERSION = '5.3.1-task-profiles-code-version-override'
 
 
 # Configuration loading and extension points
@@ -2598,17 +2598,19 @@ def add_reference_comparisons(rows, root, reference_id, experiment_id):
             if value>0: row["log2_ratio_auprc"] = math.log2(value/reference)
 
 
-def collect(root: Path, experiment_id: str):
+def collect(root: Path, experiment_id: str, *, allow_code_version_mismatch=False):
     experiment = root/"results"/experiment_id
     config = json.loads((experiment/"config.json").read_text())
     destination = root/"results"/"Results_all"
     destination.mkdir(parents=True,exist_ok=True)
     with (destination/f".{experiment_id}.lock").open("a") as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
-        return _collect(root,experiment,config,destination)
+        return _collect(root,experiment,config,destination,
+            allow_code_version_mismatch=allow_code_version_mismatch or
+                os.environ.get("ABLATION_ALLOW_CODE_VERSION_MISMATCH") == "1")
 
 
-def _collect(root, experiment, config, destination):
+def _collect(root, experiment, config, destination, *, allow_code_version_mismatch=False):
     rows,metadata = [],{}
     for path in sorted((experiment/"runs").rglob("run.json")):
         meta = json.loads(path.read_text())
@@ -2634,8 +2636,11 @@ def _collect(root, experiment, config, destination):
     active = set(selected.values())
     code_hashes = {metadata[r]["code_hash"] for r in active}
     config_hashes = {metadata[r]["config_hash"] for r in active}
-    if len(code_hashes)>1 or len(config_hashes)>1:
+    if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch):
         raise ValueError("Selected runs mix code/config versions. Use a distinct experiment name for a changed implementation.")
+    if len(code_hashes)>1:
+        print("Warning: collection with differing code versions explicitly allowed; original code hashes are retained.",
+              file=sys.stderr)
     for row in rows:
         row["included_in_summary"] = row["run_id"] in active and row.get("status")=="completed"
     # Enrich evaluation rows with source-run descriptors without copying runtime
