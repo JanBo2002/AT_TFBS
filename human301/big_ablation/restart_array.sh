@@ -175,8 +175,10 @@ def worker(root, batch):
     config = read_json(row['config_path'])
     require(Path(state['root']).resolve() == root and state['configs'] == [config['name']],
             'Projekt oder Config passt nicht zum Wiederanlauf.')
-    require(digest(config) == row['config_hash'] and package_hash(root) == state['code_hash'],
-            'Code oder Config seit Einreichung veraendert.')
+    require(digest(config) == row['config_hash'],
+            'Config seit Einreichung veraendert.')
+    require(allow_code_version_mismatch or package_hash(root) == state['code_hash'],
+            'Code seit Einreichung veraendert; ausdruecklich --allow-code-version-mismatch verwenden.')
     path = location(root, config, row)
     with (batch / f'task_{index}.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -360,3 +362,4 @@ except (OSError, ValueError, KeyError, TypeError, RuntimeError, subprocess.Subpr
     print('Abgebrochen:', exc, file=sys.stderr)
     raise SystemExit(1)
 PYTHON_RESTART
+
