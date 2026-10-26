@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "name": "A04",
+  "description": "128 input channels: kernels 3/6/9/12 with 32 channels each; additional channel dropout 0.1; bottleneck dropout unchanged at 0.1.",
+  "reference": "00_basic",
+  "workflow": {
+    "factory": "training:supervised",
+    "params": {}
+  },
+  "data": {
+    "factory": "data:human301",
+    "params": {}
+  },
+  "predictor": {
+    "factory": "model:maa",
+    "params": {
+      "sequence_length": 256,
+      "embed_channels": 128,
+      "encoder_channels": [
+        80,
+        96,
+        128
+      ],
+      "bottleneck_length": 64,
+      "motif_kernels": [
+        3,
+        6,
+        9,
+        12
+      ],
+      "transformer_heads": 4,
+      "transformer_ffn": 256,
+      "dropout": 0.1,
+      "activation": "relu",
+      "classification_readout": "center",
+      "regression_nonnegative": true,
+      "channel_dropout": 0.1
+    }
+  },
+  "fitting": {
+    "factory": "training:baseline",
+    "params": {
+      "epochs": 50,
+      "batch_size": 88,
+      "num_workers": 4,
+      "eval_batch_size": 128,
+      "negatives_per_positive": 10,
+      "hard_negative_fraction": 0.0,
+      "hard_negative_start_epoch": 6,
+      "hard_negative_refresh": 5,
+      "learning_rate": 0.0003,
+      "min_learning_rate": 1e-06,
+      "weight_decay": 0.0001,
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-08,
+      "gradient_clip": 1.0,
+      "patience": 10,
+      "min_delta": 0.0001,
+      "min_checkpoint_epoch": 1,
+      "amp": true,
+      "reverse_complement_probability": 0.5,
+      "checkpoint_objective": "auto",
+      "threshold_strategy": "val-mcc",
+      "classification_threshold": 0.5
+    }
+  },
+  "inference": {
+    "factory": "training:fixed_views",
+    "params": {
+      "eval_crops": "multi",
+      "eval_rc": true
+    }
+  },
+  "analyses": [],
+  "seeds": [
+    13
+  ],
+  "train_assays": [
+    "CHIP",
+    "GHTS"
+  ],
+  "test_assays": [
+    "CHIP",
+    "GHTS"
+  ]
+}
