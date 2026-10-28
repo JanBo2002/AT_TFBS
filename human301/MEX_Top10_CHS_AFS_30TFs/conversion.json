@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-28",
+  "conversion_id": "self_uniform_epsilon_1e-4_ln_v1",
+  "scope": "35 supplements only; 565 originals unchanged",
+  "original_count": 565,
+  "self_converted_count": 35,
+  "CHS_self_converted": 34,
+  "AFS_self_converted": 1,
+  "recipe": {
+    "id": "self_uniform_epsilon_1e-4_ln_v1",
+    "log_base": "e",
+    "alphabet": "ACGT",
+    "background": [
+      0.25,
+      0.25,
+      0.25,
+      0.25
+    ],
+    "epsilon": 0.0001,
+    "frequency": "f[b,j] = raw[b,j] / sum_b(raw[b,j])",
+    "smoothed_probability": "p = (f + epsilon) / (1 + 4*epsilon)",
+    "weight": "w = ln(p / 0.25)",
+    "author_export_equivalence_claimed": false
+  },
+  "numeric_serialization": "one position per line; A,C,G,T; tab-separated; 16 significant decimal digits",
+  "raw_input_files_included": true,
+  "motif_discovery_performed": false,
+  "prior_recipe_reference": "PWMs_30_human_TFs.zip/README.md and motifs.json",
+  "prior_recipe_calibration": {
+    "reference_MEX_matrices_checked": 600,
+    "maximum_absolute_weight_difference": 8.881784197001252e-16,
+    "description": "Same documented epsilon=1e-4 conversion compared with the previously generated reference matrices"
+  },
+  "selection": "Keep all 565 published originals. Fill only deficits to 10 per TF/source assay, using the best remaining motif IDs from the earlier top-10 list in previous_index order.",
+  "source_score_verification": {
+    "archive": "MEX_metrics_complete.zip",
+    "archive_md5": "99a8fc77fa00971db7fd71dcfc55339c",
+    "member": "MEX_metrics_complete.tsv",
+    "uncompressed_size": 9036028108,
+    "member_CRC32": "7ca85be0",
+    "full_member_read_and_CRC_verified": true,
+    "rows_scanned": 16869771,
+    "motifs": 35,
+    "retained_AP_values": 66,
+    "selection": "Approved same-source-assay Val dataset identities matched exactly to MEX metadata"
+  },
+  "author_export_equivalence_claimed_for_supplements": false
+}
