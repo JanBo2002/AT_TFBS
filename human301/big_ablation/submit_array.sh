@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Version: 2026-10-27-native-array-queue
 set -euo pipefail
 ABLATION_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_ROOT" "$@" <<'HUM301_NATIVE_ARRAY'
@@ -50,6 +51,10 @@ def queue_jobs(root, env):
     return list(dict.fromkeys(rows))
 
 
+def training_name(name):
+    return name.startswith(('h301_array_', 'hum301_array')) or re.match(r'A\d+_', name)
+
+
 def run_directory(root, name, row):
     require(row['tf'] and row['training_scope'] == 'single_tf',
             'Wiederaufnahme ist für die vorhandenen Single-TF-Konfigurationen vorgesehen.')
@@ -86,6 +91,9 @@ def completed(path, row, config):
 def main():
     root = Path(sys.argv[1]).resolve()
     arguments = sys.argv[2:]
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith('SBATCH_') and key not in {'SLURM_CLUSTERS', 'SLURM_FEDERATION'}}
+    env.update(LC_ALL='C', ABLATION_PYTHON=sys.executable)
     require(arguments, 'Aufruf: bash submit_array.sh [--restart] KONFIG [KONFIG ...] [--account=NAME]')
     require(not os.environ.get('SLURM_JOB_ID'), 'Den Launcher auf dem Login-Knoten starten.')
     manifest = root / 'configs' / 'caches.csv'
@@ -128,14 +136,8 @@ def main():
             'collect_config.sbatch aus array_queue_immediate_summary.zip verwenden.')
     plans = root / 'plans'
     plans.mkdir(exist_ok=True)
-    env = {key: value for key, value in os.environ.items()
-           if not key.startswith('SBATCH_') and key not in {'SLURM_CLUSTERS', 'SLURM_FEDERATION'}}
-    env.update(LC_ALL='C', ABLATION_PYTHON=sys.executable)
     with (plans / '.dispatcher.lock').open('a') as lock:
-        try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise RuntimeError('Der alte Hintergrund-Launcher oder ein anderer Start läuft noch.') from None
+        fcntl.flock(lock, fcntl.LOCK_EX)
         requested = set(configs)
         previous_arrays = {}
         for previous_path in plans.glob('*/submission.json'):
@@ -146,17 +148,31 @@ def main():
             if isinstance(previous, dict) and previous.get('array_id') is not None:
                 previous_arrays[str(previous['array_id'])] = set(previous.get('configs', []))
         stop = set()
+        prior_jobs = set()
         for job, name in queue_jobs(root, env):
-            if name.startswith('h301_array_') or re.match(r'A\d+_', name):
+            require(name != 'h301_slots',
+                    f'Alte CPU-Slotsteuerung {job} ist noch aktiv. Zuerst diesen Steuerjob mit scancel {job} beenden; bestehende Array-Grenzen werden hier nicht verändert.')
+            if training_name(name):
                 owned = previous_arrays.get(job)
                 if owned is None:
-                    owned = {config for config in configs if name == 'h301_array_' + config}
-                require(restart and owned and owned <= requested,
-                        f'Trainingsarray {job} ({name}) ist noch aktiv. Ein Neustart ersetzt nur vollständig ausgewählte Configs; andere Trainings werden nicht abgebrochen.')
-                stop.add(job)
-            elif name.startswith('h301_collect_') and name[len('h301_collect_'):] in requested:
-                require(restart, f'Für diese Config ist noch Sammeljob {job} aktiv; --restart verwenden.')
-                stop.add(job)
+                    owned = {path.stem for path in (root / 'configs').glob('*.json')
+                             if name in {'h301_array_' + path.stem, 'h301_array_retry_' + path.stem, path.stem}}
+                require(owned,
+                        f'Config-Zuordnung für Trainingsarray {job} ({name}) fehlt in plans/*/submission.json. Vor einem Neustart darf kein möglicherweise betroffener Lauf umgeordnet werden.')
+                if owned and owned & requested:
+                    require(restart and owned <= requested,
+                            f'Trainingsarray {job} enthält angeforderte und weitere Configs. Für einen Neustart alle Configs dieses Arrays gemeinsam angeben.')
+                    stop.add(job)
+                else:
+                    prior_jobs.add(job)
+                    print(f'Bestehendes Training bleibt aktiv: {job} ({name}); das neue Array wartet auf dessen Ende.', flush=True)
+            elif name.startswith('h301_collect_'):
+                if name[len('h301_collect_'):] in requested:
+                    require(restart, f'Für diese Config ist noch Sammeljob {job} aktiv; --restart verwenden.')
+                    stop.add(job)
+                else:
+                    # Finish existing summaries before starting the next array.
+                    prior_jobs.add(job)
         batch = Path(tempfile.mkdtemp(prefix='batch_array_', dir=plans)).resolve()
         (batch / 'slurm').mkdir()
         plan = batch / 'tasks.csv'
@@ -256,7 +272,16 @@ def main():
             print('Alle ausgewählten Runs sind bereits abgeschlossen. Keine Trainingsjobs eingereicht.', flush=True)
             return 0
         label = active_configs[0] if len(active_configs) == 1 else active_configs[0] + '_to_' + active_configs[-1]
-        array_id = receipt(run(['sbatch', '--parsable', *account_options,
+        # Native array dependencies enforce old arrays first without changing
+        # their throttles or reserving a job slot for a controller. Recheck the
+        # queue because old jobs may have ended while the plan was prepared.
+        waiting_for = sorted({job for job, name in queue_jobs(root, env)
+                              if job in prior_jobs}, key=int)
+        state['wait_for_jobs'] = waiting_for
+        atomic_json(state_path, state)
+        dependency_options = (['--dependency=afterany:' + ':'.join(waiting_for),
+                               '--kill-on-invalid-dep=yes'] if waiting_for else [])
+        array_id = receipt(run(['sbatch', '--parsable', *account_options, *dependency_options,
             f'--array=0-{len(rows)-1}%8', '--no-requeue', '--export=ALL',
             '--job-name=h301_array_' + label, f'--chdir={root}',
             f'--output={batch / "slurm" / "train_%A_%a.out"}',
@@ -264,7 +289,10 @@ def main():
             str(root / 'train_array.sbatch'), str(plan), str(root)], env))
         state['array_id'] = array_id
         atomic_json(state_path, state)
-        print(f'Jobarray {array_id}: {len(rows)} Trainingsaufgaben, maximal 8 gleichzeitig.', flush=True)
+        print(f'Jobarray {array_id}: {len(rows)} Trainingsaufgaben; maximal 8 gleichzeitig.', flush=True)
+        if waiting_for:
+            print('Start nach Ende der bisherigen Trainings-/Sammeljobs: ' + ', '.join(waiting_for) + '.', flush=True)
+        print('Keine CPU-Slotsteuerung; bestehende ArrayTaskThrottle-Werte bleiben unverändert.', flush=True)
         print('Planreihenfolge: ' + ' -> '.join(active_configs), flush=True)
         print(f'Aufgabenplan und Logs: {batch}', flush=True)
         # Normal collection runs in the last finishing task. Retain a CPU fallback
