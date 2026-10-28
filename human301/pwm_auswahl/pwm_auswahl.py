@@ -26,7 +26,7 @@ import sys
 import tempfile
 from contextlib import contextmanager
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 BASE = Path('/data/projects/SFB_A03/jan/AT_TFBS/human301')
 ASSIGNMENT_ROOT = Path('/data/projects/SFB_A03/clara/ArchThalia-ML/Input_data/best_20_motif_CHS_GHTS')
 SCRIPT = Path(__file__).resolve()
@@ -38,11 +38,13 @@ METADATA_FIELDS = ['Motif', 'TF', 'Overall rank', 'Tool', 'Train data',
                    'Train dataset ID', 'Train experiment ID', 'Approved']
 SUMMARY_FIELDS = ['TF', 'Assay', 'Status', 'Input_files', 'Unique_matrices',
                   'Eligible', 'Missing_metadata_or_rank', 'Not_approved',
-                  'Above_rank_limit', 'Representatives', 'Selected', 'Requested', 'Message']
+                  'Above_rank_limit', 'Representatives', 'Selected', 'Requested',
+                  'Effective_E', 'Exact_only', 'Rank_fill', 'Minimum_met', 'Message']
 DECISION_FIELDS = ['TF', 'Assay', 'Matrix_ID', 'Original_header', 'Original_file',
                    'Width', 'Alias_IDs', 'MEX_overall_rank', 'Rank_motif_ID',
                    'Approved', 'Eligible', 'Status', 'Representative', 'Group',
-                   'Selected_order', 'Similarity_rule', 'Evidence_query',
+                   'Selected_order', 'Selection_reason', 'Effective_E',
+                   'Similarity_rule', 'Evidence_query',
                    'Evidence_target', 'Tomtom_E', 'Tomtom_p', 'Tomtom_q',
                    'Overlap', 'Offset', 'Orientation', 'Copied_to']
 
@@ -256,8 +258,7 @@ def load_group(tf, assay, metadata, args):
 def find_tomtom(explicit):
     candidates = ([explicit] if explicit else [
         shutil.which('tomtom'),
-        str(Path.home() / 'miniforge3/envs/at_env/bin/tomtom'),
-        str(Path.home() / 'miniforge3/envs/pwm_meme/bin/tomtom')])
+        str(Path.home() / 'miniforge3/envs/at_env/bin/tomtom')])
     for candidate in candidates:
         if not candidate:
             continue
@@ -266,7 +267,8 @@ def find_tomtom(explicit):
             return str(Path(located).resolve())
     raise RuntimeError('Tomtom nicht gefunden. Einmalig z.B.:\n'
                        'source ~/miniforge3/etc/profile.d/conda.sh\n'
-                       'conda create -n pwm_meme -c conda-forge -c bioconda meme=5.5.8\n'
+                       'conda activate at_env\n'
+                       'conda install --freeze-installed -c conda-forge -c bioconda meme=5.5.8\n'
                        'Danach erneut starten oder --tomtom /absoluter/pfad/tomtom angeben.')
 
 
@@ -428,6 +430,64 @@ def select_motifs(tf, assay, motifs, matches, args):
     return leaders, decisions
 
 
+def select_adaptive(tf, assay, motifs, matches, args):
+    """Relax redundancy filtering until k representatives exist, then rank-fill.
+
+    The score ordering remains fixed. Each trial starts again from that ordering;
+    greedy representative counts are not assumed to be monotone in the cutoff.
+    None is an explicit exact-matrix/RC-only stage, not a numeric E=0 threshold.
+    """
+    mode = args.selection_mode
+    thresholds = [args.evalue]
+    if mode == 'adaptive':
+        thresholds += [10.0 ** exponent for exponent in (
+            -2, -3, -4, -5, -6, -8, -10, -12, -16, -20, -30, -50, -100, -200, -300)
+                       if 10.0 ** exponent < args.evalue]
+        thresholds.append(None)
+    attempts = []
+    for threshold in thresholds:
+        trial = argparse.Namespace(**vars(args))
+        # A negative internal cutoff disables only the Tomtom-E comparisons;
+        # exact equality / exact RC checks still run before that cutoff.
+        trial.evalue = threshold if threshold is not None else -1.0
+        leaders, decisions = select_motifs(tf, assay, motifs, matches, trial)
+        count = sum(row['Status'] == 'selected' for row in decisions)
+        attempts.append({'evalue': threshold, 'exact_only': threshold is None,
+                         'representatives': len(leaders), 'selected': count})
+        if count >= args.top_k:
+            break
+    selected = [row for row in decisions if row['Status'] == 'selected']
+    for row in selected:
+        row['Selection_reason'] = 'representative'
+    fill = 0
+    if mode == 'adaptive' and len(selected) < args.top_k:
+        # Unique numerical matrices were deduplicated during input loading.
+        # To honour the requested count, exact RC variants can now be retained
+        # as separate original matrices, explicitly labelled as rank-fill.
+        for row in decisions:
+            if len(selected) >= args.top_k:
+                break
+            if not row['Eligible'] or row['Status'] == 'selected':
+                continue
+            row['Status'] = 'selected'
+            row['Selection_reason'] = 'rank_fill'
+            selected.append(row)
+            fill += 1
+    # decisions is already in deterministic MEX quality order. Re-number and
+    # copy the final selected set in that order, including any rank-filled rows.
+    order = 0
+    for row in decisions:
+        row['Effective_E'] = threshold if threshold is not None else ''
+        if row['Status'] == 'selected':
+            order += 1
+            row['Selected_order'] = order
+    report = {'mode': mode, 'initial_evalue': args.evalue,
+              'effective_evalue': threshold, 'exact_only': threshold is None,
+              'attempts': attempts, 'rank_fill': fill,
+              'minimum_met': len(selected) >= args.top_k}
+    return leaders, decisions, report
+
+
 def alias_rows(tf, assay, motifs, metadata):
     result = []
     for motif in motifs:
@@ -466,7 +526,13 @@ def process_group(tf, assay, metadata, args, context):
         logging.info('%s/%s: vorhandenes, unveraendertes Ergebnis wiederverwendet.', tf, assay)
         return previous['summary'], previous['selected']
     matches = run_tomtom(folder, motifs, args) if motifs else {}
-    leaders, decisions = select_motifs(tf, assay, motifs, matches, args)
+    leaders, decisions, selection = select_adaptive(tf, assay, motifs, matches, args)
+    atomic_json(folder / 'selection_policy.json', selection)
+    atomic_tsv(folder / 'threshold_trials.tsv', ['E_value', 'Exact_only',
+               'Representatives', 'Selected'], [
+                   {'E_value': trial['evalue'] if trial['evalue'] is not None else '',
+                    'Exact_only': trial['exact_only'], 'Representatives': trial['representatives'],
+                    'Selected': trial['selected']} for trial in selection['attempts']])
     selected_dir = folder / 'selected'
     selected_dir.mkdir(exist_ok=True)
     expected_names = set()
@@ -501,8 +567,17 @@ def process_group(tf, assay, metadata, args, context):
     if not motifs:
         status, message = 'NO_PWM', 'Keine Eingabe-PWMs gefunden.'
     elif len(chosen) < args.top_k:
-        status = 'FEWER_THAN_REQUESTED'
-        message = 'Nur {} geeignete, untereinander nicht stark aehnliche Repraesentanten.'.format(len(chosen))
+        if args.selection_mode == 'adaptive':
+            status = 'INSUFFICIENT_RANKED'
+            message = 'Nur {} verwendbare, zugelassene Matrizen mit MEX-Rang; {} angefordert.'.format(
+                len(eligible), args.top_k)
+        else:
+            status = 'FEWER_THAN_REQUESTED'
+            message = 'Nur {} geeignete Repraesentanten bei fester E-Grenze.'.format(len(chosen))
+    elif selection['rank_fill']:
+        status = 'OK_RANK_FILLED'
+        message = '{} zusaetzliche Originalmatrizen nach MEX-Rang aufgefuellt; '
+        message = message.format(selection['rank_fill']) + 'sie sind nicht als unabhaengige Motive zu interpretieren.'
     else:
         status = 'OK'
     summary = dict(TF=tf, Assay=assay, Status=status, Input_files=len(files),
@@ -512,6 +587,9 @@ def process_group(tf, assay, metadata, args, context):
                    Not_approved=sum(motif.reason == 'excluded_not_approved' for motif in motifs),
                    Above_rank_limit=sum(motif.reason == 'excluded_above_rank_limit' for motif in motifs),
                    Representatives=len(leaders), Selected=len(chosen), Requested=args.top_k,
+                   Effective_E=selection['effective_evalue'] if selection['effective_evalue'] is not None else '',
+                   Exact_only=selection['exact_only'], Rank_fill=selection['rank_fill'],
+                   Minimum_met=selection['minimum_met'],
                    Message=message)
     output_files = []
     for path in sorted(folder.rglob('*')):
@@ -520,8 +598,9 @@ def process_group(tf, assay, metadata, args, context):
     atomic_json(completion, {'fingerprint': fingerprint, 'completed_utc': now(),
                             'max_reconstructed_row_error': max((m.row_error for m in motifs), default=0),
                             'summary': summary, 'selected': chosen, 'output_files': output_files})
-    logging.info('%s/%s: %d Matrizen, %d geeignet, %d Repraesentanten, %d ausgewaehlt. %s',
-                 tf, assay, len(motifs), len(eligible), len(leaders), len(chosen), message)
+    logging.info('%s/%s: %d Matrizen, %d geeignet, %d Repraesentanten, %d ausgewaehlt; '
+                 'E=%s, Auffuellung=%d. %s', tf, assay, len(motifs), len(eligible),
+                 len(leaders), len(chosen), selection['effective_evalue'], selection['rank_fill'], message)
     return summary, chosen
 
 
@@ -532,6 +611,7 @@ def analysis_context(args, version):
             'metadata_sha256': sha256(args.metadata), 'tomtom_version': version,
             'tomtom_sha256': sha256(args.tomtom), 'distance': 'ed',
             'evalue_threshold': args.evalue, 'direction': args.direction,
+            'selection_mode': args.selection_mode,
             'minimum_overlap': args.min_overlap, 'top_k': args.top_k,
             'pwm_log_base': 'e', 'background_ACGT': [0.25] * 4,
             'pwm_pseudocount': args.pwm_pseudocount, 'row_tolerance': args.row_tolerance,
@@ -566,8 +646,8 @@ def run_analysis(args):
                              'input_root': str(args.input_root), 'metadata': str(args.metadata),
                              'assignment_root': str(args.assignment_root) if args.assignment_root else None,
                              'tomtom': args.tomtom})
-        logging.info('PWM-Auswahl: Top-%d je TF/Assay; Tomtom %s; E <= %g; Richtung %s.',
-                     args.top_k, version, args.evalue, args.direction)
+        logging.info('PWM-Auswahl: %d je TF/Assay; Modus %s; Tomtom %s; Start-E <= %g; Richtung %s.',
+                     args.top_k, args.selection_mode, version, args.evalue, args.direction)
         summaries, selected, failures = [], [], 0
         for tf in args.tfs:
             for assay in args.assays:
@@ -644,6 +724,7 @@ def worker_arguments(args):
     result = [str(Path(sys.executable).resolve()), '-u', str(SCRIPT), 'run',
               '--input-root', str(args.input_root), '--metadata', str(args.metadata),
               '--output', str(args.output), '--top-k', str(args.top_k),
+              '--selection-mode', args.selection_mode,
               '--evalue', str(args.evalue), '--min-overlap', str(args.min_overlap),
               '--direction', args.direction, '--pwm-pseudocount', str(args.pwm_pseudocount),
               '--row-tolerance', str(args.row_tolerance), '--tomtom', args.tomtom,
@@ -740,16 +821,19 @@ def make_parser():
     common.add_argument('--metadata', type=Path, default=SCRIPT.parent / 'MEX_metadata_30TF.tsv')
     common.add_argument('--assignment-root', type=Path, default=ASSIGNMENT_ROOT)
     common.add_argument('--no-alias-scan', action='store_true', help='Keine Originalzuordnungen erneut lesen.')
-    common.add_argument('--output', type=Path, default=BASE / 'pwms_diverse')
-    common.add_argument('--top-k', type=int, default=4)
-    common.add_argument('--evalue', type=float, default=0.05)
+    common.add_argument('--output', type=Path, default=BASE / 'pwms_ranked10')
+    common.add_argument('--top-k', type=int, default=10)
+    common.add_argument('--selection-mode', choices=['adaptive', 'fixed'], default='adaptive',
+                        help='adaptive: E-Grenze senken und ggf. nach Rang auffuellen; fixed: feste Grenze, keine Auffuellung.')
+    common.add_argument('--evalue', type=float, default=1e-4,
+                        help='Startgrenze der Aehnlichkeitsfilterung; im fixed-Modus feste Grenze.')
     common.add_argument('--min-overlap', type=int, default=5)
     common.add_argument('--direction', choices=['either', 'seed'], default='either',
                         help='either: E<=Schwelle in mindestens einer Richtung; seed: nur Repraesentant als Query.')
     common.add_argument('--include-unapproved', action='store_true', help='Auch MEX Approved!=yes fuer Auswahl zulassen.')
     common.add_argument('--max-overall-rank', type=int, default=None)
     common.add_argument('--pwm-pseudocount', type=float, default=1e-5)
-    common.add_argument('--row-tolerance', type=float, default=5e-6)
+    common.add_argument('--row-tolerance', type=float, default=0.0021)
     common.add_argument('--tomtom', default=None, help='Pfad zur Tomtom-Executable.')
     common.add_argument('--tomtom-timeout', type=int, default=1800, help='Maximale Sekunden pro TF/Assay.')
     common.add_argument('--tfs', type=comma_list, default=TF_NAMES)
