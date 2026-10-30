@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-SCRIPT_VERSION = '5.3.0-post-kernel-pwm-channels'
+SCRIPT_VERSION = '5.4.0-chromosome-split-provenance'
 
 if torch.version.hip is not None:
     print("ROCm detected: forcing mathematical SDPA backend")
@@ -583,7 +583,11 @@ def _load_pwm_bank(context, pwm_root: str, pwm_count: int, sequence_length: int,
         raise ValueError(f"No PWM assay mapping for {context.train_assay!r}")
     assay = assay_map[context.train_assay]
     root = Path(pwm_root).expanduser().resolve()
+    from data import validate_pwm_split_provenance
+    split_provenance = validate_pwm_split_provenance(context, root, assay)
     identity = (str(root), tf, assay, pwm_count, sequence_length, learned_channels)
+    if split_provenance is not None:
+        identity += (split_provenance["sha256"],)
     artifacts = getattr(context, "artifacts", None)
     cached = artifacts.get("_maa_pwm_bank") if artifacts is not None else None
     if cached is not None:
@@ -647,6 +651,8 @@ def _load_pwm_bank(context, pwm_root: str, pwm_count: int, sequence_length: int,
         "unknown_bases": "mask_any_window_containing_N",
         "trainable_pwm_weights": False, "channels": channels,
     }
+    if split_provenance is not None:
+        manifest["split_provenance"] = split_provenance
     if artifacts is not None:
         # Inference reuses this source-assay bank even when evaluating a
         # different target assay. File changes mid-run cannot replace it.

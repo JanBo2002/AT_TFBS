@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 2026-10-27-native-array-queue
+# Version: 2026-10-30-native-array-split-variants
 set -euo pipefail
 ABLATION_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_ROOT" "$@" <<'HUM301_NATIVE_ARRAY'
@@ -173,6 +173,20 @@ def main():
                 else:
                     # Finish existing summaries before starting the next array.
                     prior_jobs.add(job)
+        variants = set()
+        for spec in config_specs.values():
+            variant = spec.get('data', {}).get('params', {}).get('split_variant', 'original')
+            require(isinstance(variant, str) and variant in ('original', 'mirrored', 'mixed'),
+                    f'Ungültige split_variant: {variant!r}')
+            if variant != 'original':
+                variants.add(variant)
+        variants = sorted(variants)
+        if variants:
+            print('Bereite Split-Caches für alle TFs/Assays des Manifests vor: ' + ', '.join(variants), flush=True)
+            prepared = subprocess.run([sys.executable, str(root / 'data.py'), 'prepare-splits',
+                                       '--manifest', str(manifest), '--variants', *variants,
+                                       '--report', str(plans / 'split_preparation.json')], env=env)
+            require(prepared.returncode == 0, 'Split-Vorbereitung fehlgeschlagen; kein neues Trainingsarray wurde eingereicht.')
         batch = Path(tempfile.mkdtemp(prefix='batch_array_', dir=plans)).resolve()
         (batch / 'slurm').mkdir()
         plan = batch / 'tasks.csv'
