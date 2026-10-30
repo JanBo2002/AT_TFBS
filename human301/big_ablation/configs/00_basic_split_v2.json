@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "name": "00_basic_split_v2",
+  "description": "Frozen uploaded motif64 baseline; only the input kernel bank varies across these three configurations. Chromosome split: split_v2.",
+  "reference": "00_basic_split_v2",
+  "workflow": {
+    "factory": "ablation.workflows:supervised",
+    "params": {}
+  },
+  "data": {
+    "factory": "ablation.providers:human301",
+    "params": {
+      "split_variant": "split_v2"
+    }
+  },
+  "predictor": {
+    "factory": "ablation.builders:maa",
+    "params": {
+      "sequence_length": 256,
+      "embed_channels": 64,
+      "encoder_channels": [
+        80,
+        96,
+        128
+      ],
+      "bottleneck_length": 64,
+      "motif_kernels": [
+        9,
+        12
+      ],
+      "transformer_heads": 4,
+      "transformer_ffn": 256,
+      "dropout": 0.1,
+      "activation": "relu",
+      "classification_readout": "center",
+      "regression_nonnegative": true
+    }
+  },
+  "fitting": {
+    "factory": "ablation.fitting:baseline",
+    "params": {
+      "epochs": 50,
+      "batch_size": 88,
+      "num_workers": 4,
+      "eval_batch_size": 128,
+      "negatives_per_positive": 10,
+      "hard_negative_fraction": 0.0,
+      "hard_negative_start_epoch": 6,
+      "hard_negative_refresh": 5,
+      "learning_rate": 0.0003,
+      "min_learning_rate": 1e-06,
+      "weight_decay": 0.0001,
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-08,
+      "gradient_clip": 1.0,
+      "patience": 10,
+      "min_delta": 0.0001,
+      "min_checkpoint_epoch": 1,
+      "amp": true,
+      "reverse_complement_probability": 0.5,
+      "checkpoint_objective": "auto",
+      "threshold_strategy": "val-mcc",
+      "classification_threshold": 0.5
+    }
+  },
+  "inference": {
+    "factory": "ablation.inference:fixed_views",
+    "params": {
+      "eval_crops": "multi",
+      "eval_rc": true
+    }
+  },
+  "analyses": [],
+  "seeds": [
+    13
+  ],
+  "train_assays": [
+    "CHIP",
+    "GHTS"
+  ],
+  "test_assays": [
+    "CHIP",
+    "GHTS"
+  ]
+}
