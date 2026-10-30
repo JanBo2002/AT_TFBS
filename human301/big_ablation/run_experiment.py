@@ -23,13 +23,14 @@ from pathlib import Path
 
 import torch
 
-from data import discover, read_manifest, read_priority, order_tasks
+from data import (discover, read_manifest, read_priority, order_tasks,
+                  config_split_variant, prepare_split_variants, resolve_split_cache_paths)
 from training import (
     RunRecorder, atomic_json, metadata, package_hash, RunContext, digest,
     recipe_digest, invoke, load_config, collect, verify,
 )
 
-SCRIPT_VERSION = '5.2.2-task-profiles-code-version-override'
+SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
 
 
 # Slurm access and shared eight-job dispatcher
@@ -337,6 +338,9 @@ def prepare(args):
     priority = ROOT / "configs" / "training_priority.csv"
     selection = argparse.Namespace(all_configs=False, config=args.config, manifest=args.manifest.resolve(),
                                    tf=None, train_assay=None, seed=None, priority_file=priority)
+    variants = sorted({config_split_variant(config) for _, config in resolve_configs(selection)} - {"original"})
+    if variants:
+        prepare_split_variants(selection.manifest, variants)
     rows = make_plan(selection)
     if not rows:
         raise ValueError("Task plan is empty")
@@ -480,6 +484,7 @@ def make_plan(args):
     lookup={(r["tf"],r["assay"]):r["cache"] for r in manifest}
     rows=[]
     for path,config in configs:
+        variant = config_split_variant(config)
         selected_tfs = config.get("tfs", tfs)
         priority = getattr(args, "priority_file", ROOT/"configs"/"training_priority.csv")
         profile_pairs = None
@@ -501,6 +506,9 @@ def make_plan(args):
             for row in custom:
                 if set(row) != set(PLAN_FIELDS)-{"config_path","config_hash"}:
                     raise ValueError("Custom planner returned an invalid task schema")
+                if variant != "original":
+                    selected = resolve_split_cache_paths(json.loads(row["cache_paths_json"]), variant)
+                    row = dict(row, cache_paths_json=json.dumps({k: str(v) for k, v in selected.items()}, sort_keys=True))
                 rows.append(dict(row,config_path=str(path),config_hash=digest(config)))
             continue
         config_rows=[]
@@ -512,6 +520,8 @@ def make_plan(args):
             missing=[a for a in needed if (tf,a) not in lookup]
             if missing: raise ValueError(f"Missing caches for {tf}: {missing}")
             cache_paths={a:str(lookup[(tf,a)]) for a in needed}
+            if variant != "original":
+                cache_paths = {a: str(p) for a, p in resolve_split_cache_paths(cache_paths, variant).items()}
             for assay in assays:
                 if profile_pairs is not None and (tf, assay) not in profile_pairs:
                     continue

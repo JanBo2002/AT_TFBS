@@ -4,13 +4,17 @@ from __future__ import annotations
 import argparse
 import bisect
 import csv
+import copy
+import fcntl
 import gzip
 import hashlib
 import json
 import math
+import os
 import random
 import re
 import sys
+import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,7 +28,7 @@ from sklearn.metrics import average_precision_score, matthews_corrcoef, roc_auc_
 from scipy.optimize import Bounds, LinearConstraint, milp
 from scipy import sparse
 
-SCRIPT_VERSION = '5.0.0-shared-configurations'
+SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
 
 
 # Sequence caches and preparation
@@ -1431,6 +1435,8 @@ def discover(root: Path, destination: Path) -> None:
                 summary = json.loads(str(raw["summary_json"].item()))
         except (OSError, ValueError):
             continue
+        if summary.get("split_variant", "original") != "original":
+            continue
         texts = [str(path.relative_to(root.resolve()))]
         texts += [str(v.get("path", "")) for v in summary.get("sources", {}).values() if isinstance(v, dict)]
         assignments = set()
@@ -1464,10 +1470,311 @@ def discover(root: Path, destination: Path) -> None:
         writer.writerows(candidates)
 
 
-def human301(context):
-    # The current fitting module deliberately uses the unchanged original
-    # Dataset/Sampler. A different data factory can return another provider.
-    return dict(context.cache_paths)
+SPLIT_VARIANTS = ("original", "mirrored", "mixed")
+SPLIT_DEFINITIONS = {
+    "mirrored": {
+        "train": [4, 6, 8, 10, 12, 14, 18, 20, 22],
+        "validation": [2, 16],
+        "test": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21],
+    },
+    "mixed": {
+        "train": [2, 5, 6, 10, 11, 13, 15, 18, 20],
+        "validation": [1, 8],
+        "test": [3, 4, 7, 9, 12, 14, 16, 17, 19, 21, 22],
+    },
+}
+
+
+def validate_split_variant(value):
+    if not isinstance(value, str) or value not in SPLIT_VARIANTS:
+        raise ValueError(f"split_variant must be one of {SPLIT_VARIANTS}, got {value!r}")
+    return value
+
+
+def config_split_variant(config):
+    spec = config.get("data", {})
+    variant = validate_split_variant(spec.get("params", {}).get("split_variant", "original"))
+    if variant != "original" and spec.get("factory") not in (
+        "ablation.providers:human301", "data:human301",
+    ):
+        raise ValueError("Chromosome split variants require the human301 data factory")
+    return variant
+
+
+def split_cache_path(source, variant):
+    validate_split_variant(variant)
+    source = Path(source).resolve()
+    if variant == "original":
+        return source
+    return source.parent / "splits" / variant / source.name
+
+
+def cache_summary(path):
+    with np.load(path, allow_pickle=False) as raw:
+        return json.loads(str(raw["summary_json"].item()))
+
+
+def resolve_split_cache_paths(paths, variant="original"):
+    """Resolve once at planning; also accept already-resolved task-table paths."""
+    validate_split_variant(variant)
+    if variant == "original":
+        # Keep legacy paths, cache bytes and cached split assignments untouched.
+        return dict(paths)
+    resolved = {}
+    for assay, raw in paths.items():
+        source = Path(raw).resolve()
+        source_summary = cache_summary(source)
+        existing_variant = source_summary.get("split_variant", "original")
+        if existing_variant == variant:
+            target, summary = source, source_summary
+        elif existing_variant != "original":
+            raise ValueError(f"Cannot use {existing_variant} cache as {variant}: {source}")
+        else:
+            target = split_cache_path(source, variant)
+            if not target.is_file():
+                raise FileNotFoundError(
+                    f"Split cache missing: {target}. Run python data.py prepare-splits "
+                    "--manifest configs/caches.csv first (submit_array.sh does this automatically)."
+                )
+            summary = cache_summary(target)
+            if summary.get("parent_cache", {}).get("sha256") != sha256_file(source):
+                raise ValueError(f"Split cache belongs to different source bytes: {target}")
+        if (summary.get("split_variant") != variant
+                or summary.get("split_definition") != SPLIT_DEFINITIONS[variant]):
+            raise ValueError(f"Unexpected chromosome split definition: {target}")
+        resolved[assay] = target
+    return resolved
+
+
+def _variant_split(chromosomes, variant):
+    definition = SPLIT_DEFINITIONS[validate_split_variant(variant)]
+    mapping = {str(chrom): code for code, name in enumerate(SPLIT_NAMES)
+               for chrom in definition[name]}
+    if (sum(len(v) for v in definition.values()) != 22
+            or len(mapping) != 22 or set(mapping) != {str(i) for i in range(1, 23)}):
+        raise ValueError(f"Split must assign each autosome exactly once: {variant}")
+    normalized = [canonical_chrom(c) for c in chromosomes]
+    unsupported = set(normalized) - mapping.keys()
+    if unsupported:
+        raise ValueError(f"{variant} only defines autosomes 1-22; found {sorted(unsupported)}")
+    return np.asarray([mapping[c] for c in normalized], dtype=np.uint8)
+
+
+def _variant_summary(cache, split, source, source_hash, variant):
+    summary = copy.deepcopy(cache["summary"])
+    summary.update(
+        split_variant=variant, split_definition=copy.deepcopy(SPLIT_DEFINITIONS[variant]),
+        parent_cache={"path": str(source), "sha256": source_hash},
+        sample_id_note="Stable source identifiers; split prefixes in IDs describe the original source, not the new assignment.",
+        source_assignment_note="sources lists the original input files; current assignments are in split_definition and the split array.",
+    )
+    summary["splits"] = {}
+    signatures_by_split = []
+    audit = {}
+    for code, name in enumerate(SPLIT_NAMES):
+        index = np.flatnonzero(split == code)
+        labels = cache["labels"][index]
+        if set(labels.tolist()) != {0, 1}:
+            raise ValueError(f"{source}: {variant}/{name} needs positive and negative samples")
+        dna = cache["sequences"][index]
+        nf = (dna == 4).mean(axis=1)
+        stats = dict(counts(labels), chromosomes=sorted(set(cache["chromosomes"][index].tolist())),
+                     sequences_with_N=int(np.count_nonzero(nf)),
+                     max_N_fraction=float(nf.max()), mean_GC_fraction_ACGT_only={})
+        for label, label_name in ((1, "positive"), (0, "negative")):
+            selected = dna[labels == label]
+            gc = ((selected == 1) | (selected == 2)).sum(1) / (selected != 4).sum(1)
+            stats["mean_GC_fraction_ACGT_only"][label_name] = float(gc.mean())
+        summary["splits"][name] = stats
+        signatures = [hashlib.sha256(min(seq.tobytes(), COMPLEMENT[seq[::-1]].tobytes())).digest()
+                      for seq in dna]
+        signature_set = set(signatures)
+        by_label = [{s for s, y in zip(signatures, labels) if y == label} for label in (0, 1)]
+        audit[name] = {
+            "duplicates_or_RC_duplicates_within_split": len(signatures) - len(signature_set),
+            "identical_or_RC_identical_sequences_with_both_labels": len(by_label[0] & by_label[1]),
+        }
+        signatures_by_split.append(signature_set)
+    for i in range(3):
+        for j in range(i + 1, 3):
+            audit[f"{SPLIT_NAMES[i]}_{SPLIT_NAMES[j]}_shared_sequences_or_RC"] = len(
+                signatures_by_split[i] & signatures_by_split[j])
+    summary["sequence_audit"] = audit
+    summary["sequence_audit_action"] = "Reported only; no samples removed, duplicated or relabeled"
+    return summary
+
+
+def _atomic_cache_json(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w") as handle:
+            json.dump(value, handle, indent=2, default=json_default)
+            handle.write("\n")
+        os.replace(temp, path)
+    finally:
+        Path(temp).unlink(missing_ok=True)
+
+
+def prepare_split_variants(manifest, variants=("mirrored", "mixed"), *, overwrite=False, report=None):
+    """Prepare every TF/assay in the original manifest; never rewrite originals."""
+    variants = tuple(dict.fromkeys(validate_split_variant(v) for v in variants))
+    rows = read_manifest(Path(manifest))
+    records = []
+    for row in rows:
+        source = Path(row["cache"])
+        cache = load_cache(source)
+        if cache["summary"].get("split_variant", "original") != "original":
+            raise ValueError(f"Preparation requires the original manifest, got {source}")
+        source_hash = sha256_file(source)
+        for variant in variants:
+            if variant == "original":
+                record = dict(tf=row["tf"], assay=row["assay"], split_variant=variant,
+                              cache=str(source), status="unchanged", splits=cache["summary"].get("splits", {}))
+            else:
+                target = split_cache_path(source, variant)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with target.with_suffix(target.suffix + ".lock").open("a") as lock:
+                    fcntl.flock(lock, fcntl.LOCK_EX)
+                    expected_split = _variant_split(cache["chromosomes"], variant)
+                    reuse = target.is_file() and not overwrite
+                    if reuse:
+                        existing = load_cache(target)
+                        summary = existing["summary"]
+                        if (summary.get("parent_cache", {}).get("sha256") != source_hash
+                                or summary.get("split_variant") != variant
+                                or summary.get("split_definition") != SPLIT_DEFINITIONS[variant]
+                                or not np.array_equal(existing["split"], expected_split)
+                                or any(not np.array_equal(existing[k], cache[k])
+                                       for k in cache if k not in ("summary", "split"))):
+                            raise ValueError(f"Existing split cache differs from its source/definition: {target}. "
+                                             "Use a fresh source copy or --overwrite when no runs use this variant.")
+                        status = "reused"
+                        del existing
+                    else:
+                        summary = _variant_summary(cache, expected_split, source, source_hash, variant)
+                        payload = {k: v for k, v in cache.items() if k != "summary"}
+                        payload.update(split=expected_split, summary_json=np.asarray(json.dumps(summary)))
+                        fd, temp = tempfile.mkstemp(prefix=target.name + ".", suffix=".tmp", dir=target.parent)
+                        try:
+                            with os.fdopen(fd, "wb") as handle:
+                                np.savez_compressed(handle, **payload)
+                            load_cache(Path(temp))
+                            if sha256_file(source) != source_hash:
+                                raise ValueError(f"Source changed during preparation: {source}")
+                            os.replace(temp, target)
+                        finally:
+                            Path(temp).unlink(missing_ok=True)
+                        status = "created"
+                    _atomic_cache_json(target.with_suffix(".summary.json"), summary)
+                record = dict(tf=row["tf"], assay=row["assay"], split_variant=variant,
+                              cache=str(target), status=status, source_cache=str(source),
+                              source_sha256=source_hash, splits=summary["splits"])
+            records.append(record)
+            sizes = '; '.join(f"{name}: +{s['positive']}/-{s['negative']}"
+                              for name, s in record['splits'].items() if 'positive' in s and 'negative' in s)
+            print(f"{row['tf']}/{row['assay']} | {variant}: {record['status']} | {sizes} | {record['cache']}", flush=True)
+            if report is not None:
+                _atomic_cache_json(report, {"manifest": str(Path(manifest).resolve()), "records": records})
+    return records
+
+
+def human301(context, split_variant="original"):
+    paths = resolve_split_cache_paths(context.cache_paths, split_variant)
+    if split_variant != "original":
+        predictor_params = getattr(context, "config", {}).get("predictor", {}).get("params", {})
+        if "pwm_root" in predictor_params:
+            assay = {"CHIP": "CHS", "GHTS": "GHTS"}[context.train_assay]
+            validate_pwm_split_provenance(context, predictor_params["pwm_root"], assay)
+        context.cache_paths = dict(paths)
+        context.recorder.update(split_variant=split_variant,
+                                train_cache_path=str(paths[context.train_assay]))
+    return paths
+
+
+def validate_pwm_split_provenance(context, pwm_root, assay):
+    """Require an explicit split-specific provenance record for resplit PWMs."""
+    variant = config_split_variant(getattr(context, "config", {}))
+    if variant == "original":
+        return None
+    path = Path(pwm_root) / context.tf / assay / "split_provenance.json"
+    if not path.is_file():
+        raise ValueError(
+            f"{variant} PWM run needs {path}. Rebuild/select PWMs for this split and "
+            "record split_variant, fit_chromosomes and selection_chromosomes; "
+            "original-split PWMs must not be silently reused."
+        )
+    record = json.loads(path.read_text())
+    if record.get("split_variant") != variant:
+        raise ValueError(f"PWM split provenance mismatch: {path}")
+    for key, allowed in (
+        ("fit_chromosomes", set(SPLIT_DEFINITIONS[variant]["train"])),
+        ("selection_chromosomes", set(SPLIT_DEFINITIONS[variant]["train"])
+                                 | set(SPLIT_DEFINITIONS[variant]["validation"])),
+    ):
+        values = record.get(key)
+        if not isinstance(values, list):
+            raise ValueError(f"PWM provenance needs a {key} list: {path}")
+        normalized = {canonical_chrom(c) for c in values}
+        if not normalized <= {str(c) for c in allowed}:
+            raise ValueError(f"PWM {key} includes chromosomes outside the allowed source split: {path}")
+    return {"path": str(path.resolve()), "sha256": sha256_file(path), "record": record}
+
+
+def make_split_configs(config_paths, variants=("mirrored", "mixed")):
+    """Copy selected recipes and their references; preserve all fitting parameters."""
+    variants = tuple(dict.fromkeys(validate_split_variant(v) for v in variants))
+    if "original" in variants:
+        raise ValueError("Use original configs directly; only mirrored/mixed copies are generated")
+    written = []
+    visiting = set()
+    done = set()
+
+    def make(raw, variant):
+        path = Path(raw)
+        if not path.is_file():
+            name = str(raw) if str(raw).endswith(".json") else str(raw) + ".json"
+            path = Path(__file__).resolve().parent / "configs" / name
+        path = path.resolve()
+        key = (path, variant)
+        if key in done:
+            return
+        if key in visiting:
+            raise ValueError(f"Circular config references: {path}")
+        visiting.add(key)
+        base = json.loads(path.read_text())
+        if config_split_variant(base) != "original":
+            raise ValueError(f"Generate split copies from an original config: {path}")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", base["name"]):
+            raise ValueError(f"Unsafe experiment name: {path}")
+        reference = base["reference"]
+        if not isinstance(reference, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", reference):
+            raise ValueError(f"Unsafe reference name: {path}")
+        if reference != base["name"]:
+            make(path.parent / (reference + ".json"), variant)
+        result = copy.deepcopy(base)
+        result["name"] += "_" + variant
+        result["reference"] += "_" + variant
+        result["description"] = base.get("description", "") + " Chromosome split: " + variant + "."
+        result["data"]["params"]["split_variant"] = variant
+        destination = path.parent / (result["name"] + ".json")
+        if destination.exists():
+            if json.loads(destination.read_text()) != result:
+                raise FileExistsError(f"Different config already exists: {destination}")
+        else:
+            with destination.open("x") as handle:
+                json.dump(result, handle, indent=2)
+                handle.write("\n")
+        written.append(destination)
+        print(destination, flush=True)
+        visiting.remove(key)
+        done.add(key)
+
+    for raw in config_paths:
+        for variant in variants:
+            make(raw, variant)
+    return written
 
 def read_priority(path: Path) -> dict[tuple[str, str], int]:
     with path.open(newline="") as handle:
@@ -1512,9 +1819,21 @@ def main():
     prep.add_argument("--overwrite", action="store_true")
     inspect = sub.add_parser("inspect")
     inspect.add_argument("--cache", required=True, type=Path)
+    variants = sub.add_parser("prepare-splits", help="Prepare chromosome splits for every TF/assay in the original manifest")
+    variants.add_argument("--manifest", required=True, type=Path)
+    variants.add_argument("--variants", nargs="+", choices=SPLIT_VARIANTS, default=["mirrored", "mixed"])
+    variants.add_argument("--report", type=Path)
+    variants.add_argument("--overwrite", action="store_true", help="Replace variant caches only; use only when no runs use them")
+    recipes = sub.add_parser("make-split-configs", help="Create split-specific copies of configs and their references")
+    recipes.add_argument("--config", required=True, nargs="+", type=Path)
+    recipes.add_argument("--variants", nargs="+", choices=("mirrored", "mixed"), default=["mirrored", "mixed"])
     args = parser.parse_args()
     if args.command == "prepare":
         prepare(args)
+    elif args.command == "prepare-splits":
+        prepare_split_variants(args.manifest, args.variants, overwrite=args.overwrite, report=args.report)
+    elif args.command == "make-split-configs":
+        make_split_configs(args.config, args.variants)
     else:
         print(json.dumps(load_cache(args.cache)["summary"], indent=2))
 

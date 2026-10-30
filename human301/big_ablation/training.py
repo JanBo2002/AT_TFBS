@@ -40,8 +40,9 @@ from scipy.stats import pearsonr, spearmanr
 
 from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
 from model import HumanTFBindingModel, ModelConfig, count_parameters
+from data import config_split_variant
 
-SCRIPT_VERSION = '5.4.0-embedder-depth-forwarding'
+SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
 
 
 # Configuration loading and extension points
@@ -121,6 +122,7 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError(f"{key} must be nonempty and unique")
         if any(a not in {"CHIP", "GHTS"} for a in config[key]):
             raise ValueError("Human301 recipes support CHIP and GHTS")
+    config_split_variant(config)
     return config
 
 
@@ -422,7 +424,7 @@ class RunRecorder:
 
 
 def metadata(config, code_hash, run_id, tf, train_assay, seed, train_cache):
-    return {
+    result = {
         "experiment_id":config["name"], "reference_id":config["reference"],
         "config_hash":recipe_digest(config), "code_hash":code_hash, "config":config,
         "run_id":run_id, "model_id":run_id, "training_scope":"single_tf",
@@ -432,6 +434,10 @@ def metadata(config, code_hash, run_id, tf, train_assay, seed, train_cache):
         "array_task_id":os.environ.get("SLURM_ARRAY_TASK_ID",""),
         "python_version":platform.python_version(),
     }
+    variant = config_split_variant(config)
+    if variant != "original":
+        result["split_variant"] = variant
+    return result
 
 
 # Training defaults
