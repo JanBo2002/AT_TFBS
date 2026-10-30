@@ -41,7 +41,7 @@ from scipy.stats import pearsonr, spearmanr
 from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 
-SCRIPT_VERSION = '5.3.1-task-profiles-code-version-override'
+SCRIPT_VERSION = '5.4.0-embedder-depth-forwarding'
 
 
 # Configuration loading and extension points
@@ -1815,6 +1815,7 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
         transformer_ffn=args.ffn_channels,
         dropout=args.dropout,
         channel_dropout=getattr(args, "channel_dropout", 0.0),
+        embedder_residual_blocks=getattr(args, "embedder_residual_blocks", 1),
         activation=args.activation,
         classification_readout=args.classification_readout,
         regression_nonnegative=not args.allow_negative_regression_output,
