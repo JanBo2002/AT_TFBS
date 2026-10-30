@@ -42,7 +42,7 @@ from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file,
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 from data import config_split_variant
 
-SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
+SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
 
 
 # Configuration loading and extension points
@@ -1821,6 +1821,7 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
         transformer_ffn=args.ffn_channels,
         dropout=args.dropout,
         channel_dropout=getattr(args, "channel_dropout", 0.0),
+        embedder_residual_blocks=getattr(args, "embedder_residual_blocks", 1),
         activation=args.activation,
         classification_readout=args.classification_readout,
         regression_nonnegative=not args.allow_negative_regression_output,

@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-SCRIPT_VERSION = '5.4.0-chromosome-split-provenance'
+SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
 
 if torch.version.hip is not None:
     print("ROCm detected: forcing mathematical SDPA backend")
@@ -182,21 +182,34 @@ class MotifConv1d(nn.Module):
 
 
 class DNAEmbedder(nn.Module):
-    """Parallel 9-/12-bp input filters followed by MAA's 5-bp residual refinement."""
+    """Parallel input filters followed by configurable 5-bp residual refinements."""
 
     def __init__(
         self, out_channels: int = 64, activation: ActivationName = "relu",
         kernels: Sequence[int] = (9, 12),
+        residual_blocks: int = 1,
     ) -> None:
         super().__init__()
+        if type(residual_blocks) is not int or residual_blocks < 0:
+            raise ValueError("residual_blocks must be a nonnegative integer")
+        self.residual_blocks = residual_blocks
         self.initial = MotifConv1d(out_channels, kernels)
+        # Preserve the original parameter names and initialization order at depth 1.
         self.residual = ConvBlock(
             out_channels, out_channels, kernel_size=5, activation=activation
-        )
+        ) if residual_blocks else nn.Identity()
+        self.additional_residuals = nn.ModuleList([
+            ConvBlock(out_channels, out_channels, kernel_size=5, activation=activation)
+            for _ in range(max(0, residual_blocks - 1))
+        ])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.initial(x)
-        return out + self.residual(out)
+        if self.residual_blocks:
+            out = out + self.residual(out)
+        for block in self.additional_residuals:
+            out = out + block(out)
+        return out
 
 
 class DownresBlock(nn.Module):
@@ -361,6 +374,7 @@ class ModelConfig:
     activation: ActivationName = "relu"
     classification_readout: str = "center"
     regression_nonnegative: bool = True
+    embedder_residual_blocks: int = 1
 
 
 class HumanTFBindingModel(nn.Module):
@@ -380,8 +394,13 @@ class HumanTFBindingModel(nn.Module):
         c1, c2, c4 = config.encoder_channels
 
         if pwm_matrices is None:
-            self.embedder = DNAEmbedder(c0, activation=config.activation, kernels=config.motif_kernels)
+            self.embedder = DNAEmbedder(
+                c0, activation=config.activation, kernels=config.motif_kernels,
+                residual_blocks=config.embedder_residual_blocks,
+            )
         else:
+            if type(config.embedder_residual_blocks) is not int or config.embedder_residual_blocks != 1:
+                raise ValueError("Variable embedder residual depth requires a model without PWM channels")
             self.embedder = PWMDNAEmbedder(
                 config.embed_channels, config.motif_kernels, config.activation,
                 pwm_matrices, pwm_manifest,
