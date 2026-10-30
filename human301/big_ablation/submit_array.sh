@@ -176,7 +176,9 @@ def main():
         variants = set()
         for spec in config_specs.values():
             variant = spec.get('data', {}).get('params', {}).get('split_variant', 'original')
-            require(isinstance(variant, str) and variant in ('original', 'mirrored', 'mixed'),
+            if isinstance(variant, str):
+                variant = {'mirrored': 'split_v2', 'mixed': 'split_v3'}.get(variant, variant)
+            require(isinstance(variant, str) and variant in ('original', 'split_v2', 'split_v3'),
                     f'Ungültige split_variant: {variant!r}')
             if variant != 'original':
                 variants.add(variant)

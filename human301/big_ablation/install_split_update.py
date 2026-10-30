@@ -62,7 +62,8 @@ def install(target, dry_run=False):
         actual = sha(current)
         if actual == sha(ROOT / name):
             continue
-        if actual != original_sha:
+        allowed = original_sha if isinstance(original_sha, list) else [original_sha]
+        if actual not in allowed:
             raise ValueError(f'{name} wurde seit dem Upload verändert. Installation abgebrochen; '
                              'die vorhandenen Änderungen werden nicht überschrieben.')
         changed.append(name)
@@ -72,7 +73,7 @@ def install(target, dry_run=False):
     if base.get('data', {}).get('params', {}).get('split_variant', 'original') != 'original':
         raise ValueError('Die vorhandene 00_basic-Config muss den ursprünglichen Split verwenden.')
     new_configs = []
-    for variant in ('mirrored', 'mixed'):
+    for variant in ('split_v2', 'split_v3'):
         recipe = copy.deepcopy(base)
         recipe['name'] += '_' + variant
         recipe['reference'] += '_' + variant

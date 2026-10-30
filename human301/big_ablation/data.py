@@ -28,7 +28,7 @@ from sklearn.metrics import average_precision_score, matthews_corrcoef, roc_auc_
 from scipy.optimize import Bounds, LinearConstraint, milp
 from scipy import sparse
 
-SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
+SCRIPT_VERSION = '5.4.1-split-v2-v3'
 
 
 # Sequence caches and preparation
@@ -1470,14 +1470,15 @@ def discover(root: Path, destination: Path) -> None:
         writer.writerows(candidates)
 
 
-SPLIT_VARIANTS = ("original", "mirrored", "mixed")
+SPLIT_VARIANTS = ("original", "split_v2", "split_v3")
+SPLIT_ALIASES = {"mirrored": "split_v2", "mixed": "split_v3"}
 SPLIT_DEFINITIONS = {
-    "mirrored": {
+    "split_v2": {
         "train": [4, 6, 8, 10, 12, 14, 18, 20, 22],
         "validation": [2, 16],
         "test": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21],
     },
-    "mixed": {
+    "split_v3": {
         "train": [2, 5, 6, 10, 11, 13, 15, 18, 20],
         "validation": [1, 8],
         "test": [3, 4, 7, 9, 12, 14, 16, 17, 19, 21, 22],
@@ -1486,7 +1487,10 @@ SPLIT_DEFINITIONS = {
 
 
 def validate_split_variant(value):
-    if not isinstance(value, str) or value not in SPLIT_VARIANTS:
+    if not isinstance(value, str):
+        raise ValueError(f"split_variant must be one of {SPLIT_VARIANTS}, got {value!r}")
+    value = SPLIT_ALIASES.get(value, value)
+    if value not in SPLIT_VARIANTS:
         raise ValueError(f"split_variant must be one of {SPLIT_VARIANTS}, got {value!r}")
     return value
 
@@ -1502,7 +1506,7 @@ def config_split_variant(config):
 
 
 def split_cache_path(source, variant):
-    validate_split_variant(variant)
+    variant = validate_split_variant(variant)
     source = Path(source).resolve()
     if variant == "original":
         return source
@@ -1516,7 +1520,7 @@ def cache_summary(path):
 
 def resolve_split_cache_paths(paths, variant="original"):
     """Resolve once at planning; also accept already-resolved task-table paths."""
-    validate_split_variant(variant)
+    variant = validate_split_variant(variant)
     if variant == "original":
         # Keep legacy paths, cache bytes and cached split assignments untouched.
         return dict(paths)
@@ -1524,7 +1528,7 @@ def resolve_split_cache_paths(paths, variant="original"):
     for assay, raw in paths.items():
         source = Path(raw).resolve()
         source_summary = cache_summary(source)
-        existing_variant = source_summary.get("split_variant", "original")
+        existing_variant = validate_split_variant(source_summary.get("split_variant", "original"))
         if existing_variant == variant:
             target, summary = source, source_summary
         elif existing_variant != "original":
@@ -1539,7 +1543,7 @@ def resolve_split_cache_paths(paths, variant="original"):
             summary = cache_summary(target)
             if summary.get("parent_cache", {}).get("sha256") != sha256_file(source):
                 raise ValueError(f"Split cache belongs to different source bytes: {target}")
-        if (summary.get("split_variant") != variant
+        if (validate_split_variant(summary.get("split_variant")) != variant
                 or summary.get("split_definition") != SPLIT_DEFINITIONS[variant]):
             raise ValueError(f"Unexpected chromosome split definition: {target}")
         resolved[assay] = target
@@ -1617,7 +1621,7 @@ def _atomic_cache_json(path, value):
         Path(temp).unlink(missing_ok=True)
 
 
-def prepare_split_variants(manifest, variants=("mirrored", "mixed"), *, overwrite=False, report=None):
+def prepare_split_variants(manifest, variants=("split_v2", "split_v3"), *, overwrite=False, report=None):
     """Prepare every TF/assay in the original manifest; never rewrite originals."""
     variants = tuple(dict.fromkeys(validate_split_variant(v) for v in variants))
     rows = read_manifest(Path(manifest))
@@ -1681,6 +1685,7 @@ def prepare_split_variants(manifest, variants=("mirrored", "mixed"), *, overwrit
 
 
 def human301(context, split_variant="original"):
+    split_variant = validate_split_variant(split_variant)
     paths = resolve_split_cache_paths(context.cache_paths, split_variant)
     if split_variant != "original":
         predictor_params = getattr(context, "config", {}).get("predictor", {}).get("params", {})
@@ -1706,7 +1711,7 @@ def validate_pwm_split_provenance(context, pwm_root, assay):
             "original-split PWMs must not be silently reused."
         )
     record = json.loads(path.read_text())
-    if record.get("split_variant") != variant:
+    if validate_split_variant(record.get("split_variant")) != variant:
         raise ValueError(f"PWM split provenance mismatch: {path}")
     for key, allowed in (
         ("fit_chromosomes", set(SPLIT_DEFINITIONS[variant]["train"])),
@@ -1722,11 +1727,11 @@ def validate_pwm_split_provenance(context, pwm_root, assay):
     return {"path": str(path.resolve()), "sha256": sha256_file(path), "record": record}
 
 
-def make_split_configs(config_paths, variants=("mirrored", "mixed")):
+def make_split_configs(config_paths, variants=("split_v2", "split_v3")):
     """Copy selected recipes and their references; preserve all fitting parameters."""
     variants = tuple(dict.fromkeys(validate_split_variant(v) for v in variants))
     if "original" in variants:
-        raise ValueError("Use original configs directly; only mirrored/mixed copies are generated")
+        raise ValueError("Use original configs directly; only split_v2/split_v3 copies are generated")
     written = []
     visiting = set()
     done = set()
@@ -1821,12 +1826,12 @@ def main():
     inspect.add_argument("--cache", required=True, type=Path)
     variants = sub.add_parser("prepare-splits", help="Prepare chromosome splits for every TF/assay in the original manifest")
     variants.add_argument("--manifest", required=True, type=Path)
-    variants.add_argument("--variants", nargs="+", choices=SPLIT_VARIANTS, default=["mirrored", "mixed"])
+    variants.add_argument("--variants", nargs="+", choices=SPLIT_VARIANTS, default=["split_v2", "split_v3"])
     variants.add_argument("--report", type=Path)
     variants.add_argument("--overwrite", action="store_true", help="Replace variant caches only; use only when no runs use them")
     recipes = sub.add_parser("make-split-configs", help="Create split-specific copies of configs and their references")
     recipes.add_argument("--config", required=True, nargs="+", type=Path)
-    recipes.add_argument("--variants", nargs="+", choices=("mirrored", "mixed"), default=["mirrored", "mixed"])
+    recipes.add_argument("--variants", nargs="+", choices=("split_v2", "split_v3"), default=["split_v2", "split_v3"])
     args = parser.parse_args()
     if args.command == "prepare":
         prepare(args)
