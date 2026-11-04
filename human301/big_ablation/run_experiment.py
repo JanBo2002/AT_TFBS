@@ -27,10 +27,10 @@ from data import (discover, read_manifest, read_priority, order_tasks,
                   config_split_variant, prepare_split_variants, resolve_split_cache_paths)
 from training import (
     RunRecorder, atomic_json, metadata, package_hash, RunContext, digest,
-    recipe_digest, invoke, load_config, collect, verify,
+    recipe_digest, invoke, load_config, collect, verify, profile_priority_file,
 )
 
-SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
+SCRIPT_VERSION = '5.5.0-middle-task-profile'
 
 
 # Slurm access and shared eight-job dispatcher
@@ -491,8 +491,9 @@ def make_plan(args):
         # Resolve the default here without adding a field to the stored JSON.
         if "tfs" not in config:
             profile = config.get("task_profile", "long")
-            filename = "training_priority.csv" if profile == "long" else "training_priority_short.csv"
-            priority = ROOT / "configs" / filename
+            priority = profile_priority_file(ROOT, profile)
+            if not priority.is_file():
+                raise ValueError(f"Priority list for task_profile '{profile}' is missing: {priority}")
             profile_pairs = read_priority(priority)
             selected_tfs = list(dict.fromkeys(tf for tf, assay in profile_pairs))
         absent = set(selected_tfs) - {row["tf"] for row in manifest}

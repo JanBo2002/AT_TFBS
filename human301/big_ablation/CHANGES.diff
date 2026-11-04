@@ -1,0 +1,143 @@
+--- training.py	2026-11-04 00:26:33.961371490 +0000
++++ training.py	2026-11-04 00:29:40.325382568 +0000
+@@ -42,7 +42,7 @@
+ from model import HumanTFBindingModel, ModelConfig, count_parameters
+ from data import config_split_variant
+ 
+-SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
++SCRIPT_VERSION = '5.6.0-middle-task-profile'
+ 
+ 
+ # Configuration loading and extension points
+@@ -56,10 +56,27 @@
+     return hashlib.sha256(json_text(value).encode()).hexdigest()
+ 
+ 
++TASK_SELECTION_KEYS = {"description", "seeds", "train_assays", "test_assays", "tfs", "task_profile"}
++
++
+ def recipe_digest(config: dict[str, Any]) -> str:
+-    # Seed/assay lists select tasks; their actual values are recorded per run.
+-    # Adding repetitions does not create another model/training recipe.
+-    return digest({k:v for k,v in config.items() if k not in {"description","seeds","train_assays","test_assays"}})
++    # Seed/assay lists, the TF list and the task profile select tasks; their
++    # actual values are recorded per run. Adding repetitions or TFs does not
++    # create another model/training recipe, so an experiment can grow from the
++    # short to the middle profile without changing its recipe hash.
++    return digest({k:v for k,v in config.items() if k not in TASK_SELECTION_KEYS})
++
++
++def run_recipe_hash(meta: dict[str, Any]) -> str:
++    """Recipe hash of a recorded run, recomputed from its stored configuration.
++
++    Older run.json files carry a config_hash that still included task_profile;
++    recomputing from the stored config keeps old and new runs comparable.
++    """
++    config = meta.get("config")
++    if isinstance(config, dict) and config:
++        return recipe_digest(config)
++    return meta["config_hash"]
+ 
+ 
+ def factory(spec: dict[str, Any]) -> Callable:
+@@ -82,6 +99,22 @@
+     return factory(spec)(*args, **copy.deepcopy(spec.get("params", {})), **kwargs)
+ 
+ 
++# Task profiles select which TF/assay pairs a configuration trains. Each
++# profile has its own priority list in configs/ (consecutive priorities).
++TASK_PROFILES = ("long", "middle", "short")
++PRIORITY_FILES = {
++    "long": "training_priority.csv",
++    "middle": "training_priority_middle.csv",
++    "short": "training_priority_short.csv",
++}
++
++
++def profile_priority_file(root: Path, profile: str) -> Path:
++    if profile not in PRIORITY_FILES:
++        raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
++    return root / "configs" / PRIORITY_FILES[profile]
++
++
+ def load_config(path: Path) -> dict[str, Any]:
+     config = json.loads(path.read_text())
+     required = {"schema_version", "name", "reference", "workflow", "data", "predictor",
+@@ -104,8 +137,8 @@
+     if len(set(config["seeds"])) != len(config["seeds"]):
+         raise ValueError("Duplicate seeds")
+     if "task_profile" in config:
+-        if config["task_profile"] not in ("long", "short"):
+-            raise ValueError("task_profile must be 'long' or 'short'")
++        if config["task_profile"] not in TASK_PROFILES:
++            raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
+         if "tfs" in config:
+             raise ValueError("Select task_profile or tfs, not both")
+     if "tfs" in config:
+@@ -2638,11 +2671,13 @@
+     selected = {}
+     for meta in sorted(metadata.values(),key=lambda m:m["started_at"]):
+         if meta["status"] != "completed": continue
+-        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],meta["config_hash"])
++        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],run_recipe_hash(meta))
+         selected[key]=meta["run_id"]
+     active = set(selected.values())
+     code_hashes = {metadata[r]["code_hash"] for r in active}
+-    config_hashes = {metadata[r]["config_hash"] for r in active}
++    # Compare recipes, not stored hash strings: runs recorded before the task
++    # profile was excluded from the recipe hash must stay comparable.
++    config_hashes = {run_recipe_hash(metadata[r]) for r in active}
+     if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch):
+         raise ValueError("Selected runs mix code/config versions. Use a distinct experiment name for a changed implementation.")
+     if len(code_hashes)>1:
+--- run_experiment.py	2026-11-04 00:26:33.957371490 +0000
++++ run_experiment.py	2026-11-04 00:29:47.993383024 +0000
+@@ -27,10 +27,10 @@
+                   config_split_variant, prepare_split_variants, resolve_split_cache_paths)
+ from training import (
+     RunRecorder, atomic_json, metadata, package_hash, RunContext, digest,
+-    recipe_digest, invoke, load_config, collect, verify,
++    recipe_digest, invoke, load_config, collect, verify, profile_priority_file,
+ )
+ 
+-SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
++SCRIPT_VERSION = '5.5.0-middle-task-profile'
+ 
+ 
+ # Slurm access and shared eight-job dispatcher
+@@ -491,8 +491,9 @@
+         # Resolve the default here without adding a field to the stored JSON.
+         if "tfs" not in config:
+             profile = config.get("task_profile", "long")
+-            filename = "training_priority.csv" if profile == "long" else "training_priority_short.csv"
+-            priority = ROOT / "configs" / filename
++            priority = profile_priority_file(ROOT, profile)
++            if not priority.is_file():
++                raise ValueError(f"Priority list for task_profile '{profile}' is missing: {priority}")
+             profile_pairs = read_priority(priority)
+             selected_tfs = list(dict.fromkeys(tf for tf, assay in profile_pairs))
+         absent = set(selected_tfs) - {row["tf"] for row in manifest}
+--- submit_array.sh	2026-11-04 00:26:33.953371489 +0000
++++ submit_array.sh	2026-11-04 00:29:53.289383339 +0000
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env bash
+-# Version: 2026-10-30-native-array-split-variants
++# Version: 2026-11-04-middle-task-profile
+ set -euo pipefail
+ ABLATION_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_ROOT" "$@" <<'HUM301_NATIVE_ARRAY'
+@@ -269,8 +269,12 @@
+             seen.add(identity)
+             indices[config].append(index)
+         shutil.copyfile(root / 'configs/training_priority.csv', batch / 'training_priority.csv')
+-        if any(spec.get('task_profile') == 'short' for spec in config_specs.values()):
+-            shutil.copyfile(root / 'configs/training_priority_short.csv', batch / 'training_priority_short.csv')
++        # Keep a copy of every profile priority list the batch was planned with.
++        profile_files = {'short': 'training_priority_short.csv', 'middle': 'training_priority_middle.csv'}
++        for profile, filename in profile_files.items():
++            if any(spec.get('task_profile') == profile for spec in config_specs.values()):
++                require((root / 'configs' / filename).is_file(), f'Prioritätsliste für task_profile {profile} fehlt: configs/{filename}')
++                shutil.copyfile(root / 'configs' / filename, batch / filename)
+         active_configs = [name for name in configs if indices[name]]
+         state = dict(root=str(root), configs=active_configs, requested_configs=configs, mode='native_array', array_id=None,
+                      created_at=datetime.now(timezone.utc).isoformat(), plan=str(plan),

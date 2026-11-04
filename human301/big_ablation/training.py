@@ -42,7 +42,7 @@ from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file,
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 from data import config_split_variant
 
-SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
+SCRIPT_VERSION = '5.6.0-middle-task-profile'
 
 
 # Configuration loading and extension points
@@ -56,10 +56,27 @@ def digest(value: Any) -> str:
     return hashlib.sha256(json_text(value).encode()).hexdigest()
 
 
+TASK_SELECTION_KEYS = {"description", "seeds", "train_assays", "test_assays", "tfs", "task_profile"}
+
+
 def recipe_digest(config: dict[str, Any]) -> str:
-    # Seed/assay lists select tasks; their actual values are recorded per run.
-    # Adding repetitions does not create another model/training recipe.
-    return digest({k:v for k,v in config.items() if k not in {"description","seeds","train_assays","test_assays"}})
+    # Seed/assay lists, the TF list and the task profile select tasks; their
+    # actual values are recorded per run. Adding repetitions or TFs does not
+    # create another model/training recipe, so an experiment can grow from the
+    # short to the middle profile without changing its recipe hash.
+    return digest({k:v for k,v in config.items() if k not in TASK_SELECTION_KEYS})
+
+
+def run_recipe_hash(meta: dict[str, Any]) -> str:
+    """Recipe hash of a recorded run, recomputed from its stored configuration.
+
+    Older run.json files carry a config_hash that still included task_profile;
+    recomputing from the stored config keeps old and new runs comparable.
+    """
+    config = meta.get("config")
+    if isinstance(config, dict) and config:
+        return recipe_digest(config)
+    return meta["config_hash"]
 
 
 def factory(spec: dict[str, Any]) -> Callable:
@@ -80,6 +97,22 @@ def factory(spec: dict[str, Any]) -> Callable:
 
 def invoke(spec: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
     return factory(spec)(*args, **copy.deepcopy(spec.get("params", {})), **kwargs)
+
+
+# Task profiles select which TF/assay pairs a configuration trains. Each
+# profile has its own priority list in configs/ (consecutive priorities).
+TASK_PROFILES = ("long", "middle", "short")
+PRIORITY_FILES = {
+    "long": "training_priority.csv",
+    "middle": "training_priority_middle.csv",
+    "short": "training_priority_short.csv",
+}
+
+
+def profile_priority_file(root: Path, profile: str) -> Path:
+    if profile not in PRIORITY_FILES:
+        raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
+    return root / "configs" / PRIORITY_FILES[profile]
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -104,8 +137,8 @@ def load_config(path: Path) -> dict[str, Any]:
     if len(set(config["seeds"])) != len(config["seeds"]):
         raise ValueError("Duplicate seeds")
     if "task_profile" in config:
-        if config["task_profile"] not in ("long", "short"):
-            raise ValueError("task_profile must be 'long' or 'short'")
+        if config["task_profile"] not in TASK_PROFILES:
+            raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
         if "tfs" in config:
             raise ValueError("Select task_profile or tfs, not both")
     if "tfs" in config:
@@ -2638,11 +2671,13 @@ def _collect(root, experiment, config, destination, *, allow_code_version_mismat
     selected = {}
     for meta in sorted(metadata.values(),key=lambda m:m["started_at"]):
         if meta["status"] != "completed": continue
-        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],meta["config_hash"])
+        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],run_recipe_hash(meta))
         selected[key]=meta["run_id"]
     active = set(selected.values())
     code_hashes = {metadata[r]["code_hash"] for r in active}
-    config_hashes = {metadata[r]["config_hash"] for r in active}
+    # Compare recipes, not stored hash strings: runs recorded before the task
+    # profile was excluded from the recipe hash must stay comparable.
+    config_hashes = {run_recipe_hash(metadata[r]) for r in active}
     if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch):
         raise ValueError("Selected runs mix code/config versions. Use a distinct experiment name for a changed implementation.")
     if len(code_hashes)>1:
