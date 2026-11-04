@@ -4,15 +4,15 @@
   "description": "Frozen uploaded motif64 baseline; only the input kernel bank varies across these three configurations.",
   "reference": "00_basic",
   "workflow": {
-    "factory": "ablation.workflows:supervised",
+    "factory": "training:supervised",
     "params": {}
   },
   "data": {
-    "factory": "ablation.providers:human301",
+    "factory": "data:human301",
     "params": {}
   },
   "predictor": {
-    "factory": "ablation.builders:maa",
+    "factory": "model:maa",
     "params": {
       "sequence_length": 256,
       "embed_channels": 64,
@@ -35,7 +35,7 @@
     }
   },
   "fitting": {
-    "factory": "ablation.fitting:baseline",
+    "factory": "training:baseline",
     "params": {
       "epochs": 50,
       "batch_size": 88,
@@ -63,7 +63,7 @@
     }
   },
   "inference": {
-    "factory": "ablation.inference:fixed_views",
+    "factory": "training:fixed_views",
     "params": {
       "eval_crops": "multi",
       "eval_rc": true

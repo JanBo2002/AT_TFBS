@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "name": "A05_kernel_7_short",
-  "description": "Single input kernel of size 7 with 64 output channels; channel and bottleneck dropout 0.0; restricted to the 15 selected short-run TFs.",
+  "name": "A03",
+  "description": "128 input channels: kernels 3/6/9/12 with 32 channels each; additional channel dropout 0.0; bottleneck dropout unchanged at 0.1.",
   "reference": "00_basic",
   "workflow": {
     "factory": "training:supervised",
@@ -15,7 +15,7 @@
     "factory": "model:maa",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 64,
+      "embed_channels": 128,
       "encoder_channels": [
         80,
         96,
@@ -23,11 +23,14 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        7
+        3,
+        6,
+        9,
+        12
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.0,
+      "dropout": 0.1,
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
@@ -80,6 +83,5 @@
   "test_assays": [
     "CHIP",
     "GHTS"
-  ],
-  "task_profile": "short"
+  ]
 }

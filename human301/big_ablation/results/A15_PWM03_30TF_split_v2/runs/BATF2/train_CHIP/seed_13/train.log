@@ -1,0 +1,18 @@
+Starting A15_PWM03_30TF_split_v2 | BATF2 | CHIP | seed 13
+Traceback (most recent call last):
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/run_experiment.py", line 583, in execute
+    invoke(config["workflow"],context)
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/training.py", line 82, in invoke
+    return factory(spec)(*args, **copy.deepcopy(spec.get("params", {})), **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/training.py", line 2469, in supervised
+    data = invoke(context.config["data"], context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/training.py", line 82, in invoke
+    return factory(spec)(*args, **copy.deepcopy(spec.get("params", {})), **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/data.py", line 1694, in human301
+    validate_pwm_split_provenance(context, predictor_params["pwm_root"], assay)
+  File "/data/projects/SFB_A03/jan/AT_TFBS/human301/big_ablation/data.py", line 1708, in validate_pwm_split_provenance
+    raise ValueError(
+ValueError: split_v2 PWM run needs /data/projects/SFB_A03/jan/AT_TFBS/human301/pwms_ranked10/BATF2/CHS/split_provenance.json. Rebuild/select PWMs for this split and record split_variant, fit_chromosomes and selection_chromosomes; original-split PWMs must not be silently reused.

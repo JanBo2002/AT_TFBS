@@ -51,8 +51,12 @@ def main(root, plan, index):
         atomic_json(completion, state)
         if expected <= state['task_results'].keys() and state['summary_status'] != 'completed':
             print(f'{name}: letzter Lauf beendet; Zusammenfassung wird jetzt erstellt.', flush=True)
-            collected = subprocess.run([sys.executable, str(root / 'run_experiment.py'),
-                                        'collect', '--config', name])
+            # HUM301_CONTINUATION_FINISH_V2
+            if (root / 'results' / name / 'continuation.json').is_file():
+                collected = subprocess.run(['bash', str(root / 'collect_config.sbatch'), str(root), name])
+            else:
+                collected = subprocess.run([sys.executable, str(root / 'run_experiment.py'),
+                                            'collect', '--config', name])
             outputs = (root / 'results' / 'Results_all' / (name + '.csv'),
                        root / 'results' / name / 'evaluation.md')
             success = collected.returncode == 0 and all(path.is_file() for path in outputs)
