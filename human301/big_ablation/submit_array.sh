@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Version: 2026-11-04-middle-task-profile
+# Version: 2026-10-30-native-array-split-variants
 set -euo pipefail
 ABLATION_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_ROOT" "$@" <<'HUM301_NATIVE_ARRAY'
@@ -269,12 +269,8 @@ def main():
             seen.add(identity)
             indices[config].append(index)
         shutil.copyfile(root / 'configs/training_priority.csv', batch / 'training_priority.csv')
-        # Keep a copy of every profile priority list the batch was planned with.
-        profile_files = {'short': 'training_priority_short.csv', 'middle': 'training_priority_middle.csv'}
-        for profile, filename in profile_files.items():
-            if any(spec.get('task_profile') == profile for spec in config_specs.values()):
-                require((root / 'configs' / filename).is_file(), f'Prioritätsliste für task_profile {profile} fehlt: configs/{filename}')
-                shutil.copyfile(root / 'configs' / filename, batch / filename)
+        if any(spec.get('task_profile') == 'short' for spec in config_specs.values()):
+            shutil.copyfile(root / 'configs/training_priority_short.csv', batch / 'training_priority_short.csv')
         active_configs = [name for name in configs if indices[name]]
         state = dict(root=str(root), configs=active_configs, requested_configs=configs, mode='native_array', array_id=None,
                      created_at=datetime.now(timezone.utc).isoformat(), plan=str(plan),
