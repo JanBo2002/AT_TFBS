@@ -30,7 +30,7 @@ from training import (
     recipe_digest, invoke, load_config, collect, verify, profile_priority_file,
 )
 
-SCRIPT_VERSION = '5.5.0-middle-task-profile'
+SCRIPT_VERSION = '5.6.0-certified-code'
 
 
 # Slurm access and shared eight-job dispatcher
@@ -621,6 +621,59 @@ def code_version_options(parser):
 # Version recording
 # -----------------
 
+# Certified equivalent code versions
+# ----------------------------------
+# certified_code/*.json lists program files whose current version may stand in
+# for earlier versions (stored in certified_code/ without a .py suffix, so they do
+# not enter the code hash). Each manifest is written by an update whose tests
+# showed bit-identical computations for every configuration that ran under the
+# earlier versions. A run recorded under one of these hashes differs from the
+# current code only by such certified file versions; all other files are equal.
+
+CERTIFIED_CODE_DIR = "certified_code"
+
+
+def certified_code_hashes(root):
+    """All code hashes that the manifests certify as equivalent to the current code."""
+    import itertools
+    root = Path(root)
+    files = []
+    for path in sorted(root.rglob("*.py")):
+        if "results" in path.relative_to(root).parts or "__pycache__" in path.parts:
+            continue
+        files.append((str(path.relative_to(root)), path.read_bytes()))
+    contents = dict(files)
+
+    def digest(replacements):
+        # Exactly package_hash(), with selected file contents replaced.
+        result = hashlib.sha256()
+        for name, data in files:
+            result.update(name.encode())
+            result.update(replacements.get(name, data))
+        return result.hexdigest()
+
+    hashes = {digest({})}
+    directory = root / CERTIFIED_CODE_DIR
+    for manifest_path in sorted(directory.glob("*.json")) if directory.is_dir() else []:
+        try:
+            manifest = json.loads(manifest_path.read_text())
+            options = []
+            for name, spec in sorted(manifest["files"].items()):
+                if name not in contents or hashlib.sha256(contents[name]).hexdigest() != spec["sha256"]:
+                    continue  # the file is not (or no longer) the certified version
+                variants = [contents[name]]
+                for earlier in spec.get("equivalent", []):
+                    data = (directory / earlier["ref"]).read_bytes()
+                    if hashlib.sha256(data).hexdigest() == earlier["sha256"]:
+                        variants.append(data)
+                options.append((name, variants))
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        for combination in itertools.product(*[variants for _, variants in options]):
+            hashes.add(digest({name: data for (name, _), data in zip(options, combination)}))
+    return hashes
+
+
 def write_versions(experiment, code_hash, *, allow_code_version_mismatch=False):
     """Record script versions without copying Python files into results."""
     lines = [f"code_sha256: {code_hash}"]
@@ -635,12 +688,20 @@ def write_versions(experiment, code_hash, *, allow_code_version_mismatch=False):
         current = previous.rsplit("\n\n# Additional implementation used\n",1)[-1]
         if current == content:
             return
+        note = ""
         if not (allow_code_version_mismatch or os.environ.get("ABLATION_ALLOW_CODE_VERSION_MISMATCH") == "1"):
-            raise ValueError("Experiment already uses another code version; choose a new experiment name "
-                             "or explicitly pass --allow-code-version-mismatch")
-        print("Warning: code-version mismatch explicitly allowed; previous versions.txt entries are retained.",
-              file=sys.stderr)
-        content = previous + ("" if previous.endswith("\n") else "\n") + "\n# Additional implementation used\n" + content
+            match = re.search(r"^code_sha256: ([0-9a-f]{64})$", current, re.MULTILINE)
+            if not (match and match.group(1) in certified_code_hashes(ROOT)):
+                raise ValueError("Experiment already uses another code version; choose a new experiment name "
+                                 "or explicitly pass --allow-code-version-mismatch")
+            note = "# Certified equivalent code version (certified_code/): results stay comparable\n"
+            print("Note: this experiment's earlier runs used another code version that certified_code/ "
+                  "certifies as computationally equivalent; continuing.", file=sys.stderr)
+        else:
+            print("Warning: code-version mismatch explicitly allowed; previous versions.txt entries are retained.",
+                  file=sys.stderr)
+        content = (previous + ("" if previous.endswith("\n") else "\n") + note
+                   + "\n# Additional implementation used\n" + content)
     destination.write_text(content)
 
 

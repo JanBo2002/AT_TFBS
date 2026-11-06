@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-SCRIPT_VERSION = '5.6.0-motif-exp-rc-sharing-pwm-target'
+SCRIPT_VERSION = '5.7.0-block-b-architecture-options'
 
 if torch.version.hip is not None:
     print("ROCm detected: forcing mathematical SDPA backend")
@@ -28,7 +28,9 @@ if torch.version.hip is not None:
 # Model components
 # ----------------
 
-ActivationName = Literal["relu", "gelu"]
+ActivationName = Literal["relu", "gelu", "silu"]
+NormalizationName = Literal["rmsbatch", "group"]
+PoolingName = Literal["max", "avg", "attention"]
 
 
 def make_activation(name: ActivationName) -> nn.Module:
@@ -37,7 +39,34 @@ def make_activation(name: ActivationName) -> nn.Module:
         return nn.ReLU()
     if name == "gelu":
         return nn.GELU()
+    if name == "silu":
+        return nn.SiLU()
     raise ValueError(f"Unknown activation: {name}")
+
+
+class DropPath(nn.Module):
+    """Stochastic depth: drops a whole residual branch per sample during training.
+
+    Kept branches are rescaled by 1/(1 - rate). At rate 0 (the default) the
+    module is a pure pass-through and consumes no random numbers.
+    """
+
+    def __init__(self, rate: float = 0.0) -> None:
+        super().__init__()
+        if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0.0 <= rate < 1.0:
+            raise ValueError("stochastic_depth must be a number in [0, 1)")
+        self.rate = float(rate)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.rate == 0.0 or not self.training:
+            return x
+        keep = 1.0 - self.rate
+        shape = (x.shape[0],) + (1,) * (x.ndim - 1)
+        mask = x.new_empty(shape).bernoulli_(keep).div_(keep)
+        return x * mask
+
+    def extra_repr(self) -> str:
+        return f"rate={self.rate}"
 
 
 class RMSBatchNorm1d(nn.Module):
@@ -113,8 +142,24 @@ class WSConv1d(nn.Conv1d):
         )
 
 
+def make_norm(kind: NormalizationName, channels: int, groups: int = 8) -> nn.Module:
+    """Channel normalization for ConvBlock: batch/EMA RMS statistics or per-sequence GroupNorm."""
+    if kind == "rmsbatch":
+        return RMSBatchNorm1d(channels)
+    if kind == "group":
+        if type(groups) is not int or groups < 1 or channels % groups:
+            raise ValueError(f"norm_groups={groups!r} must be a positive divisor of every channel count ({channels} channels)")
+        return nn.GroupNorm(groups, channels)
+    raise ValueError(f"Unknown normalization: {kind}")
+
+
 class ConvBlock(nn.Module):
-    """RMSBatchNorm -> activation -> standardized Conv1D (or pointwise Linear)."""
+    """Norm -> activation -> standardized Conv1D (or pointwise Linear).
+
+    The default normalization is the original RMSBatchNorm1d (batch statistics in
+    training, EMA statistics in evaluation); "group" uses nn.GroupNorm, i.e.
+    statistics of the sequence itself in both modes.
+    """
 
     def __init__(
         self,
@@ -124,11 +169,13 @@ class ConvBlock(nn.Module):
         dilation: int = 1,
         groups: int = 1,
         activation: ActivationName = "relu",
+        norm: NormalizationName = "rmsbatch",
+        norm_groups: int = 8,
     ) -> None:
         super().__init__()
         if kernel_size % 2 == 0:
             raise ValueError("Only odd kernel sizes are supported for same padding")
-        self.norm = RMSBatchNorm1d(in_channels)
+        self.norm = make_norm(norm, in_channels, norm_groups)
         self.activation = make_activation(activation)
         padding = dilation * (kernel_size - 1) // 2
         if kernel_size == 1:
@@ -226,6 +273,7 @@ class DNAEmbedder(nn.Module):
         kernels: Sequence[int] = (9, 12),
         residual_blocks: int = 1,
         motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False,
+        norm: NormalizationName = "rmsbatch", norm_groups: int = 8, drop_path: float = 0.0,
     ) -> None:
         super().__init__()
         if type(residual_blocks) is not int or residual_blocks < 0:
@@ -234,19 +282,20 @@ class DNAEmbedder(nn.Module):
         self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
         # Preserve the original parameter names and initialization order at depth 1.
         self.residual = ConvBlock(
-            out_channels, out_channels, kernel_size=5, activation=activation
+            out_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups,
         ) if residual_blocks else nn.Identity()
         self.additional_residuals = nn.ModuleList([
-            ConvBlock(out_channels, out_channels, kernel_size=5, activation=activation)
+            ConvBlock(out_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups)
             for _ in range(max(0, residual_blocks - 1))
         ])
+        self.drop_path = DropPath(drop_path)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.initial(x)
         if self.residual_blocks:
-            out = out + self.residual(out)
+            out = out + self.drop_path(self.residual(out))
         for block in self.additional_residuals:
-            out = out + block(out)
+            out = out + self.drop_path(block(out))
         return out
 
 
@@ -258,19 +307,29 @@ class DownresBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         activation: ActivationName = "relu",
+        norm: NormalizationName = "rmsbatch",
+        norm_groups: int = 8,
+        drop_path: float = 0.0,
     ) -> None:
         super().__init__()
         self.first = ConvBlock(
-            in_channels, out_channels, kernel_size=5, activation=activation
+            in_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups,
         )
         self.second = ConvBlock(
-            out_channels, out_channels, kernel_size=5, activation=activation
+            out_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups,
         )
         self.out_channels = out_channels
+        # Stochastic depth only on true identity residuals: the channel-changing
+        # first branch has no identity to fall back to and is never dropped.
+        self.drop_path = DropPath(drop_path)
+        self.drop_first = in_channels == out_channels
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = self.first(x) + pad_or_crop_channels(x, self.out_channels)
-        return out + self.second(out)
+        first = self.first(x)
+        if self.drop_first:
+            first = self.drop_path(first)
+        out = first + pad_or_crop_channels(x, self.out_channels)
+        return out + self.drop_path(self.second(out))
 
 
 class UpresBlock(nn.Module):
@@ -282,23 +341,32 @@ class UpresBlock(nn.Module):
         out_channels: int,
         activation: ActivationName = "relu",
         upsample: bool = True,
+        norm: NormalizationName = "rmsbatch",
+        norm_groups: int = 8,
+        drop_path: float = 0.0,
     ) -> None:
         super().__init__()
         self.reduce = ConvBlock(
-            in_channels, out_channels, kernel_size=5, activation=activation
+            in_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups,
         )
         self.skip_projection = ConvBlock(
-            out_channels, out_channels, kernel_size=1, activation=activation
+            out_channels, out_channels, kernel_size=1, activation=activation, norm=norm, norm_groups=norm_groups,
         )
         self.refine = ConvBlock(
-            out_channels, out_channels, kernel_size=5, activation=activation
+            out_channels, out_channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups,
         )
         self.out_channels = out_channels
         self.upsample = bool(upsample)
         self.residual_scale = nn.Parameter(torch.tensor(0.9, dtype=torch.float32))
+        # As in DownresBlock: only same-width residual branches are dropped.
+        self.drop_path = DropPath(drop_path)
+        self.drop_reduce = in_channels == out_channels
 
     def forward(self, x: torch.Tensor, unet_skip: torch.Tensor) -> torch.Tensor:
-        out = self.reduce(x) + pad_or_crop_channels(x, self.out_channels)
+        reduced = self.reduce(x)
+        if self.drop_reduce:
+            reduced = self.drop_path(reduced)
+        out = reduced + pad_or_crop_channels(x, self.out_channels)
         if self.upsample:
             out = F.interpolate(out, scale_factor=2, mode="nearest")
         out = out * self.residual_scale
@@ -307,7 +375,7 @@ class UpresBlock(nn.Module):
                 f"Decoder/skip length mismatch: {out.shape[-1]} vs {unet_skip.shape[-1]}"
             )
         out = out + self.skip_projection(unet_skip)
-        return out + self.refine(out)
+        return out + self.drop_path(self.refine(out))
 
 
 class DilatedMetaFormerBlock(nn.Module):
@@ -321,6 +389,7 @@ class DilatedMetaFormerBlock(nn.Module):
         expansion: int = 2,
         dropout: float = 0.1,
         activation: ActivationName = "relu",
+        drop_path: float = 0.0,
     ) -> None:
         super().__init__()
         padding = dilation * (kernel_size - 1) // 2
@@ -343,10 +412,11 @@ class DilatedMetaFormerBlock(nn.Module):
             nn.Dropout(dropout),
         )
         self.dropout = nn.Dropout(dropout)
+        self.drop_path = DropPath(drop_path)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.dropout(self.token_mixer(self.token_activation(self.token_norm(x))))
-        x = x + self.channel_mlp(self.channel_norm(x))
+        x = x + self.drop_path(self.dropout(self.token_mixer(self.token_activation(self.token_norm(x)))))
+        x = x + self.drop_path(self.channel_mlp(self.channel_norm(x)))
         return x
 
 
@@ -360,6 +430,7 @@ class TransformerBlock(nn.Module):
         ffn_channels: int = 256,
         dropout: float = 0.1,
         activation: ActivationName = "relu",
+        drop_path: float = 0.0,
     ) -> None:
         super().__init__()
         if channels % num_heads != 0:
@@ -379,6 +450,7 @@ class TransformerBlock(nn.Module):
             nn.Linear(ffn_channels, channels),
             nn.Dropout(dropout),
         )
+        self.drop_path = DropPath(drop_path)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # [B,C,L] -> [B,L,C] for nn.MultiheadAttention
@@ -390,9 +462,60 @@ class TransformerBlock(nn.Module):
             normalized,
             need_weights=False,
         )
-        sequence = sequence + attended
-        sequence = sequence + self.ffn(self.norm2(sequence))
+        sequence = sequence + self.drop_path(attended)
+        sequence = sequence + self.drop_path(self.ffn(self.norm2(sequence)))
         return sequence.transpose(1, 2)
+
+
+class AttentionPool1d(nn.Module):
+    """Enformer-style attention pooling over non-overlapping windows.
+
+    Per channel, the positions of a window are weighted by a softmax over
+    learned logits (1x1 convolution, initialized to 2 * identity, so that the
+    initial behaviour is a soft maximum of the activations themselves).
+    """
+
+    def __init__(self, channels: int, window: int = 2) -> None:
+        super().__init__()
+        self.window = window
+        self.logits = nn.Conv1d(channels, channels, kernel_size=1, bias=False)
+        with torch.no_grad():
+            self.logits.weight.copy_(2.0 * torch.eye(channels)[:, :, None])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        batch, channels, length = x.shape
+        if length % self.window:
+            raise ValueError(f"Length {length} is not divisible by the pooling window {self.window}")
+        logits = self.logits(x).reshape(batch, channels, length // self.window, self.window)
+        weights = torch.softmax(logits.float(), dim=-1).to(x.dtype)
+        return (x.reshape(batch, channels, length // self.window, self.window) * weights).sum(dim=-1)
+
+
+class SqueezeExcite(nn.Module):
+    """Squeeze-and-excitation: each sequence reweights its own channels.
+
+    The squeeze is a global maximum over positions by default (LegNet-Max
+    style), optionally the mean; the excitation is a two-layer bottleneck MLP
+    with a sigmoid gate.
+    """
+
+    def __init__(self, channels: int, reduction: int = 4, pool: str = "max",
+                 activation: ActivationName = "relu") -> None:
+        super().__init__()
+        if type(reduction) is not int or reduction < 1:
+            raise ValueError("se_reduction must be a positive integer")
+        if pool not in ("max", "mean"):
+            raise ValueError(f"Unknown SE squeeze: {pool}")
+        self.pool = pool
+        hidden = max(1, channels // reduction)
+        self.fc1 = nn.Conv1d(channels, hidden, kernel_size=1)
+        self.activation = make_activation(activation)
+        self.fc2 = nn.Conv1d(hidden, channels, kernel_size=1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        squeezed = x.amax(dim=-1, keepdim=True) if self.pool == "max" else x.mean(dim=-1, keepdim=True)
+        gate = torch.sigmoid(self.fc2(self.activation(self.fc1(squeezed))))
+        return x * gate
 
 
 # Model configuration and forward pass
@@ -415,29 +538,52 @@ class ModelConfig:
     embedder_residual_blocks: int = 1
     motif_activation: MotifActivation = "none"
     motif_rc_sharing: bool = False
+    decoder: bool = True
+    normalization: NormalizationName = "rmsbatch"
+    norm_groups: int = 8
+    pooling: PoolingName = "max"
+    pooling_stages: int = 2
+    se_blocks: bool = False
+    se_reduction: int = 4
+    se_pool: str = "max"
+    stochastic_depth: float = 0.0
 
 
 class HumanTFBindingModel(nn.Module):
     def __init__(self, config: ModelConfig, *, pwm_matrices=None, pwm_manifest=None, pwm_target=None) -> None:
         super().__init__()
-        if config.sequence_length % 4 != 0:
-            raise ValueError("sequence_length must be divisible by 4 for two pool stages")
-        if config.sequence_length // 4 != config.bottleneck_length:
+        if config.pooling_stages not in (1, 2):
+            raise ValueError("pooling_stages must be 1 or 2")
+        stride = 2 ** config.pooling_stages
+        if config.sequence_length % stride != 0:
+            raise ValueError(f"sequence_length must be divisible by {stride} for {config.pooling_stages} pool stage(s)")
+        if config.sequence_length // stride != config.bottleneck_length:
             raise ValueError(
-                "bottleneck_length must equal sequence_length / 4 for this architecture"
+                f"bottleneck_length must equal sequence_length / {stride} for {config.pooling_stages} pool stage(s)"
             )
+        if config.pooling not in ("max", "avg", "attention"):
+            raise ValueError(f"Unknown pooling: {config.pooling}")
+        if type(config.decoder) is not bool or type(config.se_blocks) is not bool:
+            raise ValueError("decoder and se_blocks must be true or false")
+        if pwm_target is not None and not config.decoder:
+            raise ValueError("The PWM auxiliary target needs the decoder (base-resolution features)")
         self.config = config
+        self.readout_stride = 1 if config.decoder else stride
         if not 0.0 <= config.channel_dropout < 1.0:
             raise ValueError("channel_dropout must be in [0, 1)")
         c0 = config.embed_channels + (len(pwm_matrices) if pwm_matrices is not None else 0)
         self.feature_channels = c0
         c1, c2, c4 = config.encoder_channels
+        # Settings shared by every convolutional/residual block.
+        block = dict(activation=config.activation, norm=config.normalization,
+                     norm_groups=config.norm_groups, drop_path=config.stochastic_depth)
 
         if pwm_matrices is None:
             self.embedder = DNAEmbedder(
-                c0, activation=config.activation, kernels=config.motif_kernels,
+                c0, kernels=config.motif_kernels,
                 residual_blocks=config.embedder_residual_blocks,
                 motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
+                **block,
             )
         else:
             if type(config.embedder_residual_blocks) is not int or config.embedder_residual_blocks != 1:
@@ -446,16 +592,29 @@ class HumanTFBindingModel(nn.Module):
                 config.embed_channels, config.motif_kernels, config.activation,
                 pwm_matrices, pwm_manifest,
                 motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
+                norm=config.normalization, norm_groups=config.norm_groups, drop_path=config.stochastic_depth,
             )
         # Drop complete channels across all sequence positions, during training.
         # Identity preserves the original computation and RNG stream at p=0.
         self.channel_dropout = (
             nn.Dropout1d(config.channel_dropout) if config.channel_dropout else nn.Identity()
         )
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
-        self.down1 = DownresBlock(c0, c1, activation=config.activation)
-        self.down2 = DownresBlock(c1, c2, activation=config.activation)
-        self.down3 = DownresBlock(c2, c4, activation=config.activation)
+        if config.pooling == "max":
+            self.pool: nn.Module = nn.MaxPool1d(kernel_size=2, stride=2)
+        elif config.pooling == "avg":
+            self.pool = nn.AvgPool1d(kernel_size=2, stride=2)
+        else:
+            # One learned pooling module per stage (channel counts differ).
+            self.pool = nn.ModuleList([AttentionPool1d(c0)] + ([AttentionPool1d(c1)] if config.pooling_stages == 2 else []))
+        self.down1 = DownresBlock(c0, c1, **block)
+        self.down2 = DownresBlock(c1, c2, **block)
+        self.down3 = DownresBlock(c2, c4, **block)
+        self.se_down = None
+        if config.se_blocks:
+            self.se_down = nn.ModuleList([
+                SqueezeExcite(channels, config.se_reduction, config.se_pool, config.activation)
+                for channels in (c1, c2, c4)
+            ])
 
         self.position_embedding = nn.Parameter(
             torch.zeros(1, c4, config.bottleneck_length)
@@ -466,11 +625,11 @@ class HumanTFBindingModel(nn.Module):
             [
                 DilatedMetaFormerBlock(
                     c4, kernel_size=5, dilation=1, dropout=config.dropout,
-                    activation=config.activation,
+                    activation=config.activation, drop_path=config.stochastic_depth,
                 ),
                 DilatedMetaFormerBlock(
                     c4, kernel_size=5, dilation=2, dropout=config.dropout,
-                    activation=config.activation,
+                    activation=config.activation, drop_path=config.stochastic_depth,
                 ),
                 TransformerBlock(
                     channels=c4,
@@ -478,6 +637,7 @@ class HumanTFBindingModel(nn.Module):
                     ffn_channels=config.transformer_ffn,
                     dropout=config.dropout,
                     activation=config.activation,
+                    drop_path=config.stochastic_depth,
                 ),
                 TransformerBlock(
                     channels=c4,
@@ -485,20 +645,36 @@ class HumanTFBindingModel(nn.Module):
                     ffn_channels=config.transformer_ffn,
                     dropout=config.dropout,
                     activation=config.activation,
+                    drop_path=config.stochastic_depth,
                 ),
                 DilatedMetaFormerBlock(
                     c4, kernel_size=5, dilation=4, dropout=config.dropout,
-                    activation=config.activation,
+                    activation=config.activation, drop_path=config.stochastic_depth,
                 ),
             ]
         )
 
-        self.up1 = UpresBlock(c4, c2, activation=config.activation, upsample=False)
-        self.up2 = UpresBlock(c2, c1, activation=config.activation)
-        self.up3 = UpresBlock(c1, c0, activation=config.activation)
+        self.se_up = None
+        if config.decoder:
+            self.up1 = UpresBlock(c4, c2, upsample=False, **block)
+            # With a single pooling stage the second decoder block stays at the
+            # bottleneck resolution; only the last block returns to 256 bp.
+            self.up2 = UpresBlock(c2, c1, upsample=(config.pooling_stages == 2), **block)
+            self.up3 = UpresBlock(c1, c0, **block)
+            if config.se_blocks:
+                self.se_up = nn.ModuleList([
+                    SqueezeExcite(channels, config.se_reduction, config.se_pool, config.activation)
+                    for channels in (c2, c1, c0)
+                ])
+            head_channels = c0
+        else:
+            # No decoder: the heads read the bottleneck directly (stride 4 or 2
+            # base pairs per position); the regression track is repeated back
+            # to base resolution so that consumers see the usual length.
+            head_channels = c4
 
-        self.classification_head = nn.Conv1d(c0, 1, kernel_size=1)
-        self.regression_head = nn.Conv1d(c0, 1, kernel_size=1)
+        self.classification_head = nn.Conv1d(head_channels, 1, kernel_size=1)
+        self.regression_head = nn.Conv1d(head_channels, 1, kernel_size=1)
         # Optional auxiliary target: predict fixed PWM score tracks from the
         # decoder output. Registered last, so every existing parameter keeps its
         # name, shape and initialization order when the option is off.
@@ -510,6 +686,11 @@ class HumanTFBindingModel(nn.Module):
                 raise ValueError("pwm_target_weight must be a positive number")
             self.pwm_target = PWMTargetHead(c0, matrices, manifest)
             self.pwm_target_weight = float(weight)
+
+    def _pool(self, x: torch.Tensor, stage: int) -> torch.Tensor:
+        if isinstance(self.pool, nn.ModuleList):
+            return self.pool[stage](x)
+        return self.pool(x)
 
     @staticmethod
     def gather_positions(track: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
@@ -549,19 +730,32 @@ class HumanTFBindingModel(nn.Module):
             )
 
         skip0 = self.channel_dropout(self.embedder(sequence))  # [B, c0, 256]
-        x = self.down1(self.pool(skip0))                 # [B, 80,128]
+        x = self.down1(self._pool(skip0, 0))             # [B, 80,128]
+        if self.se_down is not None:
+            x = self.se_down[0](x)
         skip1 = x
-        x = self.down2(self.pool(x))                     # [B, 96, 64]
+        x = self.down2(self._pool(x, 1) if self.config.pooling_stages == 2 else x)  # [B, 96, 64] (or 128)
+        if self.se_down is not None:
+            x = self.se_down[1](x)
         skip2 = x
         x = self.down3(x)                                # [B,128, 64]; no third pooling
+        if self.se_down is not None:
+            x = self.se_down[2](x)
 
         x = x + self.position_embedding
         for block in self.bottleneck:
             x = block(x)
 
-        x = self.up1(x, skip2)                           # [B, 96, 64]
-        x = self.up2(x, skip1)                           # [B, 80,128]
-        x = self.up3(x, skip0)                           # [B, c0, 256]
+        if self.config.decoder:
+            x = self.up1(x, skip2)                       # [B, 96, 64]
+            if self.se_up is not None:
+                x = self.se_up[0](x)
+            x = self.up2(x, skip1)                       # [B, 80,128]
+            if self.se_up is not None:
+                x = self.se_up[1](x)
+            x = self.up3(x, skip0)                       # [B, c0, 256]
+            if self.se_up is not None:
+                x = self.se_up[2](x)
 
         classification_track = self.classification_head(x).squeeze(1)
         regression_track_raw = self.regression_head(x).squeeze(1)
@@ -570,8 +764,12 @@ class HumanTFBindingModel(nn.Module):
             if self.config.regression_nonnegative
             else regression_track_raw
         )
+        if self.readout_stride > 1:
+            regression_track = F.interpolate(
+                regression_track[:, None], scale_factor=self.readout_stride, mode="nearest"
+            ).squeeze(1)
         classification_logit = self.classify_track(
-            classification_track, center_indices
+            classification_track, center_indices // self.readout_stride
         )
         result = {
             "classification_track": classification_track,
@@ -803,19 +1001,21 @@ class PWMDNAEmbedder(nn.Module):
     """Concatenate learned kernel outputs and fixed PWM tracks, then refine."""
 
     def __init__(self, out_channels, kernels, activation, matrices, manifest,
-                 motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False) -> None:
+                 motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False,
+                 norm: NormalizationName = "rmsbatch", norm_groups: int = 8, drop_path: float = 0.0) -> None:
         super().__init__()
         self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
         self.scanner = FixedPWMScanner(matrices, manifest)
         channels = out_channels + len(matrices)
-        self.residual = ConvBlock(channels, channels, kernel_size=5, activation=activation)
+        self.residual = ConvBlock(channels, channels, kernel_size=5, activation=activation, norm=norm, norm_groups=norm_groups)
+        self.drop_path = DropPath(drop_path)
 
     def features(self, sequence: torch.Tensor) -> torch.Tensor:
         return torch.cat([self.initial(sequence), self.scanner(sequence)], dim=1)
 
     def forward(self, sequence: torch.Tensor) -> torch.Tensor:
         out = self.features(sequence)
-        return out + self.residual(out)
+        return out + self.drop_path(self.residual(out))
 
 
 def _record_pwm_manifest(context, manifest, filename, key):

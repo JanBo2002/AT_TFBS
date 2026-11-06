@@ -15,6 +15,7 @@ import math
 import os
 import platform
 import re
+import shutil
 import socket
 import sys
 import tempfile
@@ -38,11 +39,11 @@ from sklearn.metrics import (
 )
 from scipy.stats import pearsonr, spearmanr
 
-from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
+from data import STORED_LENGTH, evaluation_crop_starts, human301_crop_range, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
 from model import HumanTFBindingModel, ModelConfig, count_parameters
 from data import config_split_variant
 
-SCRIPT_VERSION = '5.6.0-middle-task-profile'
+SCRIPT_VERSION = '5.8.0-block-b-certified-code'
 
 
 # Configuration loading and extension points
@@ -383,6 +384,8 @@ class RunRecorder:
         except ImportError:
             pass
         requested = arguments.get("epochs")
+        # A run that reused a foreign checkpoint (reuse_checkpoint) trained nothing itself.
+        reused = self.meta.get("checkpoint_source") is not None
         train_wall = self.meta.get("training_wall_s")
         fit_loop = self.fit_loop_seconds
         train_total = sum(r.get("train_s") or 0 for r in history) if history else None
@@ -394,8 +397,9 @@ class RunRecorder:
             "train_total_s":train_total, "validation_total_s":val_total, "mining_total_s":mining_total,
             "setup_s":self.meta.get("setup_s"),
             "post_fit_s":None if train_wall is None or fit_loop is None else max(0,train_wall-fit_loop-(self.meta.get("setup_s") or 0)),
-            "epochs_requested":requested, "epochs_run":len(history) if history or self.meta.get("config",{}).get("fitting") else None,
-            "early_stopped":None if requested is None else len(history)<requested,
+            "epochs_requested":None if reused else requested,
+            "epochs_run":None if reused else (len(history) if history or self.meta.get("config",{}).get("fitting") else None),
+            "early_stopped":None if (requested is None or reused) else len(history)<requested,
             "best_epoch":checkpoint.get("epoch"),
             "checkpoint_objective":checkpoint.get("checkpoint_objective"),
             "validation_selection_score":checkpoint.get("validation_score"),
@@ -646,6 +650,11 @@ def compute_multitask_loss(
             total = regression_loss
         else:
             total = classification_loss + training_config.regression_weight * regression_loss
+    auxiliary = outputs.get("auxiliary_loss")
+    if auxiliary is not None:
+        # Already weighted by the model (e.g. the PWM-track target); only
+        # present for training-length inputs, so evaluation totals are unchanged.
+        total = total + auxiliary.to(total.dtype)
     return total, {
         "classification": classification_loss.detach(),
         "regression": regression_loss.detach(),
@@ -1703,6 +1712,32 @@ def write_classification_curves(
 # Training loop
 # -------------
 
+def model_config_from_args(args, sequence_length: int) -> ModelConfig:
+    """Build the ModelConfig from training arguments.
+
+    Every ModelConfig field is taken from the argument namespace when present
+    (predictor params are copied there by the fitting component), otherwise the
+    dataclass default applies; bottleneck_length follows the pooling stages.
+    """
+    translations = {"transformer_heads": "heads", "transformer_ffn": "ffn_channels"}
+    values = {}
+    for item in fields(ModelConfig):
+        if item.name in ("sequence_length", "bottleneck_length"):
+            continue
+        if item.name == "regression_nonnegative":
+            values[item.name] = not args.allow_negative_regression_output
+            continue
+        source = translations.get(item.name, item.name)
+        if hasattr(args, source):
+            values[item.name] = getattr(args, source)
+    values["motif_kernels"] = tuple(getattr(args, "motif_kernels", ModelConfig.motif_kernels))
+    values["encoder_channels"] = tuple(values["encoder_channels"])
+    stages = values.get("pooling_stages", ModelConfig.pooling_stages)
+    if stages not in (1, 2):
+        raise ValueError("pooling_stages must be 1 or 2")
+    return ModelConfig(sequence_length=sequence_length, bottleneck_length=sequence_length // (2 ** stages), **values)
+
+
 def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None) -> int:
     function_started = time.perf_counter()
     if not 0.0 <= args.reverse_complement_probability <= 1.0:
@@ -1764,7 +1799,11 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
         if overlaps:
             print("WARNING: Shared sequences or reverse complements between cached splits: "
                   + ", ".join(overlaps) + ". The datasets remain unchanged.", file=sys.stderr)
-        print("Window geometry: 256 bp from 301 bp; crop starts 0..45; shifts -22..+23; fresh uniform draw per access")
+        if type(args.train_shift_max) is not int or args.train_shift_max < 0:
+            raise ValueError("train_shift_max must be a nonnegative integer (23 = full 0..45 crop range)")
+        crop_low, crop_high = human301_crop_range(args.train_shift_max)
+        print(f"Window geometry: 256 bp from 301 bp; crop starts {crop_low}..{crop_high}; "
+              f"shifts {crop_low - 22:+d}..{crop_high - 22:+d}; fresh uniform draw per access")
         print(f"Evaluation: crops {evaluation_crop_starts(301, 256, args.eval_crops)}, reverse complement={args.eval_rc}; all samples")
     else:
         if args.train_shift_max < 0:
@@ -1844,21 +1883,7 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
             split_counts={name:{"positive":int(labels[indices].sum()),
                 "negative":int(len(indices)-labels[indices].sum())} for name,indices in splits.items()})
 
-    model_config = ModelConfig(
-        sequence_length=sequence_length,
-        bottleneck_length=sequence_length // 4,
-        motif_kernels=tuple(args.motif_kernels),
-        embed_channels=args.embed_channels,
-        encoder_channels=tuple(args.encoder_channels),
-        transformer_heads=args.heads,
-        transformer_ffn=args.ffn_channels,
-        dropout=args.dropout,
-        channel_dropout=getattr(args, "channel_dropout", 0.0),
-        embedder_residual_blocks=getattr(args, "embedder_residual_blocks", 1),
-        activation=args.activation,
-        classification_readout=args.classification_readout,
-        regression_nonnegative=not args.allow_negative_regression_output,
-    )
+    model_config = model_config_from_args(args, sequence_length)
     model = (model_factory(model_config) if model_factory else HumanTFBindingModel(model_config)).to(device)
     print(f"Hidden activation: {model_config.activation.upper()}")
     total_parameters, trainable_parameters = count_parameters(model)
@@ -1868,8 +1893,13 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
         f"Parameters: {total_parameters:,} total; {trainable_parameters:,} trainable"
     )
 
-    print(f"Architecture: motif kernels {model_config.motif_kernels}; encoder 128/64/64; "
-          "original five-block bottleneck at 64; decoder 64/128/256")
+    c1, c2, c4 = model_config.encoder_channels
+    print(f"Architecture: motif kernels {model_config.motif_kernels}; embed {model_config.embed_channels}; "
+          f"encoder {c1}/{c2}/{c4}; {model_config.pooling} pooling x{model_config.pooling_stages}; "
+          f"five-block bottleneck at {model_config.bottleneck_length} tokens; "
+          f"decoder {'on' if model_config.decoder else 'off'}; norm {model_config.normalization}; "
+          f"activation {model_config.activation}; SE {'on' if model_config.se_blocks else 'off'}; "
+          f"stochastic depth {model_config.stochastic_depth}")
 
     train_dataset = TFBindingDataset(
         cache,
@@ -2020,8 +2050,9 @@ def train_command(args: argparse.Namespace, *, recorder=None, model_factory=None
             "distribution": args.train_shift_distribution,
             "redrawn_every_epoch": True,
             "redrawn_per_access": human301,
-            "crop_start_range_inclusive": [0, 45] if human301 else None,
-            "shift_range_inclusive": [-22, 23] if human301 else None,
+            "crop_start_range_inclusive": list(human301_crop_range(args.train_shift_max)) if human301 else None,
+            "shift_range_inclusive": [human301_crop_range(args.train_shift_max)[0] - 22,
+                                      human301_crop_range(args.train_shift_max)[1] - 22] if human301 else None,
         },
         "evaluation_shift": evaluation_shift,
     }
@@ -2425,7 +2456,83 @@ def baseline(context, data, **params):
     context.artifacts["checkpoint"] = checkpoint
     return checkpoint
 
-def fixed_views(context, data, checkpoint, eval_crops="multi", eval_rc=True):
+def reuse_checkpoint(context, data, *, source_config: str):
+    """Inference-only fitting: reuse the frozen checkpoint of an identical model.
+
+    The source experiment must have the same data and predictor recipe; its
+    completed run for this TF/source assay/seed supplies model_for_prediction.pt
+    unchanged. Nothing is trained here, so the experiment isolates a change of
+    the inference component (e.g. test-time augmentation) from training noise.
+    """
+    if not isinstance(source_config, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", source_config):
+        raise ValueError("source_config must name a configuration from configs/")
+    source_path = context.root / "configs" / (source_config + ".json")
+    if not source_path.is_file():
+        raise ValueError(f"Source configuration not found: {source_path}")
+    source = load_config(source_path)
+    for key in ("data", "predictor"):
+        if source[key] != context.config[key]:
+            raise ValueError(f"Source configuration {source_config} differs in '{key}'; its checkpoints do not fit this recipe")
+    if source["fitting"] is None or source["fitting"]["factory"].rsplit(":", 1)[-1] == "reuse_checkpoint":
+        raise ValueError("The source configuration must train its own checkpoints")
+    source_run = (context.root / "results" / source_config / "runs" / context.tf
+                  / f"train_{context.train_assay}" / f"seed_{context.seed:02d}")
+    try:
+        source_meta = json.loads((source_run / "run.json").read_text())
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"No completed source run for {context.tf}/{context.train_assay}/seed {context.seed}: "
+                         f"{source_run} ({exc})") from exc
+    if (source_meta.get("status") != "completed" or source_meta.get("tf") != context.tf
+            or source_meta.get("train_assay") != context.train_assay or int(source_meta.get("seed", -1)) != context.seed):
+        raise ValueError(f"Source run is not a completed run of this TF/assay/seed: {source_run}")
+    source_training = source_run / "training"
+    checkpoint = source_training / "model_for_prediction.pt"
+    if not checkpoint.is_file():
+        raise ValueError(f"Source checkpoint missing: {checkpoint}")
+    train_cache = Path(data[context.train_assay])
+    cache_hash = sha256_file(train_cache)
+    import torch
+    frozen = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    if frozen["cache_sha256"] != cache_hash:
+        raise ValueError("The source checkpoint was trained on another cache than this task uses")
+    if source_meta.get("train_cache_sha256") not in (None, cache_hash):
+        raise ValueError("Source run metadata and current training cache disagree")
+    target_training = context.run_dir / "training"
+    target_training.mkdir(parents=True, exist_ok=True)
+    copied = {}
+    for name in ("model_for_prediction.pt", "prediction_metadata.json", "configuration.json", "validation_metrics.json"):
+        if (source_training / name).is_file():
+            shutil.copy2(source_training / name, target_training / name)
+            copied[name] = sha256_file(target_training / name)
+    checkpoint_hash = copied["model_for_prediction.pt"]
+    metadata_copy = target_training / "prediction_metadata.json"
+    if metadata_copy.is_file():
+        # Point at the local copy; keep the original location for provenance.
+        record = json.loads(metadata_copy.read_text())
+        record["source_checkpoint_path"] = record.get("checkpoint_path")
+        record["checkpoint_path"] = str(target_training / "model_for_prediction.pt")
+        atomic_json(metadata_copy, record)
+    provenance = {
+        "source_config": source_config, "source_run_id": source_meta.get("run_id"),
+        "source_run_dir": str(source_run), "source_code_hash": source_meta.get("code_hash"),
+        "source_config_hash": source_meta.get("config_hash"),
+        "checkpoint_sha256": checkpoint_hash, "copied_files": copied,
+        "training_performed_here": False,
+    }
+    atomic_json(target_training / "checkpoint_source.json", provenance)
+    context.recorder.update(
+        checkpoint_source=provenance, train_cache_sha256=cache_hash,
+        resolved_training_arguments=source_meta.get("resolved_training_arguments", {}),
+        trainable_parameter_count=source_meta.get("trainable_parameter_count"),
+        device=str(resolve_device(context.device)),
+    )
+    print(f"Reusing checkpoint of {source_config} ({source_meta.get('run_id')}), sha256 {checkpoint_hash[:12]}; "
+          "no training in this run.")
+    context.artifacts["checkpoint"] = target_training / "model_for_prediction.pt"
+    return context.artifacts["checkpoint"]
+
+
+def fixed_views(context, data, checkpoint, eval_crops="multi", eval_rc=True, allow_crop_mode_change=False):
     if checkpoint is None:
         raise ValueError("fixed_views requires a trained checkpoint")
     device = resolve_device(context.device)
@@ -2434,7 +2541,12 @@ def fixed_views(context, data, checkpoint, eval_crops="multi", eval_rc=True):
     if not source_hash or frozen["cache_sha256"] != source_hash:
         raise ValueError("Source checkpoint/cache provenance mismatch")
     if (eval_crops,eval_rc) != (frozen["evaluation_crop_mode"], frozen["evaluation_reverse_complement"]):
-        raise ValueError("Inference must match the source-validation settings frozen in this recipe")
+        # Test-time augmentation experiments may evaluate with more crops than
+        # the validation used for checkpoint selection; this must be explicit.
+        if not (allow_crop_mode_change is True and eval_rc == frozen["evaluation_reverse_complement"]):
+            raise ValueError("Inference must match the source-validation settings frozen in this recipe")
+        print(f"Inference crop mode {eval_crops!r} differs from the validation mode "
+              f"{frozen['evaluation_crop_mode']!r} (explicitly allowed; threshold from validation).")
     config = ModelConfig(**frozen["model_config"])
     model = invoke(context.config["predictor"], context, model_config=config).to(device)
     model.load_state_dict(frozen["model_state"], strict=True)
@@ -2638,6 +2750,59 @@ def add_reference_comparisons(rows, root, reference_id, experiment_id):
             if value>0: row["log2_ratio_auprc"] = math.log2(value/reference)
 
 
+# Certified equivalent code versions
+# ----------------------------------
+# certified_code/*.json lists program files whose current version may stand in
+# for earlier versions (stored in certified_code/ without a .py suffix, so they do
+# not enter the code hash). Each manifest is written by an update whose tests
+# showed bit-identical computations for every configuration that ran under the
+# earlier versions. A run recorded under one of these hashes differs from the
+# current code only by such certified file versions; all other files are equal.
+
+CERTIFIED_CODE_DIR = "certified_code"
+
+
+def certified_code_hashes(root):
+    """All code hashes that the manifests certify as equivalent to the current code."""
+    import itertools
+    root = Path(root)
+    files = []
+    for path in sorted(root.rglob("*.py")):
+        if "results" in path.relative_to(root).parts or "__pycache__" in path.parts:
+            continue
+        files.append((str(path.relative_to(root)), path.read_bytes()))
+    contents = dict(files)
+
+    def digest(replacements):
+        # Exactly package_hash(), with selected file contents replaced.
+        result = hashlib.sha256()
+        for name, data in files:
+            result.update(name.encode())
+            result.update(replacements.get(name, data))
+        return result.hexdigest()
+
+    hashes = {digest({})}
+    directory = root / CERTIFIED_CODE_DIR
+    for manifest_path in sorted(directory.glob("*.json")) if directory.is_dir() else []:
+        try:
+            manifest = json.loads(manifest_path.read_text())
+            options = []
+            for name, spec in sorted(manifest["files"].items()):
+                if name not in contents or hashlib.sha256(contents[name]).hexdigest() != spec["sha256"]:
+                    continue  # the file is not (or no longer) the certified version
+                variants = [contents[name]]
+                for earlier in spec.get("equivalent", []):
+                    data = (directory / earlier["ref"]).read_bytes()
+                    if hashlib.sha256(data).hexdigest() == earlier["sha256"]:
+                        variants.append(data)
+                options.append((name, variants))
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        for combination in itertools.product(*[variants for _, variants in options]):
+            hashes.add(digest({name: data for (name, _), data in zip(options, combination)}))
+    return hashes
+
+
 def collect(root: Path, experiment_id: str, *, allow_code_version_mismatch=False):
     experiment = root/"results"/experiment_id
     config = json.loads((experiment/"config.json").read_text())
@@ -2678,9 +2843,14 @@ def _collect(root, experiment, config, destination, *, allow_code_version_mismat
     # Compare recipes, not stored hash strings: runs recorded before the task
     # profile was excluded from the recipe hash must stay comparable.
     config_hashes = {run_recipe_hash(metadata[r]) for r in active}
-    if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch):
+    certified = (len(code_hashes)>1 and not allow_code_version_mismatch
+                 and code_hashes <= certified_code_hashes(root))
+    if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch and not certified):
         raise ValueError("Selected runs mix code/config versions. Use a distinct experiment name for a changed implementation.")
-    if len(code_hashes)>1:
+    if certified:
+        print("Note: runs use different code versions that certified_code/ certifies as computationally "
+              "equivalent; original code hashes are retained.", file=sys.stderr)
+    elif len(code_hashes)>1:
         print("Warning: collection with differing code versions explicitly allowed; original code hashes are retained.",
               file=sys.stderr)
     for row in rows:
@@ -2917,14 +3087,20 @@ def verify(root: Path, output: Path, reference_path=None):
                     if old_row[key]!=new_row[key]: raise AssertionError(f"Epoch history differs: {key}")
             checks.append("two full training epochs: weights, LR schedule, metrics, selected checkpoint and validation-MCC threshold bitwise equal")
         variants=[]
+        model_fields={f.name for f in fields(ModelConfig)}
         for path in sorted((root/"configs").glob("*.json")):
             c=json.loads(path.read_text())
+            if c["predictor"]["factory"].rsplit(":",1)[-1]!="maa":
+                # PWM builders need a TF context and PWM files; checked by their own runs.
+                variants.append({"name":c["name"],"skipped":"builder "+c["predictor"]["factory"]})
+                continue
             params=c["predictor"]["params"]
-            params={k:tuple(v) if k in {"motif_kernels","encoder_channels"} else v for k,v in params.items()}
+            params={k:tuple(v) if k in {"motif_kernels","encoder_channels"} else v for k,v in params.items() if k in model_fields}
             model=HumanTFBindingModel(ModelConfig(**params)).eval()
             with torch.no_grad(): result=model(sequence,centers)
-            if result["classification_track"].shape!=(2,256): raise AssertionError("Invalid track shape")
-            widths=[branch.out_channels for branch in model.embedder.initial.branches]
+            if result["classification_track"].shape!=(2,256//model.readout_stride): raise AssertionError("Invalid track shape")
+            sharing=2 if getattr(model.embedder.initial,"rc_sharing",False) else 1
+            widths=[branch.out_channels*sharing for branch in model.embedder.initial.branches]
             budget=params.get("embed_channels",64)
             expected=[budget//len(widths)+int(i<budget%len(widths)) for i in range(len(widths))]
             if widths!=expected: raise AssertionError("Input channel allocation differs from configuration")
