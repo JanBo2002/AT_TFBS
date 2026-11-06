@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
+SCRIPT_VERSION = '5.6.0-motif-exp-rc-sharing-pwm-target'
 
 if torch.version.hip is not None:
     print("ROCm detected: forcing mathematical SDPA backend")
@@ -156,20 +156,47 @@ def pad_or_crop_channels(x: torch.Tensor, channels: int) -> torch.Tensor:
     return F.pad(x, (0, 0, 0, channels - current), mode="constant", value=0.0)
 
 
-class MotifConv1d(nn.Module):
-    """Parallel 9-/12-bp input filters with a shared output length and channel budget."""
+MotifActivation = Literal["none", "exp"]
 
-    def __init__(self, out_channels: int = 64, kernels: Sequence[int] = (9, 12)) -> None:
+# Upper bound of the pre-activation for the exponential first layer. exp(10)
+# stays finite in float16 under AMP; the bound only acts as a safety net.
+MOTIF_EXP_CLAMP = 10.0
+
+
+class MotifConv1d(nn.Module):
+    """Parallel 9-/12-bp input filters with a shared output length and channel budget.
+
+    activation="exp" applies an exponential activation to the first-layer output
+    (Koo & Ploenzke 2021), which favours complete PWM-like motifs per filter.
+    rc_sharing=True learns half of each branch's filters and derives the other
+    half as their reverse complements, so the first-layer feature set is strand
+    symmetric by construction. Both options are off by default and then leave
+    the original computation untouched.
+    """
+
+    def __init__(
+        self, out_channels: int = 64, kernels: Sequence[int] = (9, 12),
+        activation: MotifActivation = "none", rc_sharing: bool = False,
+    ) -> None:
         super().__init__()
         self.kernels = tuple(kernels)
         if not self.kernels or any(not isinstance(k, int) or isinstance(k, bool) or k < 1 for k in self.kernels):
             raise ValueError("Input kernels must be a nonempty tuple of positive integers")
         if out_channels < len(self.kernels):
             raise ValueError("At least one output channel per motif branch is required")
+        if activation not in ("none", "exp"):
+            raise ValueError(f"Unknown motif activation: {activation}")
+        if type(rc_sharing) is not bool:
+            raise ValueError("rc_sharing must be true or false")
+        self.activation = activation
+        self.rc_sharing = rc_sharing
         base, remainder = divmod(out_channels, len(self.kernels))
+        widths = [base + int(i < remainder) for i in range(len(self.kernels))]
+        if rc_sharing and any(width % 2 for width in widths):
+            raise ValueError("rc_sharing needs an even channel budget per motif branch")
         self.branches = nn.ModuleList([
-            nn.Conv1d(4, base + int(i < remainder), kernel_size=kernel)
-            for i, kernel in enumerate(self.kernels)
+            nn.Conv1d(4, width // 2 if rc_sharing else width, kernel_size=kernel)
+            for width, kernel in zip(widths, self.kernels)
         ])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -177,8 +204,18 @@ class MotifConv1d(nn.Module):
         for kernel, conv in zip(self.kernels, self.branches, strict=True):
             # Same output length, also for the even kernel: 12 bp -> 5 left, 6 right.
             left = (kernel - 1) // 2
-            outputs.append(conv(F.pad(x, (left, kernel - 1 - left))))
-        return torch.cat(outputs, dim=1)
+            padded = F.pad(x, (left, kernel - 1 - left))
+            if self.rc_sharing:
+                # A<->T, C<->G and reversed positions: the reverse-complement filter.
+                reverse = conv.weight.flip(dims=(1, 2))
+                outputs.append(F.conv1d(padded, conv.weight, conv.bias))
+                outputs.append(F.conv1d(padded, reverse, conv.bias))
+            else:
+                outputs.append(conv(padded))
+        out = torch.cat(outputs, dim=1)
+        if self.activation == "exp":
+            out = torch.exp(out.float().clamp(max=MOTIF_EXP_CLAMP)).to(out.dtype)
+        return out
 
 
 class DNAEmbedder(nn.Module):
@@ -188,12 +225,13 @@ class DNAEmbedder(nn.Module):
         self, out_channels: int = 64, activation: ActivationName = "relu",
         kernels: Sequence[int] = (9, 12),
         residual_blocks: int = 1,
+        motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False,
     ) -> None:
         super().__init__()
         if type(residual_blocks) is not int or residual_blocks < 0:
             raise ValueError("residual_blocks must be a nonnegative integer")
         self.residual_blocks = residual_blocks
-        self.initial = MotifConv1d(out_channels, kernels)
+        self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
         # Preserve the original parameter names and initialization order at depth 1.
         self.residual = ConvBlock(
             out_channels, out_channels, kernel_size=5, activation=activation
@@ -375,10 +413,12 @@ class ModelConfig:
     classification_readout: str = "center"
     regression_nonnegative: bool = True
     embedder_residual_blocks: int = 1
+    motif_activation: MotifActivation = "none"
+    motif_rc_sharing: bool = False
 
 
 class HumanTFBindingModel(nn.Module):
-    def __init__(self, config: ModelConfig, *, pwm_matrices=None, pwm_manifest=None) -> None:
+    def __init__(self, config: ModelConfig, *, pwm_matrices=None, pwm_manifest=None, pwm_target=None) -> None:
         super().__init__()
         if config.sequence_length % 4 != 0:
             raise ValueError("sequence_length must be divisible by 4 for two pool stages")
@@ -397,6 +437,7 @@ class HumanTFBindingModel(nn.Module):
             self.embedder = DNAEmbedder(
                 c0, activation=config.activation, kernels=config.motif_kernels,
                 residual_blocks=config.embedder_residual_blocks,
+                motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
             )
         else:
             if type(config.embedder_residual_blocks) is not int or config.embedder_residual_blocks != 1:
@@ -404,6 +445,7 @@ class HumanTFBindingModel(nn.Module):
             self.embedder = PWMDNAEmbedder(
                 config.embed_channels, config.motif_kernels, config.activation,
                 pwm_matrices, pwm_manifest,
+                motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
             )
         # Drop complete channels across all sequence positions, during training.
         # Identity preserves the original computation and RNG stream at p=0.
@@ -457,6 +499,17 @@ class HumanTFBindingModel(nn.Module):
 
         self.classification_head = nn.Conv1d(c0, 1, kernel_size=1)
         self.regression_head = nn.Conv1d(c0, 1, kernel_size=1)
+        # Optional auxiliary target: predict fixed PWM score tracks from the
+        # decoder output. Registered last, so every existing parameter keeps its
+        # name, shape and initialization order when the option is off.
+        self.pwm_target = None
+        self.pwm_target_weight = 0.0
+        if pwm_target is not None:
+            matrices, manifest, weight = pwm_target
+            if not isinstance(weight, (int, float)) or isinstance(weight, bool) or weight <= 0:
+                raise ValueError("pwm_target_weight must be a positive number")
+            self.pwm_target = PWMTargetHead(c0, matrices, manifest)
+            self.pwm_target_weight = float(weight)
 
     @staticmethod
     def gather_positions(track: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
@@ -520,12 +573,15 @@ class HumanTFBindingModel(nn.Module):
         classification_logit = self.classify_track(
             classification_track, center_indices
         )
-        return {
+        result = {
             "classification_track": classification_track,
             "classification_logit": classification_logit,
             "regression_track": regression_track,
             "embedding": x,
         }
+        if self.pwm_target is not None:
+            result["auxiliary_loss"] = self.pwm_target_weight * self.pwm_target(x, sequence)
+        return result
 
 
 # Model builder and parameter count
@@ -709,6 +765,11 @@ class FixedPWMScanner(nn.Module):
 
     @torch.no_grad()
     def forward(self, sequence: torch.Tensor) -> torch.Tensor:
+        return self.score_with_mask(sequence)[0]
+
+    @torch.no_grad()
+    def score_with_mask(self, sequence: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """Scores as in forward plus a [B,K,L] mask of positions whose window is complete and N-free."""
         if sequence.ndim != 3 or sequence.shape[1] != 4:
             raise ValueError("FixedPWMScanner expects one-hot [B,4,L] in A,C,G,T order")
         # Score in float32 even in an AMP training/inference context.
@@ -716,6 +777,7 @@ class FixedPWMScanner(nn.Module):
             x = sequence.float()
             known = (x.sum(dim=1, keepdim=True) == 1).float()
             result = x.new_empty(x.shape[0], self.pwm_count, x.shape[-1])
+            result_mask = torch.zeros(x.shape[0], self.pwm_count, x.shape[-1], dtype=torch.bool, device=x.device)
             for width in self.widths:
                 if width > x.shape[-1]:
                     raise ValueError(f"PWM width {width} exceeds sequence length {x.shape[-1]}")
@@ -731,15 +793,19 @@ class FixedPWMScanner(nn.Module):
                 left = (width - 1) // 2
                 full[:, :, left:left + scores.shape[-1]] = scores
                 result.index_copy_(1, indices, full)
-            return result
+                full_mask = torch.zeros(x.shape[0], count, x.shape[-1], dtype=torch.bool, device=x.device)
+                full_mask[:, :, left:left + scores.shape[-1]] = valid.expand(-1, count, -1)
+                result_mask.index_copy_(1, indices, full_mask)
+            return result, result_mask
 
 
 class PWMDNAEmbedder(nn.Module):
     """Concatenate learned kernel outputs and fixed PWM tracks, then refine."""
 
-    def __init__(self, out_channels, kernels, activation, matrices, manifest) -> None:
+    def __init__(self, out_channels, kernels, activation, matrices, manifest,
+                 motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False) -> None:
         super().__init__()
-        self.initial = MotifConv1d(out_channels, kernels)
+        self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
         self.scanner = FixedPWMScanner(matrices, manifest)
         channels = out_channels + len(matrices)
         self.residual = ConvBlock(channels, channels, kernel_size=5, activation=activation)
@@ -752,6 +818,21 @@ class PWMDNAEmbedder(nn.Module):
         return out + self.residual(out)
 
 
+def _record_pwm_manifest(context, manifest, filename, key):
+    recorder = getattr(context, "recorder", None)
+    if recorder is not None:
+        recorder.update(**{key: manifest})
+    run_dir = getattr(context, "run_dir", None)
+    if run_dir is not None:
+        path = Path(run_dir) / filename
+        if path.exists():
+            if json.loads(path.read_text()) != manifest:
+                raise ValueError(f"Refusing to replace a different PWM manifest: {path}")
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+
+
 def maa_pwm(context, model_config=None, *, pwm_root: str, pwm_count: int, **params):
     """MAA with K PWM tracks after the learned kernels; unchanged fit interface."""
     config = _maa_config(model_config, params)
@@ -759,21 +840,73 @@ def maa_pwm(context, model_config=None, *, pwm_root: str, pwm_count: int, **para
         context, pwm_root, pwm_count, config.sequence_length, config.embed_channels
     )
     model = HumanTFBindingModel(config, pwm_matrices=matrices, pwm_manifest=manifest)
-    recorder = getattr(context, "recorder", None)
-    if recorder is not None:
-        recorder.update(pwm_channels=manifest)
-    run_dir = getattr(context, "run_dir", None)
-    if run_dir is not None:
-        path = Path(run_dir) / "pwm_channels.json"
-        if path.exists():
-            if json.loads(path.read_text()) != manifest:
-                raise ValueError(f"Refusing to replace a different PWM manifest: {path}")
-        else:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    _record_pwm_manifest(context, manifest, "pwm_channels.json", "pwm_channels")
     print(f"PWM features: {context.tf}/{manifest['pwm_assay']}, "
           f"{config.embed_channels} learned kernel channels + {pwm_count} fixed PWM "
           f"channels = {model.feature_channels}; maximum over both strands.")
+    return model
+
+
+class PWMTargetHead(nn.Module):
+    """Auxiliary regression of fixed PWM score tracks from the decoder output.
+
+    The input stays the plain one-hot sequence; the network only receives the
+    PWM scores as a training target. Each PWM's two-strand window score is
+    standardized with its expected mean and standard deviation under a uniform
+    base background (single-strand moments from the matrix, then the maximum of
+    two approximately independent normal strands: mean + std/sqrt(pi), std *
+    sqrt(1 - 1/pi)), so random windows score about N(0, 1) and motif hits stand
+    out at several standard deviations; the loss is therefore on the same scale
+    as the classification loss. Positions whose window leaves the sequence or
+    contains N are excluded from the loss.
+    """
+
+    def __init__(self, channels: int, matrices, manifest) -> None:
+        super().__init__()
+        self.scanner = FixedPWMScanner(matrices, manifest)
+        means, stds = [], []
+        for matrix in matrices:
+            position_means = [sum(row) / 4.0 for row in matrix]
+            position_variances = [sum((value - mean) ** 2 for value in row) / 4.0 for row, mean in zip(matrix, position_means)]
+            strand_mean, strand_std = sum(position_means), math.sqrt(sum(position_variances))
+            means.append(strand_mean + strand_std / math.sqrt(math.pi))
+            stds.append(strand_std * math.sqrt(1.0 - 1.0 / math.pi))
+        self.register_buffer("target_mean", torch.tensor(means, dtype=torch.float32))
+        self.register_buffer("target_std", torch.tensor(stds, dtype=torch.float32).clamp_min(1e-6))
+        self.head = nn.Conv1d(channels, len(matrices), kernel_size=1)
+
+    def forward(self, features: torch.Tensor, sequence: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            scores, valid = self.scanner.score_with_mask(sequence)
+            target = (scores - self.target_mean[None, :, None]) / self.target_std[None, :, None]
+            mask = valid.to(torch.float32)
+        with torch.autocast(device_type=features.device.type, enabled=False):
+            prediction = self.head(features.float())
+            squared = (prediction - target) ** 2
+            return (squared * mask).sum() / mask.sum().clamp_min(1.0)
+
+
+def maa_pwm_target(context, model_config=None, *, pwm_root: str, pwm_count: int,
+                   pwm_target_weight: float = 1.0, **params):
+    """MAA with the K PWM score tracks as an auxiliary training target only.
+
+    Unlike maa_pwm, the PWM scores never enter the input; the model must encode
+    motif hits itself and is pulled towards motif dependence by the auxiliary
+    loss (weight * MSE on the scaled tracks), which is added to the training
+    objective. Inference is unchanged: the auxiliary head is ignored.
+    """
+    config = _maa_config(model_config, params)
+    matrices, manifest = _load_pwm_bank(
+        context, pwm_root, pwm_count, config.sequence_length, config.embed_channels
+    )
+    manifest = dict(manifest, usage="auxiliary_regression_target", target_weight=float(pwm_target_weight),
+                    target_scaling="two_strand_max_standardized_by_uniform_background_moments_per_pwm",
+                    masked_positions="incomplete_windows_and_windows_with_N",
+                    fusion_stage="none_input_is_one_hot_only")
+    model = HumanTFBindingModel(config, pwm_target=(matrices, manifest, pwm_target_weight))
+    _record_pwm_manifest(context, manifest, "pwm_target.json", "pwm_target")
+    print(f"PWM auxiliary target: {context.tf}/{manifest['pwm_assay']}, {pwm_count} fixed PWM tracks, "
+          f"loss weight {float(pwm_target_weight)}; input stays one-hot only.")
     return model
 
 

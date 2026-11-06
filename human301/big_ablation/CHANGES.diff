@@ -1,143 +1,569 @@
---- training.py	2026-11-04 00:26:33.961371490 +0000
-+++ training.py	2026-11-04 00:29:40.325382568 +0000
-@@ -42,7 +42,7 @@
+--- model.py	2026-11-04 00:26:33.957371490 +0000
++++ model.py	2026-11-04 03:39:30.874589170 +0000
+@@ -16,7 +16,7 @@
+ import torch.nn.functional as F
+ 
+ 
+-SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
++SCRIPT_VERSION = '5.6.0-motif-exp-rc-sharing-pwm-target'
+ 
+ if torch.version.hip is not None:
+     print("ROCm detected: forcing mathematical SDPA backend")
+@@ -156,20 +156,47 @@
+     return F.pad(x, (0, 0, 0, channels - current), mode="constant", value=0.0)
+ 
+ 
++MotifActivation = Literal["none", "exp"]
++
++# Upper bound of the pre-activation for the exponential first layer. exp(10)
++# stays finite in float16 under AMP; the bound only acts as a safety net.
++MOTIF_EXP_CLAMP = 10.0
++
++
+ class MotifConv1d(nn.Module):
+-    """Parallel 9-/12-bp input filters with a shared output length and channel budget."""
++    """Parallel 9-/12-bp input filters with a shared output length and channel budget.
++
++    activation="exp" applies an exponential activation to the first-layer output
++    (Koo & Ploenzke 2021), which favours complete PWM-like motifs per filter.
++    rc_sharing=True learns half of each branch's filters and derives the other
++    half as their reverse complements, so the first-layer feature set is strand
++    symmetric by construction. Both options are off by default and then leave
++    the original computation untouched.
++    """
+ 
+-    def __init__(self, out_channels: int = 64, kernels: Sequence[int] = (9, 12)) -> None:
++    def __init__(
++        self, out_channels: int = 64, kernels: Sequence[int] = (9, 12),
++        activation: MotifActivation = "none", rc_sharing: bool = False,
++    ) -> None:
+         super().__init__()
+         self.kernels = tuple(kernels)
+         if not self.kernels or any(not isinstance(k, int) or isinstance(k, bool) or k < 1 for k in self.kernels):
+             raise ValueError("Input kernels must be a nonempty tuple of positive integers")
+         if out_channels < len(self.kernels):
+             raise ValueError("At least one output channel per motif branch is required")
++        if activation not in ("none", "exp"):
++            raise ValueError(f"Unknown motif activation: {activation}")
++        if type(rc_sharing) is not bool:
++            raise ValueError("rc_sharing must be true or false")
++        self.activation = activation
++        self.rc_sharing = rc_sharing
+         base, remainder = divmod(out_channels, len(self.kernels))
++        widths = [base + int(i < remainder) for i in range(len(self.kernels))]
++        if rc_sharing and any(width % 2 for width in widths):
++            raise ValueError("rc_sharing needs an even channel budget per motif branch")
+         self.branches = nn.ModuleList([
+-            nn.Conv1d(4, base + int(i < remainder), kernel_size=kernel)
+-            for i, kernel in enumerate(self.kernels)
++            nn.Conv1d(4, width // 2 if rc_sharing else width, kernel_size=kernel)
++            for width, kernel in zip(widths, self.kernels)
+         ])
+ 
+     def forward(self, x: torch.Tensor) -> torch.Tensor:
+@@ -177,8 +204,18 @@
+         for kernel, conv in zip(self.kernels, self.branches, strict=True):
+             # Same output length, also for the even kernel: 12 bp -> 5 left, 6 right.
+             left = (kernel - 1) // 2
+-            outputs.append(conv(F.pad(x, (left, kernel - 1 - left))))
+-        return torch.cat(outputs, dim=1)
++            padded = F.pad(x, (left, kernel - 1 - left))
++            if self.rc_sharing:
++                # A<->T, C<->G and reversed positions: the reverse-complement filter.
++                reverse = conv.weight.flip(dims=(1, 2))
++                outputs.append(F.conv1d(padded, conv.weight, conv.bias))
++                outputs.append(F.conv1d(padded, reverse, conv.bias))
++            else:
++                outputs.append(conv(padded))
++        out = torch.cat(outputs, dim=1)
++        if self.activation == "exp":
++            out = torch.exp(out.float().clamp(max=MOTIF_EXP_CLAMP)).to(out.dtype)
++        return out
+ 
+ 
+ class DNAEmbedder(nn.Module):
+@@ -188,12 +225,13 @@
+         self, out_channels: int = 64, activation: ActivationName = "relu",
+         kernels: Sequence[int] = (9, 12),
+         residual_blocks: int = 1,
++        motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False,
+     ) -> None:
+         super().__init__()
+         if type(residual_blocks) is not int or residual_blocks < 0:
+             raise ValueError("residual_blocks must be a nonnegative integer")
+         self.residual_blocks = residual_blocks
+-        self.initial = MotifConv1d(out_channels, kernels)
++        self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
+         # Preserve the original parameter names and initialization order at depth 1.
+         self.residual = ConvBlock(
+             out_channels, out_channels, kernel_size=5, activation=activation
+@@ -375,10 +413,12 @@
+     classification_readout: str = "center"
+     regression_nonnegative: bool = True
+     embedder_residual_blocks: int = 1
++    motif_activation: MotifActivation = "none"
++    motif_rc_sharing: bool = False
+ 
+ 
+ class HumanTFBindingModel(nn.Module):
+-    def __init__(self, config: ModelConfig, *, pwm_matrices=None, pwm_manifest=None) -> None:
++    def __init__(self, config: ModelConfig, *, pwm_matrices=None, pwm_manifest=None, pwm_target=None) -> None:
+         super().__init__()
+         if config.sequence_length % 4 != 0:
+             raise ValueError("sequence_length must be divisible by 4 for two pool stages")
+@@ -397,6 +437,7 @@
+             self.embedder = DNAEmbedder(
+                 c0, activation=config.activation, kernels=config.motif_kernels,
+                 residual_blocks=config.embedder_residual_blocks,
++                motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
+             )
+         else:
+             if type(config.embedder_residual_blocks) is not int or config.embedder_residual_blocks != 1:
+@@ -404,6 +445,7 @@
+             self.embedder = PWMDNAEmbedder(
+                 config.embed_channels, config.motif_kernels, config.activation,
+                 pwm_matrices, pwm_manifest,
++                motif_activation=config.motif_activation, motif_rc_sharing=config.motif_rc_sharing,
+             )
+         # Drop complete channels across all sequence positions, during training.
+         # Identity preserves the original computation and RNG stream at p=0.
+@@ -457,6 +499,17 @@
+ 
+         self.classification_head = nn.Conv1d(c0, 1, kernel_size=1)
+         self.regression_head = nn.Conv1d(c0, 1, kernel_size=1)
++        # Optional auxiliary target: predict fixed PWM score tracks from the
++        # decoder output. Registered last, so every existing parameter keeps its
++        # name, shape and initialization order when the option is off.
++        self.pwm_target = None
++        self.pwm_target_weight = 0.0
++        if pwm_target is not None:
++            matrices, manifest, weight = pwm_target
++            if not isinstance(weight, (int, float)) or isinstance(weight, bool) or weight <= 0:
++                raise ValueError("pwm_target_weight must be a positive number")
++            self.pwm_target = PWMTargetHead(c0, matrices, manifest)
++            self.pwm_target_weight = float(weight)
+ 
+     @staticmethod
+     def gather_positions(track: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
+@@ -520,12 +573,15 @@
+         classification_logit = self.classify_track(
+             classification_track, center_indices
+         )
+-        return {
++        result = {
+             "classification_track": classification_track,
+             "classification_logit": classification_logit,
+             "regression_track": regression_track,
+             "embedding": x,
+         }
++        if self.pwm_target is not None:
++            result["auxiliary_loss"] = self.pwm_target_weight * self.pwm_target(x, sequence)
++        return result
+ 
+ 
+ # Model builder and parameter count
+@@ -709,6 +765,11 @@
+ 
+     @torch.no_grad()
+     def forward(self, sequence: torch.Tensor) -> torch.Tensor:
++        return self.score_with_mask(sequence)[0]
++
++    @torch.no_grad()
++    def score_with_mask(self, sequence: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
++        """Scores as in forward plus a [B,K,L] mask of positions whose window is complete and N-free."""
+         if sequence.ndim != 3 or sequence.shape[1] != 4:
+             raise ValueError("FixedPWMScanner expects one-hot [B,4,L] in A,C,G,T order")
+         # Score in float32 even in an AMP training/inference context.
+@@ -716,6 +777,7 @@
+             x = sequence.float()
+             known = (x.sum(dim=1, keepdim=True) == 1).float()
+             result = x.new_empty(x.shape[0], self.pwm_count, x.shape[-1])
++            result_mask = torch.zeros(x.shape[0], self.pwm_count, x.shape[-1], dtype=torch.bool, device=x.device)
+             for width in self.widths:
+                 if width > x.shape[-1]:
+                     raise ValueError(f"PWM width {width} exceeds sequence length {x.shape[-1]}")
+@@ -731,15 +793,19 @@
+                 left = (width - 1) // 2
+                 full[:, :, left:left + scores.shape[-1]] = scores
+                 result.index_copy_(1, indices, full)
+-            return result
++                full_mask = torch.zeros(x.shape[0], count, x.shape[-1], dtype=torch.bool, device=x.device)
++                full_mask[:, :, left:left + scores.shape[-1]] = valid.expand(-1, count, -1)
++                result_mask.index_copy_(1, indices, full_mask)
++            return result, result_mask
+ 
+ 
+ class PWMDNAEmbedder(nn.Module):
+     """Concatenate learned kernel outputs and fixed PWM tracks, then refine."""
+ 
+-    def __init__(self, out_channels, kernels, activation, matrices, manifest) -> None:
++    def __init__(self, out_channels, kernels, activation, matrices, manifest,
++                 motif_activation: MotifActivation = "none", motif_rc_sharing: bool = False) -> None:
+         super().__init__()
+-        self.initial = MotifConv1d(out_channels, kernels)
++        self.initial = MotifConv1d(out_channels, kernels, motif_activation, motif_rc_sharing)
+         self.scanner = FixedPWMScanner(matrices, manifest)
+         channels = out_channels + len(matrices)
+         self.residual = ConvBlock(channels, channels, kernel_size=5, activation=activation)
+@@ -752,31 +818,98 @@
+         return out + self.residual(out)
+ 
+ 
+-def maa_pwm(context, model_config=None, *, pwm_root: str, pwm_count: int, **params):
+-    """MAA with K PWM tracks after the learned kernels; unchanged fit interface."""
+-    config = _maa_config(model_config, params)
+-    matrices, manifest = _load_pwm_bank(
+-        context, pwm_root, pwm_count, config.sequence_length, config.embed_channels
+-    )
+-    model = HumanTFBindingModel(config, pwm_matrices=matrices, pwm_manifest=manifest)
++def _record_pwm_manifest(context, manifest, filename, key):
+     recorder = getattr(context, "recorder", None)
+     if recorder is not None:
+-        recorder.update(pwm_channels=manifest)
++        recorder.update(**{key: manifest})
+     run_dir = getattr(context, "run_dir", None)
+     if run_dir is not None:
+-        path = Path(run_dir) / "pwm_channels.json"
++        path = Path(run_dir) / filename
+         if path.exists():
+             if json.loads(path.read_text()) != manifest:
+                 raise ValueError(f"Refusing to replace a different PWM manifest: {path}")
+         else:
+             path.parent.mkdir(parents=True, exist_ok=True)
+             path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
++
++
++def maa_pwm(context, model_config=None, *, pwm_root: str, pwm_count: int, **params):
++    """MAA with K PWM tracks after the learned kernels; unchanged fit interface."""
++    config = _maa_config(model_config, params)
++    matrices, manifest = _load_pwm_bank(
++        context, pwm_root, pwm_count, config.sequence_length, config.embed_channels
++    )
++    model = HumanTFBindingModel(config, pwm_matrices=matrices, pwm_manifest=manifest)
++    _record_pwm_manifest(context, manifest, "pwm_channels.json", "pwm_channels")
+     print(f"PWM features: {context.tf}/{manifest['pwm_assay']}, "
+           f"{config.embed_channels} learned kernel channels + {pwm_count} fixed PWM "
+           f"channels = {model.feature_channels}; maximum over both strands.")
+     return model
+ 
+ 
++class PWMTargetHead(nn.Module):
++    """Auxiliary regression of fixed PWM score tracks from the decoder output.
++
++    The input stays the plain one-hot sequence; the network only receives the
++    PWM scores as a training target. Each PWM's two-strand window score is
++    standardized with its expected mean and standard deviation under a uniform
++    base background (single-strand moments from the matrix, then the maximum of
++    two approximately independent normal strands: mean + std/sqrt(pi), std *
++    sqrt(1 - 1/pi)), so random windows score about N(0, 1) and motif hits stand
++    out at several standard deviations; the loss is therefore on the same scale
++    as the classification loss. Positions whose window leaves the sequence or
++    contains N are excluded from the loss.
++    """
++
++    def __init__(self, channels: int, matrices, manifest) -> None:
++        super().__init__()
++        self.scanner = FixedPWMScanner(matrices, manifest)
++        means, stds = [], []
++        for matrix in matrices:
++            position_means = [sum(row) / 4.0 for row in matrix]
++            position_variances = [sum((value - mean) ** 2 for value in row) / 4.0 for row, mean in zip(matrix, position_means)]
++            strand_mean, strand_std = sum(position_means), math.sqrt(sum(position_variances))
++            means.append(strand_mean + strand_std / math.sqrt(math.pi))
++            stds.append(strand_std * math.sqrt(1.0 - 1.0 / math.pi))
++        self.register_buffer("target_mean", torch.tensor(means, dtype=torch.float32))
++        self.register_buffer("target_std", torch.tensor(stds, dtype=torch.float32).clamp_min(1e-6))
++        self.head = nn.Conv1d(channels, len(matrices), kernel_size=1)
++
++    def forward(self, features: torch.Tensor, sequence: torch.Tensor) -> torch.Tensor:
++        with torch.no_grad():
++            scores, valid = self.scanner.score_with_mask(sequence)
++            target = (scores - self.target_mean[None, :, None]) / self.target_std[None, :, None]
++            mask = valid.to(torch.float32)
++        with torch.autocast(device_type=features.device.type, enabled=False):
++            prediction = self.head(features.float())
++            squared = (prediction - target) ** 2
++            return (squared * mask).sum() / mask.sum().clamp_min(1.0)
++
++
++def maa_pwm_target(context, model_config=None, *, pwm_root: str, pwm_count: int,
++                   pwm_target_weight: float = 1.0, **params):
++    """MAA with the K PWM score tracks as an auxiliary training target only.
++
++    Unlike maa_pwm, the PWM scores never enter the input; the model must encode
++    motif hits itself and is pulled towards motif dependence by the auxiliary
++    loss (weight * MSE on the scaled tracks), which is added to the training
++    objective. Inference is unchanged: the auxiliary head is ignored.
++    """
++    config = _maa_config(model_config, params)
++    matrices, manifest = _load_pwm_bank(
++        context, pwm_root, pwm_count, config.sequence_length, config.embed_channels
++    )
++    manifest = dict(manifest, usage="auxiliary_regression_target", target_weight=float(pwm_target_weight),
++                    target_scaling="two_strand_max_standardized_by_uniform_background_moments_per_pwm",
++                    masked_positions="incomplete_windows_and_windows_with_N",
++                    fusion_stage="none_input_is_one_hot_only")
++    model = HumanTFBindingModel(config, pwm_target=(matrices, manifest, pwm_target_weight))
++    _record_pwm_manifest(context, manifest, "pwm_target.json", "pwm_target")
++    print(f"PWM auxiliary target: {context.tf}/{manifest['pwm_assay']}, {pwm_count} fixed PWM tracks, "
++          f"loss weight {float(pwm_target_weight)}; input stays one-hot only.")
++    return model
++
++
+ def count_parameters(model: nn.Module) -> tuple[int, int]:
+     total = sum(parameter.numel() for parameter in model.parameters())
+     trainable = sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
+--- data.py	2026-11-04 00:26:33.961371490 +0000
++++ data.py	2026-11-04 03:39:30.874648316 +0000
+@@ -28,7 +28,7 @@
+ from scipy.optimize import Bounds, LinearConstraint, milp
+ from scipy import sparse
+ 
+-SCRIPT_VERSION = '5.4.1-split-v2-v3'
++SCRIPT_VERSION = '5.5.0-crop-range-and-all-crops'
+ 
+ 
+ # Sequence caches and preparation
+@@ -227,9 +227,25 @@
+         return (center,)
+     if mode == "multi":
+         return tuple(sorted({0, center, last - center, last}))
++    if mode == "all":
++        # Every admissible crop start (0..45 for 256 bp from 301 bp): full test-time augmentation.
++        return tuple(range(last + 1))
+     raise ValueError(f"Unknown crop mode: {mode}")
+ 
+ 
++# Human301 training crops: 256 bp from 301 bp, crop starts 0..45 around the
++# centred start 22. The original run uses the full range (shift_max >= 23).
++HUMAN301_CROP_LAST = 45
++HUMAN301_CROP_CENTER = 22
++
++
++def human301_crop_range(shift_max):
++    """Inclusive crop-start bounds for a maximal shift; the full 0..45 range at >= 23."""
++    low = max(0, HUMAN301_CROP_CENTER - int(shift_max))
++    high = min(HUMAN301_CROP_LAST, HUMAN301_CROP_CENTER + int(shift_max))
++    return low, high
++
++
+ class CyclicNegativePool:
+     def __init__(self, positions, seed):
+         self.positions = np.asarray(positions, dtype=np.int64)
+@@ -1155,9 +1171,10 @@
+ 
+     def shift_summary(self) -> dict[str, Any]:
+         if self.human301:
++            low, high = human301_crop_range(self.shift_max)
+             return {
+-                "crop_start_min": 0, "crop_start_max": 45,
+-                "shift_min": -22, "shift_max": 23,
++                "crop_start_min": low, "crop_start_max": high,
++                "shift_min": low - self.context_per_side, "shift_max": high - self.context_per_side,
+                 "distribution": "uniform", "redrawn_per_access": True,
+             }
+         shifts = self.epoch_shifts[:self.indices.size]
+@@ -1175,7 +1192,12 @@
+         index = int(self.indices[item])
+         if self.human301:
+             rng = self._augmentation_rng() if self.training else None
+-            crop_start = int(rng.integers(0, 46)) if self.training else 0
++            if self.training:
++                low, high = human301_crop_range(self.shift_max)
++                # The full range keeps the original draw (and RNG stream) bit for bit.
++                crop_start = int(rng.integers(0, 46)) if (low, high) == (0, 45) else int(rng.integers(low, high + 1))
++            else:
++                crop_start = 0
+             crop_end = crop_start + self.window_length if self.training else STORED_LENGTH
+             shift = crop_start - self.context_per_side if self.training else 0
+             reverse = self.training and rng.random() < self.reverse_complement_probability
+--- training.py	2026-11-04 00:34:46.000000000 +0000
++++ training.py	2026-11-04 03:53:14.425060299 +0000
+@@ -15,6 +15,7 @@
+ import os
+ import platform
+ import re
++import shutil
+ import socket
+ import sys
+ import tempfile
+@@ -38,11 +39,11 @@
+ )
+ from scipy.stats import pearsonr, spearmanr
+ 
+-from data import STORED_LENGTH, evaluation_crop_starts, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
++from data import STORED_LENGTH, evaluation_crop_starts, human301_crop_range, load_cache, sha256_file, seed_everything, canonical_chrom, json_default, TFBindingDataset, CyclicBalancedNegativeSampler, build_or_load_cache, make_splits, draw_shifts, cache_geometry, make_fixed_balanced_evaluation_split, make_loader, resolve_device
  from model import HumanTFBindingModel, ModelConfig, count_parameters
  from data import config_split_variant
  
--SCRIPT_VERSION = '5.5.0-embedder-depth-and-chromosome-splits'
-+SCRIPT_VERSION = '5.6.0-middle-task-profile'
+-SCRIPT_VERSION = '5.6.0-middle-task-profile'
++SCRIPT_VERSION = '5.7.0-middle-profile-aux-target-tta'
  
  
  # Configuration loading and extension points
-@@ -56,10 +56,27 @@
-     return hashlib.sha256(json_text(value).encode()).hexdigest()
+@@ -383,6 +384,8 @@
+         except ImportError:
+             pass
+         requested = arguments.get("epochs")
++        # A run that reused a foreign checkpoint (reuse_checkpoint) trained nothing itself.
++        reused = self.meta.get("checkpoint_source") is not None
+         train_wall = self.meta.get("training_wall_s")
+         fit_loop = self.fit_loop_seconds
+         train_total = sum(r.get("train_s") or 0 for r in history) if history else None
+@@ -394,8 +397,9 @@
+             "train_total_s":train_total, "validation_total_s":val_total, "mining_total_s":mining_total,
+             "setup_s":self.meta.get("setup_s"),
+             "post_fit_s":None if train_wall is None or fit_loop is None else max(0,train_wall-fit_loop-(self.meta.get("setup_s") or 0)),
+-            "epochs_requested":requested, "epochs_run":len(history) if history or self.meta.get("config",{}).get("fitting") else None,
+-            "early_stopped":None if requested is None else len(history)<requested,
++            "epochs_requested":None if reused else requested,
++            "epochs_run":None if reused else (len(history) if history or self.meta.get("config",{}).get("fitting") else None),
++            "early_stopped":None if (requested is None or reused) else len(history)<requested,
+             "best_epoch":checkpoint.get("epoch"),
+             "checkpoint_objective":checkpoint.get("checkpoint_objective"),
+             "validation_selection_score":checkpoint.get("validation_score"),
+@@ -646,6 +650,11 @@
+             total = regression_loss
+         else:
+             total = classification_loss + training_config.regression_weight * regression_loss
++    auxiliary = outputs.get("auxiliary_loss")
++    if auxiliary is not None:
++        # Already weighted by the model (e.g. the PWM-track target); only
++        # present for training-length inputs, so evaluation totals are unchanged.
++        total = total + auxiliary.to(total.dtype)
+     return total, {
+         "classification": classification_loss.detach(),
+         "regression": regression_loss.detach(),
+@@ -1764,7 +1773,11 @@
+         if overlaps:
+             print("WARNING: Shared sequences or reverse complements between cached splits: "
+                   + ", ".join(overlaps) + ". The datasets remain unchanged.", file=sys.stderr)
+-        print("Window geometry: 256 bp from 301 bp; crop starts 0..45; shifts -22..+23; fresh uniform draw per access")
++        if type(args.train_shift_max) is not int or args.train_shift_max < 0:
++            raise ValueError("train_shift_max must be a nonnegative integer (23 = full 0..45 crop range)")
++        crop_low, crop_high = human301_crop_range(args.train_shift_max)
++        print(f"Window geometry: 256 bp from 301 bp; crop starts {crop_low}..{crop_high}; "
++              f"shifts {crop_low - 22:+d}..{crop_high - 22:+d}; fresh uniform draw per access")
+         print(f"Evaluation: crops {evaluation_crop_starts(301, 256, args.eval_crops)}, reverse complement={args.eval_rc}; all samples")
+     else:
+         if args.train_shift_max < 0:
+@@ -1855,6 +1868,8 @@
+         dropout=args.dropout,
+         channel_dropout=getattr(args, "channel_dropout", 0.0),
+         embedder_residual_blocks=getattr(args, "embedder_residual_blocks", 1),
++        motif_activation=getattr(args, "motif_activation", "none"),
++        motif_rc_sharing=getattr(args, "motif_rc_sharing", False),
+         activation=args.activation,
+         classification_readout=args.classification_readout,
+         regression_nonnegative=not args.allow_negative_regression_output,
+@@ -2020,8 +2035,9 @@
+             "distribution": args.train_shift_distribution,
+             "redrawn_every_epoch": True,
+             "redrawn_per_access": human301,
+-            "crop_start_range_inclusive": [0, 45] if human301 else None,
+-            "shift_range_inclusive": [-22, 23] if human301 else None,
++            "crop_start_range_inclusive": list(human301_crop_range(args.train_shift_max)) if human301 else None,
++            "shift_range_inclusive": [human301_crop_range(args.train_shift_max)[0] - 22,
++                                      human301_crop_range(args.train_shift_max)[1] - 22] if human301 else None,
+         },
+         "evaluation_shift": evaluation_shift,
+     }
+@@ -2425,7 +2441,83 @@
+     context.artifacts["checkpoint"] = checkpoint
+     return checkpoint
  
- 
-+TASK_SELECTION_KEYS = {"description", "seeds", "train_assays", "test_assays", "tfs", "task_profile"}
+-def fixed_views(context, data, checkpoint, eval_crops="multi", eval_rc=True):
++def reuse_checkpoint(context, data, *, source_config: str):
++    """Inference-only fitting: reuse the frozen checkpoint of an identical model.
 +
-+
- def recipe_digest(config: dict[str, Any]) -> str:
--    # Seed/assay lists select tasks; their actual values are recorded per run.
--    # Adding repetitions does not create another model/training recipe.
--    return digest({k:v for k,v in config.items() if k not in {"description","seeds","train_assays","test_assays"}})
-+    # Seed/assay lists, the TF list and the task profile select tasks; their
-+    # actual values are recorded per run. Adding repetitions or TFs does not
-+    # create another model/training recipe, so an experiment can grow from the
-+    # short to the middle profile without changing its recipe hash.
-+    return digest({k:v for k,v in config.items() if k not in TASK_SELECTION_KEYS})
-+
-+
-+def run_recipe_hash(meta: dict[str, Any]) -> str:
-+    """Recipe hash of a recorded run, recomputed from its stored configuration.
-+
-+    Older run.json files carry a config_hash that still included task_profile;
-+    recomputing from the stored config keeps old and new runs comparable.
++    The source experiment must have the same data and predictor recipe; its
++    completed run for this TF/source assay/seed supplies model_for_prediction.pt
++    unchanged. Nothing is trained here, so the experiment isolates a change of
++    the inference component (e.g. test-time augmentation) from training noise.
 +    """
-+    config = meta.get("config")
-+    if isinstance(config, dict) and config:
-+        return recipe_digest(config)
-+    return meta["config_hash"]
- 
- 
- def factory(spec: dict[str, Any]) -> Callable:
-@@ -82,6 +99,22 @@
-     return factory(spec)(*args, **copy.deepcopy(spec.get("params", {})), **kwargs)
- 
- 
-+# Task profiles select which TF/assay pairs a configuration trains. Each
-+# profile has its own priority list in configs/ (consecutive priorities).
-+TASK_PROFILES = ("long", "middle", "short")
-+PRIORITY_FILES = {
-+    "long": "training_priority.csv",
-+    "middle": "training_priority_middle.csv",
-+    "short": "training_priority_short.csv",
-+}
++    if not isinstance(source_config, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", source_config):
++        raise ValueError("source_config must name a configuration from configs/")
++    source_path = context.root / "configs" / (source_config + ".json")
++    if not source_path.is_file():
++        raise ValueError(f"Source configuration not found: {source_path}")
++    source = load_config(source_path)
++    for key in ("data", "predictor"):
++        if source[key] != context.config[key]:
++            raise ValueError(f"Source configuration {source_config} differs in '{key}'; its checkpoints do not fit this recipe")
++    if source["fitting"] is None or source["fitting"]["factory"].rsplit(":", 1)[-1] == "reuse_checkpoint":
++        raise ValueError("The source configuration must train its own checkpoints")
++    source_run = (context.root / "results" / source_config / "runs" / context.tf
++                  / f"train_{context.train_assay}" / f"seed_{context.seed:02d}")
++    try:
++        source_meta = json.loads((source_run / "run.json").read_text())
++    except (OSError, ValueError) as exc:
++        raise ValueError(f"No completed source run for {context.tf}/{context.train_assay}/seed {context.seed}: "
++                         f"{source_run} ({exc})") from exc
++    if (source_meta.get("status") != "completed" or source_meta.get("tf") != context.tf
++            or source_meta.get("train_assay") != context.train_assay or int(source_meta.get("seed", -1)) != context.seed):
++        raise ValueError(f"Source run is not a completed run of this TF/assay/seed: {source_run}")
++    source_training = source_run / "training"
++    checkpoint = source_training / "model_for_prediction.pt"
++    if not checkpoint.is_file():
++        raise ValueError(f"Source checkpoint missing: {checkpoint}")
++    train_cache = Path(data[context.train_assay])
++    cache_hash = sha256_file(train_cache)
++    import torch
++    frozen = torch.load(checkpoint, map_location="cpu", weights_only=True)
++    if frozen["cache_sha256"] != cache_hash:
++        raise ValueError("The source checkpoint was trained on another cache than this task uses")
++    if source_meta.get("train_cache_sha256") not in (None, cache_hash):
++        raise ValueError("Source run metadata and current training cache disagree")
++    target_training = context.run_dir / "training"
++    target_training.mkdir(parents=True, exist_ok=True)
++    copied = {}
++    for name in ("model_for_prediction.pt", "prediction_metadata.json", "configuration.json", "validation_metrics.json"):
++        if (source_training / name).is_file():
++            shutil.copy2(source_training / name, target_training / name)
++            copied[name] = sha256_file(target_training / name)
++    checkpoint_hash = copied["model_for_prediction.pt"]
++    metadata_copy = target_training / "prediction_metadata.json"
++    if metadata_copy.is_file():
++        # Point at the local copy; keep the original location for provenance.
++        record = json.loads(metadata_copy.read_text())
++        record["source_checkpoint_path"] = record.get("checkpoint_path")
++        record["checkpoint_path"] = str(target_training / "model_for_prediction.pt")
++        atomic_json(metadata_copy, record)
++    provenance = {
++        "source_config": source_config, "source_run_id": source_meta.get("run_id"),
++        "source_run_dir": str(source_run), "source_code_hash": source_meta.get("code_hash"),
++        "source_config_hash": source_meta.get("config_hash"),
++        "checkpoint_sha256": checkpoint_hash, "copied_files": copied,
++        "training_performed_here": False,
++    }
++    atomic_json(target_training / "checkpoint_source.json", provenance)
++    context.recorder.update(
++        checkpoint_source=provenance, train_cache_sha256=cache_hash,
++        resolved_training_arguments=source_meta.get("resolved_training_arguments", {}),
++        trainable_parameter_count=source_meta.get("trainable_parameter_count"),
++        device=str(resolve_device(context.device)),
++    )
++    print(f"Reusing checkpoint of {source_config} ({source_meta.get('run_id')}), sha256 {checkpoint_hash[:12]}; "
++          "no training in this run.")
++    context.artifacts["checkpoint"] = target_training / "model_for_prediction.pt"
++    return context.artifacts["checkpoint"]
 +
 +
-+def profile_priority_file(root: Path, profile: str) -> Path:
-+    if profile not in PRIORITY_FILES:
-+        raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
-+    return root / "configs" / PRIORITY_FILES[profile]
-+
-+
- def load_config(path: Path) -> dict[str, Any]:
-     config = json.loads(path.read_text())
-     required = {"schema_version", "name", "reference", "workflow", "data", "predictor",
-@@ -104,8 +137,8 @@
-     if len(set(config["seeds"])) != len(config["seeds"]):
-         raise ValueError("Duplicate seeds")
-     if "task_profile" in config:
--        if config["task_profile"] not in ("long", "short"):
--            raise ValueError("task_profile must be 'long' or 'short'")
-+        if config["task_profile"] not in TASK_PROFILES:
-+            raise ValueError("task_profile must be one of: " + ", ".join(TASK_PROFILES))
-         if "tfs" in config:
-             raise ValueError("Select task_profile or tfs, not both")
-     if "tfs" in config:
-@@ -2638,11 +2671,13 @@
-     selected = {}
-     for meta in sorted(metadata.values(),key=lambda m:m["started_at"]):
-         if meta["status"] != "completed": continue
--        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],meta["config_hash"])
-+        key=(meta.get("training_scope","single_tf"),meta.get("tf"),meta.get("tf_ids_json"),meta["train_assay"],meta["seed"],run_recipe_hash(meta))
-         selected[key]=meta["run_id"]
-     active = set(selected.values())
-     code_hashes = {metadata[r]["code_hash"] for r in active}
--    config_hashes = {metadata[r]["config_hash"] for r in active}
-+    # Compare recipes, not stored hash strings: runs recorded before the task
-+    # profile was excluded from the recipe hash must stay comparable.
-+    config_hashes = {run_recipe_hash(metadata[r]) for r in active}
-     if len(config_hashes)>1 or (len(code_hashes)>1 and not allow_code_version_mismatch):
-         raise ValueError("Selected runs mix code/config versions. Use a distinct experiment name for a changed implementation.")
-     if len(code_hashes)>1:
---- run_experiment.py	2026-11-04 00:26:33.957371490 +0000
-+++ run_experiment.py	2026-11-04 00:29:47.993383024 +0000
-@@ -27,10 +27,10 @@
-                   config_split_variant, prepare_split_variants, resolve_split_cache_paths)
- from training import (
-     RunRecorder, atomic_json, metadata, package_hash, RunContext, digest,
--    recipe_digest, invoke, load_config, collect, verify,
-+    recipe_digest, invoke, load_config, collect, verify, profile_priority_file,
- )
- 
--SCRIPT_VERSION = '5.4.0-chromosome-split-variants'
-+SCRIPT_VERSION = '5.5.0-middle-task-profile'
- 
- 
- # Slurm access and shared eight-job dispatcher
-@@ -491,8 +491,9 @@
-         # Resolve the default here without adding a field to the stored JSON.
-         if "tfs" not in config:
-             profile = config.get("task_profile", "long")
--            filename = "training_priority.csv" if profile == "long" else "training_priority_short.csv"
--            priority = ROOT / "configs" / filename
-+            priority = profile_priority_file(ROOT, profile)
-+            if not priority.is_file():
-+                raise ValueError(f"Priority list for task_profile '{profile}' is missing: {priority}")
-             profile_pairs = read_priority(priority)
-             selected_tfs = list(dict.fromkeys(tf for tf, assay in profile_pairs))
-         absent = set(selected_tfs) - {row["tf"] for row in manifest}
---- submit_array.sh	2026-11-04 00:26:33.953371489 +0000
-+++ submit_array.sh	2026-11-04 00:29:53.289383339 +0000
-@@ -1,5 +1,5 @@
- #!/usr/bin/env bash
--# Version: 2026-10-30-native-array-split-variants
-+# Version: 2026-11-04-middle-task-profile
- set -euo pipefail
- ABLATION_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
- exec "${ABLATION_PYTHON:-python3}" - "$ABLATION_ROOT" "$@" <<'HUM301_NATIVE_ARRAY'
-@@ -269,8 +269,12 @@
-             seen.add(identity)
-             indices[config].append(index)
-         shutil.copyfile(root / 'configs/training_priority.csv', batch / 'training_priority.csv')
--        if any(spec.get('task_profile') == 'short' for spec in config_specs.values()):
--            shutil.copyfile(root / 'configs/training_priority_short.csv', batch / 'training_priority_short.csv')
-+        # Keep a copy of every profile priority list the batch was planned with.
-+        profile_files = {'short': 'training_priority_short.csv', 'middle': 'training_priority_middle.csv'}
-+        for profile, filename in profile_files.items():
-+            if any(spec.get('task_profile') == profile for spec in config_specs.values()):
-+                require((root / 'configs' / filename).is_file(), f'Prioritätsliste für task_profile {profile} fehlt: configs/{filename}')
-+                shutil.copyfile(root / 'configs' / filename, batch / filename)
-         active_configs = [name for name in configs if indices[name]]
-         state = dict(root=str(root), configs=active_configs, requested_configs=configs, mode='native_array', array_id=None,
-                      created_at=datetime.now(timezone.utc).isoformat(), plan=str(plan),
++def fixed_views(context, data, checkpoint, eval_crops="multi", eval_rc=True, allow_crop_mode_change=False):
+     if checkpoint is None:
+         raise ValueError("fixed_views requires a trained checkpoint")
+     device = resolve_device(context.device)
+@@ -2434,7 +2526,12 @@
+     if not source_hash or frozen["cache_sha256"] != source_hash:
+         raise ValueError("Source checkpoint/cache provenance mismatch")
+     if (eval_crops,eval_rc) != (frozen["evaluation_crop_mode"], frozen["evaluation_reverse_complement"]):
+-        raise ValueError("Inference must match the source-validation settings frozen in this recipe")
++        # Test-time augmentation experiments may evaluate with more crops than
++        # the validation used for checkpoint selection; this must be explicit.
++        if not (allow_crop_mode_change is True and eval_rc == frozen["evaluation_reverse_complement"]):
++            raise ValueError("Inference must match the source-validation settings frozen in this recipe")
++        print(f"Inference crop mode {eval_crops!r} differs from the validation mode "
++              f"{frozen['evaluation_crop_mode']!r} (explicitly allowed; threshold from validation).")
+     config = ModelConfig(**frozen["model_config"])
+     model = invoke(context.config["predictor"], context, model_config=config).to(device)
+     model.load_state_dict(frozen["model_state"], strict=True)

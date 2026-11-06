@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "name": "A35_tta46_middle",
+  "description": "Test-time augmentation only: inference averages the probabilities of all 46 crop starts (0..45) and both strands (92 views) instead of the 4 fixed crops. No training in this experiment: the frozen checkpoints of A23_embed_64_middle (recipe-identical to 01_basic_0p1cdo) are reused, so the effect is isolated from training noise; checkpoint selection and the decision threshold remain those of the source validation (4 crops). Middle TF profile.",
+  "reference": "01_basic_0p1cdo",
+  "workflow": {
+    "factory": "ablation.workflows:supervised",
+    "params": {}
+  },
+  "data": {
+    "factory": "ablation.providers:human301",
+    "params": {}
+  },
+  "predictor": {
+    "factory": "ablation.builders:maa",
+    "params": {
+      "sequence_length": 256,
+      "embed_channels": 64,
+      "encoder_channels": [
+        80,
+        96,
+        128
+      ],
+      "bottleneck_length": 64,
+      "motif_kernels": [
+        9,
+        12
+      ],
+      "transformer_heads": 4,
+      "transformer_ffn": 256,
+      "dropout": 0.1,
+      "activation": "relu",
+      "classification_readout": "center",
+      "regression_nonnegative": true,
+      "channel_dropout": 0.1
+    }
+  },
+  "fitting": {
+    "factory": "ablation.fitting:reuse_checkpoint",
+    "params": {
+      "source_config": "A23_embed_64_middle"
+    }
+  },
+  "inference": {
+    "factory": "ablation.inference:fixed_views",
+    "params": {
+      "eval_crops": "all",
+      "eval_rc": true,
+      "allow_crop_mode_change": true
+    }
+  },
+  "analyses": [],
+  "seeds": [
+    13
+  ],
+  "train_assays": [
+    "CHIP",
+    "GHTS"
+  ],
+  "test_assays": [
+    "CHIP",
+    "GHTS"
+  ],
+  "task_profile": "middle"
+}

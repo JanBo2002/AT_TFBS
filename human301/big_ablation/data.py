@@ -28,7 +28,7 @@ from sklearn.metrics import average_precision_score, matthews_corrcoef, roc_auc_
 from scipy.optimize import Bounds, LinearConstraint, milp
 from scipy import sparse
 
-SCRIPT_VERSION = '5.4.1-split-v2-v3'
+SCRIPT_VERSION = '5.5.0-crop-range-and-all-crops'
 
 
 # Sequence caches and preparation
@@ -227,7 +227,23 @@ def evaluation_crop_starts(stored_length, input_length, mode):
         return (center,)
     if mode == "multi":
         return tuple(sorted({0, center, last - center, last}))
+    if mode == "all":
+        # Every admissible crop start (0..45 for 256 bp from 301 bp): full test-time augmentation.
+        return tuple(range(last + 1))
     raise ValueError(f"Unknown crop mode: {mode}")
+
+
+# Human301 training crops: 256 bp from 301 bp, crop starts 0..45 around the
+# centred start 22. The original run uses the full range (shift_max >= 23).
+HUMAN301_CROP_LAST = 45
+HUMAN301_CROP_CENTER = 22
+
+
+def human301_crop_range(shift_max):
+    """Inclusive crop-start bounds for a maximal shift; the full 0..45 range at >= 23."""
+    low = max(0, HUMAN301_CROP_CENTER - int(shift_max))
+    high = min(HUMAN301_CROP_LAST, HUMAN301_CROP_CENTER + int(shift_max))
+    return low, high
 
 
 class CyclicNegativePool:
@@ -1155,9 +1171,10 @@ class TFBindingDataset(Dataset[dict[str, Any]]):
 
     def shift_summary(self) -> dict[str, Any]:
         if self.human301:
+            low, high = human301_crop_range(self.shift_max)
             return {
-                "crop_start_min": 0, "crop_start_max": 45,
-                "shift_min": -22, "shift_max": 23,
+                "crop_start_min": low, "crop_start_max": high,
+                "shift_min": low - self.context_per_side, "shift_max": high - self.context_per_side,
                 "distribution": "uniform", "redrawn_per_access": True,
             }
         shifts = self.epoch_shifts[:self.indices.size]
@@ -1175,7 +1192,12 @@ class TFBindingDataset(Dataset[dict[str, Any]]):
         index = int(self.indices[item])
         if self.human301:
             rng = self._augmentation_rng() if self.training else None
-            crop_start = int(rng.integers(0, 46)) if self.training else 0
+            if self.training:
+                low, high = human301_crop_range(self.shift_max)
+                # The full range keeps the original draw (and RNG stream) bit for bit.
+                crop_start = int(rng.integers(0, 46)) if (low, high) == (0, 45) else int(rng.integers(low, high + 1))
+            else:
+                crop_start = 0
             crop_end = crop_start + self.window_length if self.training else STORED_LENGTH
             shift = crop_start - self.context_per_side if self.training else 0
             reverse = self.training and rng.random() < self.reverse_complement_probability
