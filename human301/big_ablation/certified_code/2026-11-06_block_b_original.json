@@ -1,0 +1,48 @@
+{
+  "id": "2026-11-06_block_b_original",
+  "state": "Original-/Middle-Stand",
+  "statement": "Die aktuellen Fassungen dieser Programmdateien rechnen f\u00fcr jede Config, die im Original-/Middle-Stand lief, bit-gleich (Modellaufbau, Initialisierung, Vorw\u00e4rts- und R\u00fcckw\u00e4rtsrechnung, Training, Inferenz); zul\u00e4ssig sind alle Mischungen aus aktuellen Fassungen und diesem einen fr\u00fcheren Stand (\u00dcbergangszust\u00e4nde einer Installation). Neue Optionen sind standardm\u00e4\u00dfig aus.",
+  "evidence": "Testprotokoll_BlockB.docx: Gleichheitstests, vollst\u00e4ndige Trainings mit Middle-, A30- und Block-B-Code bit-gleich, \u00dcbergangszust\u00e4nde, Regressionstest des Installers.",
+  "files": {
+    "model.py": {
+      "sha256": "5839dae12329736367dc032349327ab5edea38a6d94200d3ebdd4ab522bfc61b",
+      "equivalent": [
+        {
+          "sha256": "b8766dbbe7dfbe1b7f29ac45939933a2b29f6bdd7e56ef9da316b1e1ec04b497",
+          "ref": "2026-11-06_block_b/model.py.orig",
+          "version": "orig"
+        }
+      ]
+    },
+    "data.py": {
+      "sha256": "51265f5843b7d7d827d7a0385bbfe00eee6323383a69da7fd6058073faf7ae7a",
+      "equivalent": [
+        {
+          "sha256": "1bae52b69c2d3a05bdb7b8098898ce0847c7fb967e34f31bdb48e326d0e2df50",
+          "ref": "2026-11-06_block_b/data.py.orig",
+          "version": "orig"
+        }
+      ]
+    },
+    "training.py": {
+      "sha256": "98667ae8b452e7a784e7b5213d5d557026d5c0db1daa2038f9748899c5dee83f",
+      "equivalent": [
+        {
+          "sha256": "312697726b98b03b5dff763a8892a0383beab1022adccf1c8155bce733870383",
+          "ref": "2026-11-06_block_b/training.py.middle",
+          "version": "middle"
+        }
+      ]
+    },
+    "run_experiment.py": {
+      "sha256": "bfccdef0aaa8c42d62b567c93dbf70fcb96bb13ab7bfff89993811f89645f957",
+      "equivalent": [
+        {
+          "sha256": "a00f21d49fdc64d546c5c1f40f60e0da3bf2ab1f4c95cfa7cd05c1654bea24bd",
+          "ref": "2026-11-06_block_b/run_experiment.py.middle",
+          "version": "middle"
+        }
+      ]
+    }
+  }
+}
