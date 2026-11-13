@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "name": "A29_param_128_enc_56_74_128_short",
-  "description": "A2 exact parameter-matched control: 128 learned input channels, encoder 56/74/128, one 5-bp residual refinement; 1,051,031 total trainable model parameters, matching the other member of the 32-vs-128 channel control pair. Bottleneck width 128 and FFN width 256 remain unchanged; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile.",
-  "reference": "A28_param_32_enc_80_114_128_short",
+  "name": "A28_param_32_enc_80_114_128_middle",
+  "description": "A2 exact parameter-matched control: 32 learned input channels, encoder 80/114/128, one 5-bp residual refinement; 1,051,031 total trainable model parameters, matching the other member of the 32-vs-128 channel control pair. Bottleneck width 128 and FFN width 256 remain unchanged; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. Extended to the middle task profile (renamed from A28_param_32_enc_80_114_128_short).",
+  "reference": "01_basic_0p1cdo",
   "workflow": {
     "factory": "ablation.workflows:supervised",
     "params": {}
@@ -15,10 +15,10 @@
     "factory": "ablation.builders:maa",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 128,
+      "embed_channels": 32,
       "encoder_channels": [
-        56,
-        74,
+        80,
+        114,
         128
       ],
       "bottleneck_length": 64,
@@ -82,5 +82,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

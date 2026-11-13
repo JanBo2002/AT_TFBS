@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "name": "A24_embed_128_short",
-  "description": "A2 width: 128 learned input channels split equally across 9- and 12-bp branches, one 5-bp residual refinement, encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. The final decoder width follows the embedder width in this architecture.",
-  "reference": "01_basic_0p1cdo",
+  "name": "A08_kernel_15_middle",
+  "description": "Single input kernel of size 15 with 64 output channels; channel and bottleneck dropout 0.0; restricted to the 15 selected short-run TFs. Extended to the middle task profile (renamed from A08_kernel_15_short).",
+  "reference": "00_basic",
   "workflow": {
-    "factory": "ablation.workflows:supervised",
+    "factory": "training:supervised",
     "params": {}
   },
   "data": {
-    "factory": "ablation.providers:human301",
+    "factory": "data:human301",
     "params": {}
   },
   "predictor": {
-    "factory": "ablation.builders:maa",
+    "factory": "model:maa",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 128,
+      "embed_channels": 64,
       "encoder_channels": [
         80,
         96,
@@ -23,22 +23,21 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        9,
-        12
+        15
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.1,
+      "dropout": 0.0,
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
-      "channel_dropout": 0.1
+      "channel_dropout": 0.0
     }
   },
   "fitting": {
-    "factory": "ablation.fitting:baseline",
+    "factory": "training:baseline",
     "params": {
-      "epochs": 100,
+      "epochs": 50,
       "batch_size": 88,
       "num_workers": 4,
       "eval_batch_size": 128,
@@ -64,7 +63,7 @@
     }
   },
   "inference": {
-    "factory": "ablation.inference:fixed_views",
+    "factory": "training:fixed_views",
     "params": {
       "eval_crops": "multi",
       "eval_rc": true
@@ -82,5 +81,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

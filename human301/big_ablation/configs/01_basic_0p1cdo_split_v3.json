@@ -1,21 +1,23 @@
 {
   "schema_version": "1.0",
-  "name": "A26_narrow_32_deep_2_short",
-  "description": "A2 depth: 32 learned input channels in 9-/12-bp branches and 2 sequential 5-bp residual refinements; encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. Requires the included depth update for model.py and training.py.",
-  "reference": "A22_embed_32_short",
+  "name": "01_basic_0p1cdo_split_v3",
+  "description": "Basic model with dropout=0.1, channel_dropout=0.1, and up to 100 epochs; full TF profile; all other numerical settings unchanged from 00_basic. Chromosome split: split_v3.",
+  "reference": "00_basic_split_v3",
   "workflow": {
     "factory": "ablation.workflows:supervised",
     "params": {}
   },
   "data": {
     "factory": "ablation.providers:human301",
-    "params": {}
+    "params": {
+      "split_variant": "split_v3"
+    }
   },
   "predictor": {
     "factory": "ablation.builders:maa",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 32,
+      "embed_channels": 64,
       "encoder_channels": [
         80,
         96,
@@ -32,8 +34,7 @@
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
-      "channel_dropout": 0.1,
-      "embedder_residual_blocks": 2
+      "channel_dropout": 0.1
     }
   },
   "fitting": {
@@ -83,5 +84,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "long"
 }

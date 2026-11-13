@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "name": "A12_kernel_11_15_short",
-  "description": "Two input kernels of sizes 11 and 15, 32 channels each (64 total); other model and training settings identical to 00_basic; short TF profile.",
+  "name": "A10_kernel_25_middle",
+  "description": "Single input kernel of size 25 with 64 output channels; channel and bottleneck dropout 0.0; restricted to the 15 selected short-run TFs. Extended to the middle task profile (renamed from A10_kernel_25_short).",
   "reference": "00_basic",
   "workflow": {
     "factory": "training:supervised",
@@ -23,15 +23,15 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        11,
-        15
+        25
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.1,
+      "dropout": 0.0,
       "activation": "relu",
       "classification_readout": "center",
-      "regression_nonnegative": true
+      "regression_nonnegative": true,
+      "channel_dropout": 0.0
     }
   },
   "fitting": {
@@ -81,5 +81,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

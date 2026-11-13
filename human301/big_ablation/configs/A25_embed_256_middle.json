@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "name": "A19_MEX_PWM03_short",
-  "description": "A05 short backbone with 64 learned kernel channels (7 bp), followed by 3 fixed PWM score channels: 67 channels before residual refinement; existing short task profile. First K motif IDs from MEX_Top10_CHS_AFS_30TFs, ranked by source-only AUPRC; maximum 100 epochs with existing early stopping.",
-  "reference": "00_basic",
+  "name": "A25_embed_256_middle",
+  "description": "A2 width: 256 learned input channels split equally across 9- and 12-bp branches, one 5-bp residual refinement, encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. The final decoder width follows the embedder width in this architecture. Extended to the middle task profile (renamed from A25_embed_256_short).",
+  "reference": "01_basic_0p1cdo",
   "workflow": {
-    "factory": "training:supervised",
+    "factory": "ablation.workflows:supervised",
     "params": {}
   },
   "data": {
-    "factory": "data:human301",
+    "factory": "ablation.providers:human301",
     "params": {}
   },
   "predictor": {
-    "factory": "mex_pwm_model:maa_mex_pwm",
+    "factory": "ablation.builders:maa",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 64,
+      "embed_channels": 256,
       "encoder_channels": [
         80,
         96,
@@ -23,21 +23,20 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        7
+        9,
+        12
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.0,
+      "dropout": 0.1,
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
-      "channel_dropout": 0.0,
-      "pwm_root": "../MEX_Top10_CHS_AFS_30TFs",
-      "pwm_count": 3
+      "channel_dropout": 0.1
     }
   },
   "fitting": {
-    "factory": "training:baseline",
+    "factory": "ablation.fitting:baseline",
     "params": {
       "epochs": 100,
       "batch_size": 88,
@@ -65,7 +64,7 @@
     }
   },
   "inference": {
-    "factory": "training:fixed_views",
+    "factory": "ablation.inference:fixed_views",
     "params": {
       "eval_crops": "multi",
       "eval_rc": true
@@ -83,5 +82,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "name": "A23_embed_64_short",
-  "description": "A2 width: 64 learned input channels split equally across 9- and 12-bp branches, one 5-bp residual refinement, encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. The final decoder width follows the embedder width in this architecture.",
+  "name": "A32_pwm_target03_w0p1_middle",
+  "description": "A32 with auxiliary loss weight 0.1 instead of 1.0 (weaker pull towards the 3 PWM score tracks); everything else identical to A32_pwm_target03_middle; middle TF profile.",
   "reference": "01_basic_0p1cdo",
   "workflow": {
     "factory": "ablation.workflows:supervised",
@@ -12,7 +12,7 @@
     "params": {}
   },
   "predictor": {
-    "factory": "ablation.builders:maa",
+    "factory": "ablation.builders:maa_pwm_target",
     "params": {
       "sequence_length": 256,
       "embed_channels": 64,
@@ -32,7 +32,10 @@
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
-      "channel_dropout": 0.1
+      "channel_dropout": 0.1,
+      "pwm_root": "/data/projects/SFB_A03/jan/AT_TFBS/human301/pwms_ranked10",
+      "pwm_count": 3,
+      "pwm_target_weight": 0.1
     }
   },
   "fitting": {
@@ -82,5 +85,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

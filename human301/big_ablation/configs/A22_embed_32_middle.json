@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "name": "A22_embed_32_short",
-  "description": "A2 width: 32 learned input channels split equally across 9- and 12-bp branches, one 5-bp residual refinement, encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. The final decoder width follows the embedder width in this architecture.",
+  "name": "A22_embed_32_middle",
+  "description": "A2 width: 32 learned input channels split equally across 9- and 12-bp branches, one 5-bp residual refinement, encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. The final decoder width follows the embedder width in this architecture. Extended to the middle task profile (renamed from A22_embed_32_short).",
   "reference": "01_basic_0p1cdo",
   "workflow": {
     "factory": "ablation.workflows:supervised",
@@ -82,5 +82,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

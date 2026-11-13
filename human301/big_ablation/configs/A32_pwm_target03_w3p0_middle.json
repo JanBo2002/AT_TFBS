@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "name": "A27_wide_128_flat_0_short",
-  "description": "A2 depth: 128 learned input channels in 9-/12-bp branches and 0 sequential 5-bp residual refinements; encoder 80/96/128; dropout=channel_dropout=0.1, up to 100 epochs, short TF profile. Requires the included depth update for model.py and training.py.",
-  "reference": "A24_embed_128_short",
+  "name": "A32_pwm_target03_w3p0_middle",
+  "description": "A32 with auxiliary loss weight 3.0 instead of 1.0 (stronger pull towards the 3 PWM score tracks); everything else identical to A32_pwm_target03_middle; middle TF profile.",
+  "reference": "01_basic_0p1cdo",
   "workflow": {
     "factory": "ablation.workflows:supervised",
     "params": {}
@@ -12,10 +12,10 @@
     "params": {}
   },
   "predictor": {
-    "factory": "ablation.builders:maa",
+    "factory": "ablation.builders:maa_pwm_target",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 128,
+      "embed_channels": 64,
       "encoder_channels": [
         80,
         96,
@@ -33,7 +33,9 @@
       "classification_readout": "center",
       "regression_nonnegative": true,
       "channel_dropout": 0.1,
-      "embedder_residual_blocks": 0
+      "pwm_root": "/data/projects/SFB_A03/jan/AT_TFBS/human301/pwms_ranked10",
+      "pwm_count": 3,
+      "pwm_target_weight": 3.0
     }
   },
   "fitting": {
@@ -83,5 +85,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

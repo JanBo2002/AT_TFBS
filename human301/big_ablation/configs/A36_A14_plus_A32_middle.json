@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "name": "A10_kernel_25_short",
-  "description": "Single input kernel of size 25 with 64 output channels; channel and bottleneck dropout 0.0; restricted to the 15 selected short-run TFs.",
-  "reference": "00_basic",
+  "name": "A36_A14_plus_A32_middle",
+  "description": "Combination of A14 and A32: the A14 input stage (128 learned channels from kernels 3/6/9/12 with 32 channels each, channel dropout 0.2; bottleneck dropout 0.1) with the A32 auxiliary target (the 3 ranked HOCOMOCO PWM score tracks from pwms_ranked10 as regression target on the decoder output, MSE weight 1.0; the input stays one-hot only and inference ignores the auxiliary head). Training as A14 and A32 (up to 100 epochs, patience 10); everything else as 01_basic_0p1cdo; middle TF profile.",
+  "reference": "01_basic_0p1cdo",
   "workflow": {
-    "factory": "training:supervised",
+    "factory": "ablation.workflows:supervised",
     "params": {}
   },
   "data": {
-    "factory": "data:human301",
+    "factory": "ablation.providers:human301",
     "params": {}
   },
   "predictor": {
-    "factory": "model:maa",
+    "factory": "ablation.builders:maa_pwm_target",
     "params": {
       "sequence_length": 256,
-      "embed_channels": 64,
+      "embed_channels": 128,
       "encoder_channels": [
         80,
         96,
@@ -23,21 +23,27 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        25
+        3,
+        6,
+        9,
+        12
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.0,
+      "dropout": 0.1,
       "activation": "relu",
       "classification_readout": "center",
       "regression_nonnegative": true,
-      "channel_dropout": 0.0
+      "channel_dropout": 0.2,
+      "pwm_root": "/data/projects/SFB_A03/jan/AT_TFBS/human301/pwms_ranked10",
+      "pwm_count": 3,
+      "pwm_target_weight": 1.0
     }
   },
   "fitting": {
-    "factory": "training:baseline",
+    "factory": "ablation.fitting:baseline",
     "params": {
-      "epochs": 50,
+      "epochs": 100,
       "batch_size": 88,
       "num_workers": 4,
       "eval_batch_size": 128,
@@ -63,7 +69,7 @@
     }
   },
   "inference": {
-    "factory": "training:fixed_views",
+    "factory": "ablation.inference:fixed_views",
     "params": {
       "eval_crops": "multi",
       "eval_rc": true
@@ -81,5 +87,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }

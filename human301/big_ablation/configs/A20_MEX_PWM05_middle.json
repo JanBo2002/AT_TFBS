@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "name": "A13_kernel_15_21_short",
-  "description": "Two input kernels of sizes 15 and 21, 32 channels each (64 total); other model and training settings identical to 00_basic; short TF profile.",
+  "name": "A20_MEX_PWM05_middle",
+  "description": "A05 short backbone with 64 learned kernel channels (7 bp), followed by 5 fixed PWM score channels: 69 channels before residual refinement; existing short task profile. First K motif IDs from MEX_Top10_CHS_AFS_30TFs, ranked by source-only AUPRC; maximum 100 epochs with existing early stopping. Extended to the middle task profile (renamed from A20_MEX_PWM05_short).",
   "reference": "00_basic",
   "workflow": {
     "factory": "training:supervised",
@@ -12,7 +12,7 @@
     "params": {}
   },
   "predictor": {
-    "factory": "model:maa",
+    "factory": "mex_pwm_model:maa_mex_pwm",
     "params": {
       "sequence_length": 256,
       "embed_channels": 64,
@@ -23,21 +23,23 @@
       ],
       "bottleneck_length": 64,
       "motif_kernels": [
-        15,
-        21
+        7
       ],
       "transformer_heads": 4,
       "transformer_ffn": 256,
-      "dropout": 0.1,
+      "dropout": 0.0,
       "activation": "relu",
       "classification_readout": "center",
-      "regression_nonnegative": true
+      "regression_nonnegative": true,
+      "channel_dropout": 0.0,
+      "pwm_root": "../MEX_Top10_CHS_AFS_30TFs",
+      "pwm_count": 5
     }
   },
   "fitting": {
     "factory": "training:baseline",
     "params": {
-      "epochs": 50,
+      "epochs": 100,
       "batch_size": 88,
       "num_workers": 4,
       "eval_batch_size": 128,
@@ -81,5 +83,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "short"
+  "task_profile": "middle"
 }
