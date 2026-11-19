@@ -1,15 +1,17 @@
 {
   "schema_version": "1.0",
-  "name": "A36_A14_plus_A32_middle",
-  "description": "Combination of A14 and A32: the A14 input stage (128 learned channels from kernels 3/6/9/12 with 32 channels each, channel dropout 0.2; bottleneck dropout 0.1) with the A32 auxiliary target (the 3 ranked HOCOMOCO PWM score tracks from pwms_ranked10 as regression target on the decoder output, MSE weight 1.0; the input stays one-hot only and inference ignores the auxiliary head). Training as A14 and A32 (up to 100 epochs, patience 10); everything else as 01_basic_0p1cdo; middle TF profile.",
-  "reference": "01_basic_0p1cdo",
+  "name": "A36_A14_plus_A32_30TF_split_v3",
+  "description": "Combination of A14 and A32: the A14 input stage (128 learned channels from kernels 3/6/9/12 with 32 channels each, channel dropout 0.2; bottleneck dropout 0.1) with the A32 auxiliary target (the 3 ranked HOCOMOCO PWM score tracks from pwms_ranked10 as regression target on the decoder output, MSE weight 1.0; the input stays one-hot only and inference ignores the auxiliary head). Training as A14 and A32 (up to 100 epochs, patience 10); everything else as 01_basic_0p1cdo; all 30 TFs (long profile). Scaled-up copy of A36_A14_plus_A32_middle. Chromosome split: split_v3.",
+  "reference": "01_basic_0p1cdo_split_v3",
   "workflow": {
     "factory": "ablation.workflows:supervised",
     "params": {}
   },
   "data": {
     "factory": "ablation.providers:human301",
-    "params": {}
+    "params": {
+      "split_variant": "split_v3"
+    }
   },
   "predictor": {
     "factory": "ablation.builders:maa_pwm_target",
@@ -87,5 +89,5 @@
     "CHIP",
     "GHTS"
   ],
-  "task_profile": "middle"
+  "task_profile": "long"
 }
