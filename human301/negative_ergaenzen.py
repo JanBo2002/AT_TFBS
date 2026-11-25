@@ -202,7 +202,18 @@ class Fernzugriff(io.RawIOBase):
         return self.pos
 
     def readall(self):
-        raise RuntimeError("Unbegrenztes Lesen der entfernten Datei ist gesperrt")
+        """zipfile bis Python 3.12 liest das Archivende ohne Längenangabe; erlaubt ist das nur für einen kleinen Rest."""
+        rest = self.groesse - self.pos
+        if rest > 2 * 1024 * 1024:
+            raise RuntimeError("Unbegrenztes Lesen der entfernten Datei ist gesperrt")
+        teile = []
+        while self.pos < self.groesse:
+            puffer = bytearray(self.groesse - self.pos)
+            n = self.readinto(puffer)
+            if not n:
+                break
+            teile.append(bytes(puffer[:n]))
+        return b"".join(teile)
 
     def readinto(self, puffer):
         if self.pos >= self.groesse:
@@ -243,16 +254,22 @@ class Fernzugriff(io.RawIOBase):
 
 def versionen() -> list[tuple[str, str]]:
     """(Record-ID, Bezeichnung), neueste zuerst."""
-    try:
-        with anfrage(f"https://zenodo.org/api/records/{KONZEPT}/versions?size=50", versuche=2) as antwort:
-            treffer = json.load(antwort)["hits"]["hits"]
-        liste = [(str(h["id"]), f"{h['metadata'].get('version', '?')} vom {h['metadata'].get('publication_date', '?')}")
-                 for h in treffer]
-        liste.sort(key=lambda x: int(x[0]), reverse=True)
-        if liste:
-            return liste
-    except Exception as fehler:  # noqa: BLE001 - Rückfall auf bekannte Versionen
-        print(f"Zenodo-Versionsliste nicht abrufbar ({fehler}); nutze die bekannten Versionen.")
+    letzter = None
+    for url in (f"https://zenodo.org/api/records/{BEKANNTE_VERSIONEN[0]}/versions?size=25",
+                f"https://zenodo.org/api/records/{BEKANNTE_VERSIONEN[0]}/versions",
+                f"https://zenodo.org/api/records/{KONZEPT}/versions"):
+        try:
+            with anfrage(url, versuche=2) as antwort:
+                treffer = json.load(antwort)["hits"]["hits"]
+            liste = [(str(h["id"]), f"{h.get('metadata', {}).get('version', '?')} vom "
+                                    f"{h.get('metadata', {}).get('publication_date', '?')}") for h in treffer]
+            liste.sort(key=lambda x: int(x[0]), reverse=True)
+            if liste:
+                bekannt = {rid for rid, _ in liste}
+                return liste + [(rid, "bekannte Version") for rid in BEKANNTE_VERSIONEN if rid not in bekannt]
+        except Exception as fehler:  # noqa: BLE001 - nächste Variante, dann bekannte Versionen
+            letzter = fehler
+    print(f"Zenodo-Versionsliste nicht abrufbar ({letzter}); nutze die bekannten Versionen.")
     return [(rid, "bekannte Version") for rid in BEKANNTE_VERSIONEN]
 
 
